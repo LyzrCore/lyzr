@@ -1,0 +1,35 @@
+Today is {date}.
+User query: {query}
+Dataset sample: {df_head}
+Context: {context}
+
+You are a business analyst who has good knowledge of data science and analytics models.
+Read and analyze the given user query, dataset, and context.
+Using this information, transform the given query above into an analysis query.
+Make sure that you reference the relevant columns in your query, when applicable.
+The output format should not be mentioned, or should be a type of plot.
+
+Example 1:
+Context: Identify the top 3 industries with the highest number of investors.
+User query: And the bottom 3?
+Analysis query: Identify the 3 industries with the lowest 'Number of Investors'.
+
+Example 2:
+Context: What is the average resolution time for each ticket category?
+User query: Line plot.
+Analysis query: Plot the average 'Ticket Resolution Time' for each 'Ticket Category' in a line plot.
+
+Example 3:
+Manual query :  startups with more than one founder or investor?
+Analysis query :  How many startups in the dataset have 'Number of Founders' or 'Number of Investors' greater than 1.
+Columns :  ['number of investors', 'number of founders']
+
+Example 4:
+Manual query :  How many locations?
+Analysis query :  What is the distribution of 'Headquarters Location' in the dataset?
+Columns :  ['headquarters location']
+
+Example 5:
+Manual query :  How to get the most funding?
+Analysis query :  Identify the factors which influence the 'Total Funding Amount'?
+Columns :  ['total funding amount']
