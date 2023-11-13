@@ -1,11 +1,9 @@
 import openai
-from openai import OpenAI
 
 
 class FormulaGen:
     def spreadsheets(self, initial_prompt):
-        client = OpenAI()
-        response = client.chat.completions.create(
+        response = openai.Completion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -23,7 +21,7 @@ class FormulaGen:
 
         initial_response = response.choices[0].message.content
 
-        response = client.chat.completions.create(
+        response = openai.Completion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -46,8 +44,7 @@ class FormulaGen:
         return final_response
 
     def regex(self, initial_prompt):
-        client = OpenAI()
-        response = client.chat.completions.create(
+        response = openai.Completion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -65,7 +62,7 @@ class FormulaGen:
 
         initial_response = response.choices[0].message.content
 
-        response = client.chat.completions.create(
+        response = openai.Completion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -88,8 +85,7 @@ class FormulaGen:
         return final_response
 
     def text_to_sql(self, initial_prompt):
-        client = OpenAI()
-        response = client.chat.completions.create(
+        response = openai.Completion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -107,7 +103,7 @@ class FormulaGen:
 
         initial_response = response.choices[0].message.content
 
-        response = client.chat.completions.create(
+        response = openai.Completion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -132,8 +128,7 @@ class FormulaGen:
 
 class Spreadsheets:
     def spreadsheets(self, initial_prompt):
-        client = OpenAI()
-        response = client.chat.completions.create(
+        response = openai.Completion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -151,7 +146,7 @@ class Spreadsheets:
 
         initial_response = response.choices[0].message.content
 
-        response = client.chat.completions.create(
+        response = openai.Completion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -176,8 +171,7 @@ class Spreadsheets:
 
 class RegularExpressions:
     def regular_expression(self, initial_prompt):
-        client = OpenAI()
-        response = client.chat.completions.create(
+        response = openai.Completion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -195,7 +189,7 @@ class RegularExpressions:
 
         initial_response = response.choices[0].message.content
 
-        response = client.chat.completions.create(
+        response = openai.Completion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -220,8 +214,7 @@ class RegularExpressions:
 
 class TextToSQL:
     def text_to_sql(self, initial_prompt):
-        client = OpenAI()
-        response = client.chat.completions.create(
+        response = openai.Completion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {
@@ -239,7 +232,7 @@ class TextToSQL:
 
         initial_response = response.choices[0].message.content
 
-        response = client.chat.completions.create(
+        response = openai.Completion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {

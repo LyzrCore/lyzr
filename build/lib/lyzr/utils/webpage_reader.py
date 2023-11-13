@@ -1,11 +1,15 @@
+import asyncio
+import nest_asyncio
 import logging
 from typing import List, Set
 
 from bs4 import BeautifulSoup, Tag
 from llama_index.schema import Document
-from playwright.sync_api import sync_playwright
+from playwright.async_api import async_playwright
 
 logger = logging.getLogger(__name__)
+
+nest_asyncio.apply()
 
 CONTENT_TAGS = [
     "p",
@@ -48,20 +52,26 @@ def scrape(html: str) -> str:
     return " ".join(text_set)
 
 
+async def async_load_content_using_playwright(url: str) -> str:
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page()
+        await page.goto(url)
+        html = await page.content()
+        await browser.close()
+        return html
+
+
 def load_content_using_playwright(url: str) -> str:
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        page = browser.new_page()
-        page.goto(url)
-        html = page.content()
-        content = scrape(html)
-        browser.close()
-    return content
+    return asyncio.get_event_loop().run_until_complete(
+        async_load_content_using_playwright(url)
+    )
 
 
 class LyzrWebPageReader:
     @staticmethod
     def load_data(url: str) -> List[Document]:
-        content = load_content_using_playwright(url)
+        html = load_content_using_playwright(url)
+        content = scrape(html)
         document = Document(text=content, metadata={"url": url})
         return [document]

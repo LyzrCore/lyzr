@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="lyzr",
-    version="0.1.5",
+    version="0.1.6",
     author="lyzr",
     description="",
     long_description=open("README.md").read(),
@@ -17,10 +17,12 @@ setup(
     ],
     python_requires=">=3.8.1, <3.12",
     install_requires=[
-        "openai>=0.28.1",
-        "litellm>=0.13.1",
-        "llama-index>=0.8.61",
-        "langchain>=0.0.330",
+        "asyncio",
+        "nest_asyncio",
+        "openai==0.28.1",
+        "litellm==0.12.8",
+        "llama-index==0.8.57",
+        "langchain==0.0.329",
         "python-dotenv>=1.0.0",
         "tiktoken>=0.5.1",
         "pdfminer-six==20221105",
@@ -30,8 +32,5 @@ setup(
         "playwright==1.39.0",
         "pytest-playwright==0.4.3",
         "pandas==2.1.2",
-        "plotly==5.18.0",
-        "scikit-learn==1.3.2",
-        "statsmodels==0.14.0",
     ],
 )

@@ -64,7 +64,9 @@ def pdf_chat_(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_chat_engine(**chat_engine_params, chat_mode=ChatMode.CONTEXT)
+    return vector_store_index.as_chat_engine(
+        **chat_engine_params, chat_mode=ChatMode.CONTEXT
+    )
 
 
 def txt_chat_(
@@ -115,7 +117,9 @@ def txt_chat_(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_chat_engine(**chat_engine_params, chat_mode=ChatMode.CONTEXT)
+    return vector_store_index.as_chat_engine(
+        **chat_engine_params, chat_mode=ChatMode.CONTEXT
+    )
 
 
 def docx_chat_(
@@ -166,7 +170,9 @@ def docx_chat_(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_chat_engine(**chat_engine_params, chat_mode=ChatMode.CONTEXT)
+    return vector_store_index.as_chat_engine(
+        **chat_engine_params, chat_mode=ChatMode.CONTEXT
+    )
 
 
 def webpage_chat_(
@@ -207,7 +213,9 @@ def webpage_chat_(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_chat_engine(**chat_engine_params, chat_mode=ChatMode.CONTEXT)
+    return vector_store_index.as_chat_engine(
+        **chat_engine_params, chat_mode=ChatMode.CONTEXT
+    )
 
 
 def website_chat_(
@@ -248,7 +256,9 @@ def website_chat_(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_chat_engine(**chat_engine_params, chat_mode=ChatMode.CONTEXT)
+    return vector_store_index.as_chat_engine(
+        **chat_engine_params, chat_mode=ChatMode.CONTEXT
+    )
 
 
 def youtube_chat_(
@@ -289,4 +299,6 @@ def youtube_chat_(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_chat_engine(**chat_engine_params, chat_mode=ChatMode.CONTEXT)
+    return vector_store_index.as_chat_engine(
+        **chat_engine_params, chat_mode=ChatMode.CONTEXT
+    )

@@ -252,14 +252,14 @@ def website_rag(
 
 
 def youtube_rag(
-        urls: List[str] = None,
-        system_prompt: str = None,
-        query_wrapper_prompt: str = None,
-        embed_model: Union[str, EmbedType] = "default",
-        llm_params: dict = None,
-        vector_store_params: dict = None,
-        service_context_params: dict = None,
-        query_engine_params: dict = None,
+    urls: List[str] = None,
+    system_prompt: str = None,
+    query_wrapper_prompt: str = None,
+    embed_model: Union[str, EmbedType] = "default",
+    llm_params: dict = None,
+    vector_store_params: dict = None,
+    service_context_params: dict = None,
+    query_engine_params: dict = None,
 ) -> BaseQueryEngine:
     documents = read_youtube_as_documents(
         urls=urls,

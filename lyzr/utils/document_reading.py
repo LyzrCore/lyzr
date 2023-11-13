@@ -41,6 +41,7 @@ def read_pdf_as_documents(
     logger.info(f"Found {len(documents)} 'documents'.")
     return documents
 
+
 def read_docx_as_documents(
     input_dir: Optional[str] = None,
     input_files: Optional[List] = None,
@@ -110,7 +111,7 @@ def read_webpage_as_documents(url: str) -> List[Document]:
 
 
 def read_youtube_as_documents(
-        urls: List[str] = None,
+    urls: List[str] = None,
 ) -> List[Document]:
     reader = LyzrYoutubeReader()
     documents = reader.load_data(urls)

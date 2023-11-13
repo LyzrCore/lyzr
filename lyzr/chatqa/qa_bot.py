@@ -1,6 +1,5 @@
 from typing import Union, Optional, List
 
-import os
 from llama_index import ServiceContext, VectorStoreIndex
 from llama_index.embeddings.utils import EmbedType
 from llama_index.indices.query.base import BaseQueryEngine
@@ -17,14 +16,7 @@ from lyzr.utils.rag_utils import (
 
 class QABot:
     def __init__(self) -> None:
-        api_key = os.getenv("OPENAI_API_KEY")
-
-        if api_key == None:
-            error_message = (
-                "OPENAI_API_KEY is not present in environment variables or .env file."
-            )
-            print(f"Error: {error_message}")
-            raise ValueError(error_message)
+        return None
 
     @staticmethod
     def from_instances(
