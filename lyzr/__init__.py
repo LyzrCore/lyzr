@@ -19,5 +19,5 @@ __all__ = [
     "ChatBot",
     "FormulaGen",
     "Generator",
-    "CsvAnalyzr"
+    "CsvAnalyzr",
 ]
