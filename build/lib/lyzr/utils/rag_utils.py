@@ -61,10 +61,12 @@ def pdf_rag(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params, documents=documents, service_context=service_context
+        **vector_store_params,
+        documents=documents,
+        service_context=service_context,
     )
 
-    return vector_store_index.as_query_engine(**query_engine_params)
+    return vector_store_index.as_query_engine(**query_engine_params, similarity_top_k=5)
 
 
 def txt_rag(
@@ -115,7 +117,7 @@ def txt_rag(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_query_engine(**query_engine_params)
+    return vector_store_index.as_query_engine(**query_engine_params, similarity_top_k=5)
 
 
 def docx_rag(
@@ -166,7 +168,7 @@ def docx_rag(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_query_engine(**query_engine_params)
+    return vector_store_index.as_query_engine(**query_engine_params, similarity_top_k=5)
 
 
 def webpage_rag(
@@ -207,7 +209,7 @@ def webpage_rag(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_query_engine(**query_engine_params)
+    return vector_store_index.as_query_engine(**query_engine_params, similarity_top_k=5)
 
 
 def website_rag(
@@ -248,7 +250,7 @@ def website_rag(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_query_engine(**query_engine_params)
+    return vector_store_index.as_query_engine(**query_engine_params, similarity_top_k=5)
 
 
 def youtube_rag(
@@ -289,4 +291,4 @@ def youtube_rag(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_query_engine(**query_engine_params)
+    return vector_store_index.as_query_engine(**query_engine_params, similarity_top_k=5)

@@ -65,7 +65,7 @@ def pdf_chat_(
     )
 
     return vector_store_index.as_chat_engine(
-        **chat_engine_params, chat_mode=ChatMode.CONTEXT
+        **chat_engine_params, chat_mode=ChatMode.CONTEXT, similarity_top_k=5
     )
 
 
@@ -118,7 +118,7 @@ def txt_chat_(
     )
 
     return vector_store_index.as_chat_engine(
-        **chat_engine_params, chat_mode=ChatMode.CONTEXT
+        **chat_engine_params, chat_mode=ChatMode.CONTEXT, similarity_top_k=5
     )
 
 
@@ -171,7 +171,7 @@ def docx_chat_(
     )
 
     return vector_store_index.as_chat_engine(
-        **chat_engine_params, chat_mode=ChatMode.CONTEXT
+        **chat_engine_params, chat_mode=ChatMode.CONTEXT, similarity_top_k=5
     )
 
 
@@ -214,7 +214,7 @@ def webpage_chat_(
     )
 
     return vector_store_index.as_chat_engine(
-        **chat_engine_params, chat_mode=ChatMode.CONTEXT
+        **chat_engine_params, chat_mode=ChatMode.CONTEXT, similarity_top_k=5
     )
 
 
@@ -257,7 +257,7 @@ def website_chat_(
     )
 
     return vector_store_index.as_chat_engine(
-        **chat_engine_params, chat_mode=ChatMode.CONTEXT
+        **chat_engine_params, chat_mode=ChatMode.CONTEXT, similarity_top_k=5
     )
 
 
@@ -300,5 +300,5 @@ def youtube_chat_(
     )
 
     return vector_store_index.as_chat_engine(
-        **chat_engine_params, chat_mode=ChatMode.CONTEXT
+        **chat_engine_params, chat_mode=ChatMode.CONTEXT, similarity_top_k=5
     )
