@@ -9,7 +9,7 @@ from lyzr.chatqa.qa_bot import QABot
 from lyzr.base.service import LyzrService
 from lyzr.base.vector_store import LyzrVectorStoreIndex
 from lyzr.formula_generator import FormulaGen
-from lyzr.data_analyzr import DataAnalyzr
+from lyzr.csv_analyzr import CsvAnalyzr
 
 __all__ = [
     "LyzrLLMFactory",
@@ -19,5 +19,5 @@ __all__ = [
     "ChatBot",
     "FormulaGen",
     "Generator",
-    "DataAnalyzr"
+    "CsvAnalyzr"
 ]

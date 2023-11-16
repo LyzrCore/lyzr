@@ -1,15 +1,15 @@
 import pandas as pd
 import openai
-import time
 import re
 
-class DataAnalyzr:
-    def __init__(self, df, user_input, gpt_model="gpt-3.5-turbo"):
-        self.df = df
+class CsvAnalyzr:
+    def __init__(self, csv_path, user_input, gpt_model="gpt-3.5-turbo"):
+        self.csv_path = csv_path
+        self.df = pd.read_csv(csv_path)
         self.user_input = user_input
         self.gpt_model = gpt_model
-        self.df_columns = df.columns.tolist()
-        self.df_head = df.head(5)
+        self.df_columns = self.df.columns.tolist()
+        self.df_head = self.df.head(5)
 
 
     def getSteps(self):
@@ -91,7 +91,7 @@ class DataAnalyzr:
         return corrected_python_code
 
 
-    def writeCode(self, instructions):
+    def getCode(self, instructions):
 
         system_prompt = """You Write Python Function. You are a Senior Data Analyst with 10+ Years of Experience. This is a Critical Scenerio. The CEO has asked you to write Python Function to answer a question on a given data, based on the instructions given by Senior Data Scientist"""
 
@@ -104,14 +104,15 @@ class DataAnalyzr:
 
         Here is a sample output for the Python Function:
         ```python
-        import <necessory_libraries>
+        import pandas as pd
+        import <necessory_libraries> # import ALL the necessory libraries
 
         def function_name(dataframe):
             # Write your Python Function here that does the required analysis and answer's CEO's Question
            
         if __name__ == "__main__":
-            function_name(df) 
-            # Call the function, Assume that the df (dataframe) is already defined
+            df = pandas.read_csv("{self.csv_path}") # Do NOT change this line
+            function_name(df) # Call the function that you wrote with the dataframe as the argument
         ```
 
         Now, Write down python function to answer the CEO's question: {self.user_input}
@@ -126,21 +127,7 @@ class DataAnalyzr:
 
         completion = openai.ChatCompletion.create(model=self.gpt_model, temperature = 0, messages=messages)
 
-        python_code = completion.choices[0].message.content
-
-        return python_code
-
-
-    def getCode(self, data_scientist_instructions=None):
-        print("\n Getting Steps")
-        if data_scientist_instructions is None:
-            data_scientist_instructions = self.getSteps()
-
-        print("\n Steps: ", data_scientist_instructions)
-
-        print("\n Writing Code")
-        model_response = self.writeCode(instructions=data_scientist_instructions)
-        print("\n Code:\n ", model_response)
+        model_response = completion.choices[0].message.content
 
         pattern = r'```python\n(.*?)\n```'
         python_code_blocks = re.findall(pattern, model_response, re.DOTALL)
@@ -151,3 +138,20 @@ class DataAnalyzr:
             python_code = model_response    
 
         return python_code
+
+
+
+    def run(self, data_scientist_instructions=None):
+        if data_scientist_instructions is None:
+            data_scientist_instructions = self.getSteps()
+
+        python_code = self.getCode(instructions=data_scientist_instructions)
+
+        try:
+            exec(python_code)
+            return python_code
+        except Exception as e:
+            print("Failed to Analyze CSV")
+            error_message = f"Error: {str(e)}"
+            print(error_message)
+            return ""
