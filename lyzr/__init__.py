@@ -1,7 +1,3 @@
-# SPDX-FileCopyrightText: 2023-present patel <khush@base.ai>
-#
-# SPDX-License-Identifier: MIT
-
 from lyzr.generator import Generator
 from lyzr.chatqa.chatbot import ChatBot
 from lyzr.base.llm import LyzrLLMFactory
