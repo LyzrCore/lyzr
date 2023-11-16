@@ -153,4 +153,4 @@ class CsvAnalyzr:
         except Exception as e:
             print("Failed to Analyze CSV")
             error_message = f"Error: {str(e)}"
-            return f"print({error_message})"
+            return "print(error_message)"
