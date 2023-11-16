@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="lyzr",
-    version="0.1.11",
+    version="0.1.12",
     author="lyzr",
     description="",
     long_description=open("README.md").read(),
@@ -17,6 +17,14 @@ setup(
     ],
     python_requires=">=3.8.1, <3.12",
     install_requires=[
+        "transformers",
+        "accelerate",
+        "datasets[audio]",
+        "openai",
+        "pydub",
+        "streamlit",
+        "audio-recorder-streamlit",
+        "ffmpeg",
         "asyncio",
         "nest_asyncio",
         "openai==0.28.1",
@@ -31,6 +39,6 @@ setup(
         "docx2txt==0.8",
         "playwright==1.39.0",
         "pytest-playwright==0.4.3",
-        "pandas==2.1.2",
+        "pandas==2.0.2",
     ],
 )

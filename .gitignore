@@ -6,3 +6,5 @@ venv
 *.ipynb
 .idea
 .lancedb
+
+.venv

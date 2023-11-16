@@ -47,4 +47,6 @@ lyzr/utils/txt_reader.py
 lyzr/utils/webpage_reader.py
 lyzr/utils/website_reader.py
 lyzr/utils/youtube_reader.py
+lyzr/voice/__init__.py
+lyzr/voice/voice.py
 tests/__init__.py
