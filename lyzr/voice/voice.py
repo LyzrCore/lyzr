@@ -4,10 +4,6 @@ class VoiceBot:
         if api_key is None:
             raise ValueError("API key must be provided")
 
-        # Import necessary libraries
-        import openai
-        from openai import OpenAI
-
         # Initialize the OpenAI client with the provided API key
         client = OpenAI(api_key=api_key)
 
