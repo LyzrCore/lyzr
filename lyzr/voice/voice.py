@@ -6,7 +6,7 @@ import numpy as np
 import scipy.io.wavfile as wav
 import queue
 
-class LyzrVoice():
+class VoiceBot():
 
     def text_to_speech(self, text, model="tts-1-hd", voice="echo", api_key=None):
         if api_key is None:
