@@ -39,10 +39,8 @@ lyzr/utils/db_utils.py
 lyzr/utils/document_reading.py
 lyzr/utils/docx_reader.py
 lyzr/utils/env_utils.py
-lyzr/utils/llm_utils.py
 lyzr/utils/pdf_reader.py
 lyzr/utils/rag_utils.py
-lyzr/utils/templates.py
 lyzr/utils/txt_reader.py
 lyzr/utils/webpage_reader.py
 lyzr/utils/website_reader.py

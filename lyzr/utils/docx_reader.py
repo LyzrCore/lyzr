@@ -7,7 +7,12 @@ from llama_index.schema import Document
 
 class LyzrDocxReader(BaseReader):
     def __init__(self) -> None:
-        None
+        try:
+            import docx2txt
+        except ImportError:
+            raise ImportError(
+                "`docx2txt` package not found, please run `pip install docx2txt`"
+            )
 
     def load_data(self, file_path: str, extra_info: dict = None) -> List[Document]:
         loader = Docx2txtLoader(str(file_path))

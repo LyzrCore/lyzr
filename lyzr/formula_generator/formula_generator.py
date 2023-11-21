@@ -1,8 +1,12 @@
-import openai
+from openai import OpenAI
+
 
 class FormulaGen:
+    def __init__(self) -> None:
+        self.client = OpenAI()
+
     def spreadsheets(self, initial_prompt):
-        response = openai.Completion.create(
+        response = self.client.completions.create(
             engine="gpt-3.5-turbo",
             prompt=[
                 {
@@ -15,9 +19,9 @@ class FormulaGen:
             max_tokens=256,
         )
 
-        initial_response = response.choices[0].text
+        initial_response = response["choices"][0]["message"]["content"]
 
-        response = openai.Completion.create(
+        response = self.client.completions.create(
             engine="gpt-3.5-turbo",
             prompt=[
                 {
@@ -33,11 +37,11 @@ class FormulaGen:
             max_tokens=800,
         )
 
-        final_response = response.choices[0].text
+        final_response = response['choices'][0]['message']['content']
         return final_response
 
     def regex(self, initial_prompt):
-        response = openai.Completion.create(
+        response = self.client.completions.create(
             engine="gpt-3.5-turbo",
             prompt=[
                 {
@@ -50,9 +54,9 @@ class FormulaGen:
             max_tokens=256,
         )
 
-        initial_response = response.choices[0].text
+        initial_response = response['choices'][0]['message']['content']
 
-        response = openai.Completion.create(
+        response = self.client.completions.create(
             engine="gpt-3.5-turbo",
             prompt=[
                 {
@@ -68,11 +72,11 @@ class FormulaGen:
             max_tokens=800,
         )
 
-        final_response = response.choices[0].text
+        final_response = response['choices'][0]['message']['content']
         return final_response
 
     def text_to_sql(self, initial_prompt):
-        response = openai.Completion.create(
+        response = self.client.completions.create(
             engine="gpt-3.5-turbo",
             prompt=[
                 {
@@ -85,9 +89,9 @@ class FormulaGen:
             max_tokens=256,
         )
 
-        initial_response = response.choices[0].text
+        initial_response = response['choices'][0]['message']['content']
 
-        response = openai.Completion.create(
+        response = self.client.completions.create(
             engine="gpt-3.5-turbo",
             prompt=[
                 {
@@ -103,5 +107,5 @@ class FormulaGen:
             max_tokens=800,
         )
 
-        final_response = response.choices[0].text
+        final_response = response['choices'][0]['message']['content']
         return final_response

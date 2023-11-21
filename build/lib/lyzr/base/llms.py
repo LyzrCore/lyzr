@@ -2,7 +2,7 @@ import os
 from importlib import resources as impresources
 from typing import Optional
 
-import openai
+from openai import OpenAI
 
 from . import prompts
 
@@ -136,8 +136,8 @@ class LLM:
         params.update(kwargs)
 
         if self.model_type == "openai":
-            openai.api_key = self.api_key
-            completion = openai.Completion.create(
+            client = OpenAI(api_key=self.api_key) 
+            completion = client.completions.create(
                 model=self.model_name,
                 messages=messages,
                 **params,

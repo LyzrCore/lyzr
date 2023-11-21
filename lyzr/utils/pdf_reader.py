@@ -7,7 +7,13 @@ from llama_index.schema import Document
 
 class LyzrPDFReader(BaseReader):
     def __init__(self) -> None:
-      None
+        try:
+            from pdfminer.high_level import extract_text 
+        except ImportError:
+            raise ImportError(
+                "`pdfminer` package not found, please install it with "
+                "`pip install pdfminer.six`"
+            )
 
     def load_data(self, file_path: str, extra_info: dict = None) -> List[Document]:
         loader = PDFMinerLoader(str(file_path))

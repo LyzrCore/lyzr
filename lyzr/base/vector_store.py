@@ -2,15 +2,6 @@ from typing import Optional, Sequence
 
 from llama_index import Document, ServiceContext, VectorStoreIndex, StorageContext
 from llama_index.node_parser import SimpleNodeParser
-from llama_index.node_parser.extractors import (
-    EntityExtractor,
-    KeywordExtractor,
-    MetadataExtractor,
-    QuestionsAnsweredExtractor,
-    SummaryExtractor,
-    TitleExtractor,
-)
-
 
 def import_vector_store_class(vector_store_class_name: str):
     module = __import__("llama_index.vector_stores", fromlist=[vector_store_class_name])
@@ -21,8 +12,7 @@ def import_vector_store_class(vector_store_class_name: str):
 class LyzrVectorStoreIndex:
     @staticmethod
     def from_defaults(
-            vector_store_type: str = "LanceDBVectorStore",
-            enable_metadata_extraction: bool = False,
+            vector_store_type: str = "LanceDBVectorStore", 
             documents: Optional[Sequence[Document]] = None,
             service_context: Optional[ServiceContext] = None,
             **kwargs
@@ -46,31 +36,8 @@ class LyzrVectorStoreIndex:
                 )
             vector_store = vector_store_class(**kwargs)
             storage_context = StorageContext.from_defaults(vector_store=vector_store)
-
-            llm = service_context.llm if service_context is not None else None
-
-            if enable_metadata_extraction:
-                metadata_extractor = MetadataExtractor(
-                    extractors=[
-                        TitleExtractor(llm=llm, nodes=5),
-                        QuestionsAnsweredExtractor(llm=llm, questions=3),
-                        SummaryExtractor(llm=llm, summaries=["prev", "self"]),
-                        KeywordExtractor(llm=llm, keywords=10),
-                        EntityExtractor(prediction_threshold=0.5),
-                    ],
-                )
-                node_parser = SimpleNodeParser.from_defaults(
-                    metadata_extractor=metadata_extractor
-                )
-                nodes = node_parser.get_nodes_from_documents(documents)
-                index = VectorStoreIndex(
-                    nodes=nodes,
-                    storage_context=storage_context,
-                    service_context=service_context,
-                    show_progress=True,
-                )
-            else:
-                index = VectorStoreIndex.from_documents(
+          
+            index = VectorStoreIndex.from_documents(
                     documents=documents,
                     storage_context=storage_context,
                     service_context=service_context,
