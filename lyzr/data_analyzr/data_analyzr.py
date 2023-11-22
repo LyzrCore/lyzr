@@ -34,7 +34,9 @@ class CapturePrints:
 
 
 class DataAnalyzr:
-    def __init__(self, df, user_input, gpt_model="gpt-3.5-turbo"):
+    def __init__(self, df=None, user_input=None, gpt_model="gpt-3.5-turbo"):
+        if user_input is None or df is None:
+            raise ValueError("Please provide `user_input` and `dataframe`")
         self.df = self.cleanDf(df)
         self.user_input = user_input
         self.gpt_model = gpt_model
