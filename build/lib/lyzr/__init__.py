@@ -7,7 +7,7 @@ from lyzr.base.vector_store import LyzrVectorStoreIndex
 from lyzr.formula_generator import FormulaGen
 from lyzr.csv_analyzr import CsvAnalyzr
 from lyzr.voice import VoiceBot
-
+from lyzr.data_analyzr import DataAnalyzr
 
 __all__ = [
     "LyzrLLMFactory",
@@ -19,4 +19,5 @@ __all__ = [
     "Generator",
     "CsvAnalyzr",
     "VoiceBot",
+    "DataAnalyzr",
 ]

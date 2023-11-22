@@ -28,10 +28,12 @@ lyzr/chatqa/chatbot.py
 lyzr/chatqa/qa_bot.py
 lyzr/csv_analyzr/__init__.py
 lyzr/csv_analyzr/csv_analyzr.py
+lyzr/data_analyzr/__init__.py
+lyzr/data_analyzr/data_analyzr.py
 lyzr/formula_generator/__init__.py
 lyzr/formula_generator/formula_generator.py
 lyzr/generator/__init__.py
-lyzr/generator/_generator.py
+lyzr/generator/generator.py
 lyzr/utils/__init__.py
 lyzr/utils/chat_utils.py
 lyzr/utils/constants.py
