@@ -1,3 +1,3 @@
-from lyzr.generator._generator import Generator
+from lyzr.generator.generator import Generator
 
 __all__ = ["Generator"]

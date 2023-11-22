@@ -69,7 +69,7 @@ class DataAnalyzr:
 
     def getRecommendations(self, number_of_recommendations=4):
 
-        system_prompt = f"""You are a Senior Data Scientist and intelligent strategic advisor with 10+ Years of Experience. This is a Critical Scenerio. The CEO has given you a dataframe, your job is to list {number_of_recommendations} high level recommendations to Analyze data and get deep insights from the data"""
+        system_prompt = f"""You are a Senior Data Scientist and intelligent strategic advisor with 10+ Years of Experience. This is a Critical Scenario. The CEO has given you a dataframe, your job is to list {number_of_recommendations} high level recommendations to Analyze data and get deep insights from the data"""
 
         user_prompt = f"""On the given dataframe give {number_of_recommendations} advanced and high quality recommendations for analysis to get deep insights from the data.
 
@@ -82,7 +82,7 @@ class DataAnalyzr:
         2. You have to keep the recommendations concise and precise.
         3. Only include recommendations that can be answered by running python code on the dataframe.
 
-        This is an extremely critical scenerio, so only include important and high quality recommendations related to the dataframe. 
+        This is an extremely critical Scenario, so only include important and high quality recommendations related to the dataframe. 
 
         Create Recommendations that provide value and are understandable to the CEO and other CXO's. 
         
@@ -129,7 +129,7 @@ class DataAnalyzr:
 
     def getAnalysisSteps(self):
 
-        system_prompt = """You are a Senior Data Scientist with 10+ Years of Experience. This is a Critical Scenerio. The CEO has asked you a question on a dataframe, your job is to list down steps to Analyze the Data and answer the CEO's question. """
+        system_prompt = """You are a Senior Data Scientist with 10+ Years of Experience. This is a Critical Scenario. The CEO has asked you a question on a dataframe, your job is to list down steps to Analyze the Data and answer the CEO's question. """
 
         user_prompt = f"""CEO: "{self.user_input}"
 
@@ -144,7 +144,7 @@ Dataframe Head:
 4. All the analysis results be printed with `print()` function.
 5. The analysis results should be short, simple and human readable, so that the CEO and other CXO's can understand it easily.
 
-This is an extremely critical scenerio, so only include important steps related to CEO's Question and do NOT include any unnecessary steps like imports and data cleaning.
+This is an extremely critical Scenario, so only include important steps related to CEO's Question and do NOT include any unnecessary steps like imports and data cleaning.
 
 Dataframe Coloumns:
 ```python
@@ -182,7 +182,7 @@ Write list of steps:
     
     def getAnalysisCode(self, instructions):
 
-        system_prompt = """You Write Python Function. You are a Senior Data Analyst with 10+ Years of Experience. This is a Critical Scenerio. The CEO has asked you to write Python Function to answer a question on a given data, based on the instructions given by Senior Data Scientist"""
+        system_prompt = """You Write Python Function. You are a Senior Data Analyst with 10+ Years of Experience. This is a Critical Scenario. The CEO has asked you to write Python Function to answer a question on a given data, based on the instructions given by Senior Data Scientist"""
 
         user_prompt = f"""CEO: {self.user_input}
 
@@ -242,7 +242,7 @@ Just Write the Python code in markdown format, that's it.
 
     def getVisualizationSteps(self):
 
-        system_prompt = """You are a Senior Data Scientist with 10+ Years of Experience. This is a Critical Scenerio. The CEO has asked you a question on a dataframe, your job is to list down steps to Visualize the Data and create visualization to answer the CEO's question. """
+        system_prompt = """You are a Senior Data Scientist with 10+ Years of Experience. This is a Critical Scenario. The CEO has asked you a question on a dataframe, your job is to list down steps to Visualize the Data and create visualization to answer the CEO's question. """
 
         user_prompt = f"""CEO: "{self.user_input}"
 
@@ -256,7 +256,7 @@ Dataframe Head:
 3. Save the visualizations with proper labels and names.
 4. Create at least one or more visualizations
 
-This is an extremely critical scenerio, so only include important steps related to CEO's Question and do NOT include any unnecessary steps like imports and data cleaning.
+This is an extremely critical Scenario, so only include important steps related to CEO's Question and do NOT include any unnecessary steps like imports and data cleaning.
 
 Dataframe Coloumns:
 ```python
@@ -296,7 +296,7 @@ Write list of steps:
 
         system_prompt = """You are a Senior Data Analyst with 10+ Years of Experience. You write reliable python code to create a save visualizations for Data Analysis"""
 
-        user_prompt = f"""This is a Critical Scenerio. The CEO has asked you to write Python code to create visualization that answers his question on a given dataframe, based on the instructions given by Senior Data Scientist
+        user_prompt = f"""This is a Critical Scenario. The CEO has asked you to write Python code to create visualization that answers his question on a given dataframe, based on the instructions given by Senior Data Scientist
         
 CEO: "{self.user_input}"
 
