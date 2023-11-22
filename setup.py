@@ -17,13 +17,6 @@ setup(
     ],
     python_requires=">=3.8.1, <3.12",
     install_requires=[
-        "transformers",
-        "accelerate",
-        "datasets[audio]",
-        "pydub",
-        "streamlit",
-        "audio-recorder-streamlit",
-        "ffmpeg",
         "asyncio",
         "nest_asyncio",
         "openai==1.3.4",
