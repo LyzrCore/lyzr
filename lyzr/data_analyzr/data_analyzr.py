@@ -88,14 +88,7 @@ class DataAnalyzr:
 
         Create Recommendations that provide value and are understandable to the CEO and other CXO's. 
         
-        Important: Output the recommendations in Python List format example: 
-        ```
-        [
-        "Recommendation 1", 
-        "Recommendation 2",
-        ...
-        ]
-        ```
+        Important: Output the recommendations in Bullet Points
 
         Dataframe Coloumns:
         ```python
@@ -118,13 +111,6 @@ class DataAnalyzr:
         )
 
         steps = completion.choices[0].message.content
-
-        try:
-            result_list = ast.literal_eval(steps)
-            if isinstance(result_list, list) and all(isinstance(item, str) for item in result_list):
-                steps = result_list
-        except:
-            pass
 
         return steps    
 
