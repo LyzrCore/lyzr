@@ -1,0 +1,2319 @@
+,price,mark,model,year,mileage,engine_capacity,transmission,drive,hand_drive,fuel
+0,80,nissan,march,2003,80000,1240,at,2wd,rhd,gasoline
+1,110,nissan,march,2010,53000,1200,at,2wd,rhd,gasoline
+2,165,nissan,lafesta,2005,47690,2000,at,2wd,rhd,gasoline
+3,190,toyota,avensis,2008,130661,1990,at,2wd,rhd,gasoline
+4,190,daihatsu,mira,2006,66300,660,at,2wd,rhd,gasoline
+5,190,daihatsu,mira,2004,81400,660,at,2wd,rhd,gasoline
+8,220,nissan,march,2010,117000,1200,at,2wd,rhd,gasoline
+9,230,volkswagen,passat,2008,127763,3190,at,4wd,rhd,gasoline
+10,275,mazda,bongo van,2010,178218,1800,mt,2wd,rhd,gasoline
+11,283,honda,step wgn,2005,121655,2000,at,2wd,rhd,gasoline
+12,290,subaru,sambar,2004,121000,650,mt,2wd,rhd,gasoline
+13,290,honda,inspire,2002,61000,2490,at,2wd,rhd,gasoline
+14,290,mercedes-benz,mercedes-benz others,2006,86000,2030,at,2wd,rhd,gasoline
+15,290,nissan,march,2011,62000,1200,at,2wd,rhd,gasoline
+16,290,nissan,march,2010,38000,1200,at,2wd,rhd,gasoline
+17,290,nissan,march,2011,130000,1200,at,2wd,rhd,gasoline
+18,290,nissan,march,2011,113000,1200,at,2wd,rhd,gasoline
+19,290,nissan,march,2010,152300,1200,at,2wd,rhd,gasoline
+20,290,nissan,note,2010,105000,1500,at,2wd,rhd,gasoline
+21,290,nissan,march,2010,85700,1200,at,2wd,rhd,gasoline
+22,290,toyota,passo,2007,112700,1000,at,2wd,rhd,gasoline
+23,290,subaru,impreza,2008,127000,1500,at,2wd,rhd,gasoline
+24,290,toyota,passo,2009,92800,1000,at,2wd,rhd,gasoline
+25,300,kubota,kubota others,1979,9999,9,mt,4wd,center,diesel
+26,300,honda,life,2006,67975,660,at,2wd,rhd,gasoline
+27,300,toyota,passo,2007,147933,990,at,2wd,rhd,gasoline
+28,308,toyota,avensis,2006,58500,2390,at,2wd,rhd,gasoline
+29,310,toyota,progres,2002,109000,2490,at,2wd,rhd,gasoline
+30,313,nissan,cube cubic,2007,109244,1500,at,2wd,rhd,gasoline
+31,320,nissan,march,2011,65000,1200,at,2wd,rhd,gasoline
+32,330,nissan,note,2010,42300,1500,at,2wd,rhd,gasoline
+33,330,nissan,note,2010,135000,1500,at,2wd,rhd,gasoline
+34,330,nissan,cube,2010,112000,1500,at,2wd,rhd,gasoline
+35,336,mercedes-benz,a-class,2006,34175,1700,at,2wd,rhd,gasoline
+36,340,nissan,march,2010,127000,1200,at,2wd,rhd,gasoline
+37,340,nissan,cube,2010,123000,1500,at,2wd,rhd,gasoline
+38,345,toyota,passo,2007,90066,1000,at,2wd,rhd,gasoline
+39,350,nissan,note,2010,71000,1500,at,2wd,rhd,gasoline
+40,350,mitsubishi,coltplus,2005,23100,1500,at,2wd,rhd,gasoline
+41,350,nissan,march,2011,78000,1200,at,2wd,rhd,gasoline
+42,350,toyota,passo,2010,134700,1000,at,2wd,rhd,gasoline
+43,350,nissan,note,2011,143000,1500,at,2wd,rhd,gasoline
+44,350,nissan,march,2011,125000,1200,at,2wd,rhd,gasoline
+45,350,nissan,cube,2010,130300,1500,at,2wd,rhd,gasoline
+46,350,nissan,note,2006,38000,1500,at,2wd,rhd,gasoline
+47,350,nissan,cube,2010,122300,1500,at,2wd,rhd,gasoline
+48,350,toyota,passo,2011,78300,1000,at,2wd,rhd,gasoline
+49,350,toyota,passo,2010,82000,1000,at,2wd,rhd,gasoline
+50,350,suzuki,mr wagon,2006,101800,660,at,2wd,rhd,gasoline
+51,350,toyota,passo,2004,83500,1000,at,2wd,rhd,gasoline
+52,350,daihatsu,mira,2012,51000,660,at,2wd,rhd,gasoline
+53,355,toyota,passo,2009,58377,1000,at,2wd,rhd,gasoline
+54,355,mitsubishi,pajero mini,2003,92997,660,mt,2wd,rhd,gasoline
+55,370,honda,fit,2008,59484,1290,at,2wd,rhd,gasoline
+56,373,subaru,legacy b4,2005,140700,2000,at,4wd,rhd,gasoline
+57,375,toyota,vitz,2007,128317,1000,at,2wd,rhd,gasoline
+58,375,toyota,vitz,2007,127614,1000,at,2wd,rhd,gasoline
+59,378,honda,fit,2008,115131,1290,at,2wd,rhd,gasoline
+60,380,honda,inspire,2007,133000,2990,at,2wd,rhd,gasoline
+61,380,nissan,note,2010,81000,1500,at,2wd,rhd,gasoline
+62,380,toyota,mark ii blit,2006,132000,1980,at,2wd,rhd,gasoline
+63,380,nissan,note,2011,125000,1500,at,2wd,rhd,gasoline
+64,380,nissan,note,2011,123000,1500,at,2wd,rhd,gasoline
+65,381,nissan,note,2010,87000,1500,at,2wd,rhd,gasoline
+66,390,honda,insight,2009,153520,1290,at,2wd,rhd,gasoline
+67,390,nissan,note,2011,138000,1500,at,2wd,rhd,gasoline
+68,390,nissan,note,2011,120000,1500,at,2wd,rhd,gasoline
+69,390,toyota,passo,2010,84000,1000,at,2wd,rhd,gasoline
+70,390,toyota,passo,2010,108600,1000,at,2wd,rhd,gasoline
+71,390,nissan,cube,2011,109100,1500,at,2wd,rhd,gasoline
+72,390,nissan,march,2011,83000,1200,at,2wd,rhd,gasoline
+73,390,nissan,note,2011,59800,1500,at,2wd,rhd,gasoline
+74,390,nissan,note,2011,96300,1500,at,2wd,rhd,gasoline
+75,390,toyota,passo,2011,128000,1000,at,2wd,rhd,gasoline
+76,390,toyota,passo,2011,69400,1000,at,2wd,rhd,gasoline
+77,390,nissan,cube,2011,157700,1500,at,4wd,rhd,gasoline
+78,390,nissan,cube,2011,160200,1500,at,2wd,rhd,gasoline
+79,390,toyota,passo,2011,112100,1000,at,2wd,rhd,gasoline
+80,390,nissan,cube,2011,170800,1500,at,2wd,rhd,gasoline
+81,390,nissan,cube,2011,97100,1500,at,2wd,rhd,gasoline
+82,390,nissan,cube,2010,139300,1500,at,2wd,rhd,gasoline
+83,390,nissan,cube,2011,115000,1500,at,2wd,rhd,gasoline
+84,390,nissan,cube,2011,173000,1500,at,2wd,rhd,gasoline
+85,390,daihatsu,move,2006,92200,660,at,2wd,rhd,gasoline
+86,390,daihatsu,move,2006,95400,660,at,2wd,rhd,gasoline
+87,390,nissan,note,2012,104500,1500,at,2wd,rhd,gasoline
+88,390,daihatsu,tanto,2012,200500,660,at,2wd,rhd,gasoline
+89,390,daihatsu,terios kid,1998,144500,660,at,4wd,rhd,gasoline
+90,390,mazda,az-wagon,2012,110600,660,at,2wd,rhd,gasoline
+91,390,daihatsu,coo,2012,117700,1500,at,2wd,rhd,gasoline
+92,390,nissan,note,2012,215800,1500,at,2wd,rhd,gasoline
+93,398,honda,fit,2009,85495,1290,at,2wd,rhd,gasoline
+94,399,honda,fit,2009,101620,1300,at,2wd,rhd,gasoline
+95,400,nissan,note,2011,29000,1500,at,2wd,rhd,gasoline
+96,400,nissan,cube,2010,94000,1500,at,2wd,rhd,gasoline
+97,400,nissan,note,2010,54000,1500,at,2wd,rhd,gasoline
+98,400,toyota,passo,2010,126000,1000,at,2wd,rhd,gasoline
+99,400,nissan,note,2011,128000,1500,at,2wd,rhd,gasoline
+100,400,nissan,note,2010,133000,1500,at,2wd,rhd,gasoline
+101,400,nissan,note,2011,161600,1500,at,2wd,rhd,gasoline
+102,400,daihatsu,tanto,2012,183800,660,at,2wd,rhd,gasoline
+103,401,toyota,passo,2009,58544,1000,at,2wd,rhd,gasoline
+104,401,toyota,passo,2008,48698,1000,at,2wd,rhd,gasoline
+105,420,honda,insight,2010,316334,1290,at,2wd,rhd,gasoline
+106,428,nissan,cube cubic,2007,107065,1500,at,2wd,rhd,gasoline
+107,429,toyota,passo,2009,38565,1300,at,2wd,rhd,gasoline
+108,430,nissan,note,2011,102000,1500,at,2wd,rhd,gasoline
+109,430,nissan,march,2011,127000,1200,at,2wd,rhd,gasoline
+110,430,honda,fit,2004,119600,1330,at,2wd,rhd,gasoline
+111,440,nissan,note,2011,113000,1500,at,2wd,rhd,gasoline
+112,440,subaru,impreza,2009,90000,1500,at,2wd,rhd,gasoline
+113,442,mitsubishi,pajero mini,1999,53395,660,mt,4wd,rhd,gasoline
+114,448,mazda,verisa,2004,40288,1500,at,2wd,rhd,gasoline
+115,448,toyota,passo,2007,35435,1000,at,2wd,rhd,gasoline
+116,448,toyota,passo,2009,53550,1000,at,2wd,rhd,gasoline
+117,448,mitsubishi,pajero mini,1998,36274,660,at,2wd,rhd,gasoline
+118,448,toyota,passo,2009,20815,1000,at,2wd,rhd,gasoline
+119,448,mitsubishi,pajero mini,2001,97257,660,at,2wd,rhd,gasoline
+120,448,toyota,passo,2009,67804,1000,at,2wd,rhd,gasoline
+121,448,honda,fit,2007,58816,1300,at,2wd,rhd,gasoline
+122,448,suzuki,swift,2008,46078,1200,at,2wd,rhd,gasoline
+123,450,nissan,cube,2012,136000,1500,at,2wd,rhd,gasoline
+124,450,nissan,note,2011,77000,1500,at,2wd,rhd,gasoline
+125,450,nissan,cube,2011,109000,1500,at,2wd,rhd,gasoline
+126,450,toyota,passo,2011,47000,1000,at,2wd,rhd,gasoline
+127,450,nissan,note,2011,67000,1500,at,2wd,rhd,gasoline
+128,450,nissan,note,2010,98000,1500,at,2wd,rhd,gasoline
+129,450,nissan,march,2011,67000,1200,at,2wd,rhd,gasoline
+130,450,nissan,note,2010,57000,1500,at,2wd,rhd,gasoline
+131,450,nissan,note,2011,118000,1500,at,2wd,rhd,gasoline
+132,450,nissan,note,2012,51700,1500,at,2wd,rhd,gasoline
+133,450,nissan,march,2011,101000,1200,at,2wd,rhd,gasoline
+134,450,daihatsu,move,2006,92100,660,at,4wd,rhd,gasoline
+135,450,mitsubishi,delica d2,2012,163500,1200,at,2wd,rhd,gasoline
+136,450,mitsubishi,pajero mini,2000,116000,660,at,4wd,rhd,gasoline
+137,450,nissan,tiida,2010,108000,1500,at,2wd,rhd,gasoline
+138,457,toyota,sienta,2004,94806,1500,at,2wd,rhd,gasoline
+139,460,nissan,note,2011,77000,1500,at,2wd,rhd,gasoline
+140,465,bmw,mini,2002,95500,1600,mt,2wd,rhd,gasoline
+141,467,mitsubishi,colt,2009,61860,1330,at,2wd,rhd,gasoline
+142,467,toyota,platz,2000,34160,1500,at,2wd,rhd,gasoline
+143,471,nissan,bluebird sylphy,2007,51304,2000,at,2wd,rhd,gasoline
+144,476,mazda,verisa,2006,58402,1500,at,2wd,rhd,gasoline
+145,480,nissan,note,2010,128000,1500,at,2wd,rhd,gasoline
+146,480,toyota,passo,2011,104000,1000,at,2wd,rhd,gasoline
+147,480,nissan,march,2006,77066,1300,mt,2wd,rhd,gasoline
+148,485,mitsubishi,eclipse,2002,73641,2970,at,2wd,lhd,gasoline
+149,489,honda,insight,2009,133541,1290,at,2wd,rhd,gasoline
+150,489,honda,fit,2009,103465,1290,at,2wd,rhd,gasoline
+151,489,nissan,march,2011,48000,1200,at,2wd,rhd,gasoline
+152,490,toyota,passo,2011,115200,1000,at,2wd,rhd,gasoline
+153,490,nissan,cube,2010,137000,1500,at,2wd,rhd,gasoline
+154,490,toyota,passo,2011,93600,1000,at,2wd,rhd,gasoline
+155,490,nissan,march,2011,103000,1200,at,2wd,rhd,gasoline
+156,490,nissan,march,2011,77000,1200,at,2wd,rhd,gasoline
+157,490,nissan,march,2006,68000,1200,at,2wd,rhd,gasoline
+158,490,toyota,passo,2010,96000,1000,at,2wd,rhd,gasoline
+159,490,nissan,cube,2011,135000,1500,at,2wd,rhd,gasoline
+160,490,nissan,march,2011,71000,1200,at,2wd,rhd,gasoline
+161,490,toyota,passo,2011,188600,1000,at,2wd,rhd,gasoline
+162,490,nissan,tiida,2010,98000,1500,at,4wd,rhd,gasoline
+163,490,toyota,passo,2010,91000,1000,at,2wd,rhd,gasoline
+164,490,nissan,cube,2010,115000,1500,at,2wd,rhd,gasoline
+165,490,nissan,note,2007,19000,1500,at,2wd,rhd,gasoline
+166,490,toyota,vitz,2007,82000,1000,at,2wd,rhd,gasoline
+167,490,toyota,bb,2010,119000,1500,at,2wd,rhd,gasoline
+168,490,nissan,note,2012,178400,1500,at,2wd,rhd,gasoline
+169,490,nissan,cube,2012,126300,1500,at,2wd,rhd,gasoline
+170,490,honda,step wgn,2006,169400,2000,at,2wd,rhd,gasoline
+171,490,nissan,moco,2013,199000,660,at,2wd,rhd,gasoline
+172,490,nissan,tiida,2010,98000,1500,at,2wd,rhd,gasoline
+173,490,nissan,clipper truck,2012,219300,660,mt,4wd,rhd,gasoline
+174,490,daihatsu,esse,2008,120600,660,at,2wd,rhd,gasoline
+175,490,nissan,cube,2008,78700,1400,at,2wd,rhd,gasoline
+176,490,toyota,bb,2009,128300,1500,at,2wd,rhd,gasoline
+177,490,mitsubishi,ek wagon,2012,117000,660,at,2wd,rhd,gasoline
+178,495,suzuki,swift,2006,67974,1300,at,2wd,rhd,gasoline
+179,495,suzuki,swift,2008,62752,1200,at,2wd,rhd,gasoline
+180,495,volkswagen,polo,2009,22668,1400,at,2wd,rhd,gasoline
+181,498,nissan,x-trail,2005,115934,1990,at,2wd,rhd,gasoline
+182,500,nissan,cube,2011,37000,1500,at,2wd,rhd,gasoline
+183,500,nissan,cube,2011,94000,1500,at,2wd,rhd,gasoline
+184,500,nissan,note,2010,42000,1500,at,2wd,rhd,gasoline
+185,500,nissan,note,2010,121000,1500,at,2wd,rhd,gasoline
+186,500,toyota,passo,2011,104000,1000,at,2wd,rhd,gasoline
+187,500,nissan,march,2011,76000,1200,at,2wd,rhd,gasoline
+188,500,mitsubishi,pajero mini,2003,146000,660,at,4wd,rhd,gasoline
+189,500,nissan,note,2010,154000,1500,at,2wd,rhd,gasoline
+190,500,mazda,atenza sport,2007,241000,1500,at,2wd,rhd,gasoline
+191,500,nissan,note,2008,81000,1500,at,2wd,rhd,gasoline
+192,500,nissan,ad van,2013,210000,1500,at,2wd,rhd,gasoline
+193,500,mitsubishi,delica d2,2012,142200,1200,at,2wd,rhd,gasoline
+194,500,toyota,pixis space,2012,142100,660,at,2wd,rhd,gasoline
+195,500,honda,freed spike,2012,192200,1500,at,2wd,rhd,gasoline
+196,500,honda,stream,2009,82500,1800,at,2wd,rhd,gasoline
+197,500,suzuki,alto,2004,70000,660,at,2wd,rhd,gasoline
+200,520,honda,fit,2007,121134,1290,at,4wd,rhd,gasoline
+201,526,toyota,passo,2010,37195,1000,at,2wd,rhd,gasoline
+202,530,toyota,raum,2003,60000,1500,at,4wd,rhd,gasoline
+203,530,nissan,note,2012,121000,1500,at,2wd,rhd,gasoline
+204,530,nissan,cube,2012,125000,1500,at,2wd,rhd,gasoline
+205,530,toyota,passo,2011,108000,1000,at,2wd,rhd,gasoline
+206,530,nissan,cube,2010,66000,1500,at,2wd,rhd,gasoline
+207,540,nissan,note,2007,84000,1500,at,2wd,rhd,gasoline
+208,540,nissan,cube,2013,138000,1500,at,2wd,rhd,gasoline
+209,540,toyota,passo,2011,114000,1000,at,2wd,rhd,gasoline
+210,540,nissan,note,2007,32000,1500,at,2wd,rhd,gasoline
+211,541,toyota,sienta,2005,47190,1500,at,2wd,rhd,gasoline
+212,541,mazda,verisa,2005,57907,1500,at,2wd,rhd,gasoline
+213,541,toyota,passo,2009,65851,1000,at,2wd,rhd,gasoline
+214,541,honda,fit,2007,32899,1300,at,2wd,rhd,gasoline
+215,541,honda,fit,2007,69280,1500,at,2wd,rhd,gasoline
+216,541,toyota,vitz,2007,62538,1000,at,2wd,rhd,gasoline
+217,541,toyota,passo,2010,48630,1000,at,2wd,rhd,gasoline
+218,550,toyota,wish,2005,100300,2000,at,2wd,rhd,gasoline
+219,550,nissan,cube,2012,92000,1500,at,2wd,rhd,gasoline
+220,550,nissan,note,2011,44400,1500,at,2wd,rhd,gasoline
+221,550,nissan,tiida,2010,109000,1500,at,2wd,rhd,gasoline
+222,550,nissan,note,2011,56000,1500,at,2wd,rhd,gasoline
+223,550,toyota,bb,2011,130000,1500,at,2wd,rhd,gasoline
+224,550,nissan,march,2011,32000,1200,at,2wd,rhd,gasoline
+225,550,nissan,note,2011,119000,1500,at,2wd,rhd,gasoline
+226,550,toyota,passo,2011,119000,1000,at,2wd,rhd,gasoline
+227,550,toyota,passo,2011,81000,1000,at,2wd,rhd,gasoline
+228,550,toyota,passo,2010,70000,1000,at,2wd,rhd,gasoline
+229,550,toyota,passo,2011,90000,1000,at,2wd,rhd,gasoline
+230,550,toyota,passo,2011,78000,1000,at,2wd,rhd,gasoline
+231,550,nissan,note,2010,105000,1500,at,2wd,rhd,gasoline
+232,550,nissan,march,2011,116000,1200,at,2wd,rhd,gasoline
+233,550,toyota,passo,2011,115000,1000,at,2wd,rhd,gasoline
+234,550,toyota,passo,2010,117000,1300,at,2wd,rhd,gasoline
+235,550,toyota,passo,2011,100000,1000,at,2wd,rhd,gasoline
+236,550,suzuki,every,2011,148000,660,at,2wd,rhd,gasoline
+237,550,toyota,passo,2011,101000,1000,at,2wd,rhd,gasoline
+238,550,toyota,passo,2011,117000,1000,at,2wd,rhd,gasoline
+239,550,toyota,passo,2011,143000,1000,at,2wd,rhd,gasoline
+240,550,toyota,passo,2011,53000,1000,at,2wd,rhd,gasoline
+241,550,toyota,passo,2010,64000,1000,at,2wd,rhd,gasoline
+242,550,mazda,demio,2005,115000,1300,at,2wd,rhd,gasoline
+243,550,nissan,note,2012,57000,1500,at,2wd,rhd,gasoline
+244,550,nissan,cube,2013,126000,1500,at,2wd,rhd,gasoline
+245,550,toyota,vitz,2005,149954,1290,at,2wd,rhd,gasoline
+246,550,toyota,passo,2012,144800,1000,at,2wd,rhd,gasoline
+247,550,suzuki,jimny,1998,240500,660,at,4wd,rhd,gasoline
+248,550,mazda,premacy,2012,200800,2000,at,2wd,rhd,gasoline
+249,550,toyota,vitz,2010,153400,1000,at,2wd,rhd,gasoline
+250,550,nissan,x-trail,2002,152700,2000,at,4wd,rhd,gasoline
+251,550,honda,cr-v,1999,183000,2000,at,4wd,rhd,gasoline
+252,550,suzuki,lapin,2006,119300,650,at,2wd,rhd,gasoline
+253,551,mitsubishi,delica,1982,58099,1430,mt,2wd,rhd,gasoline
+254,560,suzuki,wagon r,2003,90265,650,at,2wd,rhd,gasoline
+255,560,honda,fit,2004,74200,1300,at,2wd,rhd,gasoline
+256,560,volkswagen,passat,2002,69900,2320,at,2wd,rhd,gasoline
+257,560,toyota,wish,2003,87764,1790,at,4wd,rhd,gasoline
+258,560,honda,fit,2003,83900,1300,at,2wd,rhd,gasoline
+259,569,honda,fit,2005,116000,1300,at,2wd,rhd,gasoline
+260,570,mazda,verisa,2009,80961,1490,at,2wd,rhd,gasoline
+261,570,honda,fit,2011,169240,1290,at,2wd,rhd,gasoline
+262,570,mitsubishi,colt,2009,74000,1330,at,2wd,rhd,gasoline
+263,570,mitsubishi,lancer,2008,99000,1460,at,4wd,rhd,gasoline
+264,570,daihatsu,naked,2001,90000,650,at,2wd,rhd,gasoline
+265,570,honda,fit,2004,138000,1330,at,2wd,rhd,gasoline
+266,570,suzuki,swift,2003,119000,1320,at,2wd,rhd,gasoline
+267,570,toyota,vitz,2008,68335,1000,at,2wd,rhd,gasoline
+268,578,honda,odyssey,2011,146031,2400,at,2wd,rhd,gasoline
+269,579,honda,fit,2006,36000,1300,at,2wd,rhd,gasoline
+270,579,nissan,note,2007,105101,1500,at,2wd,rhd,gasoline
+271,580,honda,insight,2009,156755,1290,at,2wd,rhd,gasoline
+272,580,honda,fit,2011,288835,1290,at,2wd,rhd,gasoline
+273,580,toyota,sienta,2005,71986,1500,at,2wd,rhd,gasoline
+274,580,toyota,ractis,2009,95306,1300,at,2wd,rhd,gasoline
+275,580,nissan,note,2011,43600,1500,at,2wd,rhd,gasoline
+276,580,toyota,passo,2010,134000,1000,at,2wd,rhd,gasoline
+277,580,mazda,demio,2003,69000,1300,at,2wd,rhd,gasoline
+278,580,mitsubishi,ek wagon,2010,91000,660,at,4wd,rhd,gasoline
+279,580,toyota,ractis,2006,107500,1300,at,2wd,rhd,gasoline
+280,587,toyota,porte,2011,68251,1300,at,2wd,rhd,gasoline
+281,588,mazda,verisa,2005,77720,1500,at,2wd,rhd,gasoline
+282,588,toyota,ractis,2006,45724,1300,at,2wd,rhd,gasoline
+283,588,toyota,vitz,2009,59480,1000,at,2wd,rhd,gasoline
+284,588,toyota,avensis,2005,88659,2000,at,2wd,rhd,gasoline
+285,588,mazda,demio,2008,103000,1300,at,2wd,rhd,gasoline
+286,588,toyota,corolla rumion,2007,121351,1500,at,2wd,rhd,gasoline
+287,588,toyota,corolla rumion,2009,112598,1500,at,2wd,rhd,gasoline
+288,590,honda,fit,2009,79797,1290,at,2wd,rhd,gasoline
+289,590,honda,insight,2009,99902,1290,at,2wd,rhd,gasoline
+290,590,honda,fit,2011,85000,1300,at,2wd,rhd,gasoline
+291,590,nissan,tiida,2010,81000,1500,at,2wd,rhd,gasoline
+292,590,nissan,cube,2010,126000,1500,at,2wd,rhd,gasoline
+293,590,honda,step wgn,2006,112100,2400,at,2wd,rhd,gasoline
+294,590,nissan,tiida latio,2012,160200,1500,at,2wd,rhd,gasoline
+295,590,toyota,vitz,2005,104700,1000,cvt,2wd,rhd,gasoline
+296,599,honda,insight,2009,151348,1290,at,2wd,rhd,gasoline
+297,599,honda,fit,2011,178408,1490,at,4wd,rhd,gasoline
+298,599,daihatsu,esse,2011,105529,660,at,2wd,rhd,gasoline
+299,599,toyota,voxy,2002,98367,2000,at,2wd,rhd,gasoline
+300,599,mazda,demio,2004,141014,1300,at,2wd,rhd,gasoline
+301,599,nissan,march,2006,102824,1200,at,2wd,rhd,gasoline
+302,600,honda,fit,2009,66000,1300,at,2wd,rhd,gasoline
+303,600,toyota,ractis,2006,158000,1300,at,2wd,rhd,gasoline
+304,600,toyota,vitz,2007,180000,1000,at,2wd,rhd,gasoline
+305,600,mazda,demio,2003,90000,1300,at,2wd,rhd,gasoline
+306,600,mazda,premacy,2010,83000,2000,at,2wd,rhd,gasoline
+307,600,toyota,passo,2005,54235,1000,at,2wd,rhd,gasoline
+308,600,toyota,voxy,2007,158600,2000,at,2wd,rhd,gasoline
+309,600,honda,fit,2003,59000,1300,at,2wd,rhd,gasoline
+310,600,nissan,moco,2013,149900,660,at,2wd,rhd,gasoline
+311,600,toyota,passo,2009,111700,1000,at,2wd,rhd,gasoline
+312,606,mazda,carol,2004,59000,650,at,2wd,rhd,gasoline
+313,607,subaru,legacy b4,2003,143700,2000,at,4wd,rhd,gasoline
+314,607,nissan,sunny,2001,88000,1500,at,2wd,rhd,gasoline
+315,607,toyota,passo,2007,38282,1000,at,2wd,rhd,gasoline
+316,607,mazda,bongo truck,1994,160000,1490,mt,2wd,rhd,gasoline
+317,610,honda,fit,2002,49000,1330,at,2wd,rhd,gasoline
+318,610,toyota,bb,2007,101000,1290,at,4wd,rhd,gasoline
+319,610,mazda,demio,2005,88000,1300,at,2wd,rhd,gasoline
+320,616,honda,fit,2005,108200,1300,at,2wd,rhd,gasoline
+321,620,nissan,note,2008,86000,1500,at,2wd,rhd,gasoline
+322,620,mazda,demio,2010,111132,1300,at,2wd,rhd,gasoline
+323,623,toyota,ractis,2005,20952,1300,at,2wd,rhd,gasoline
+324,625,mazda,demio,2003,58385,1300,at,2wd,rhd,gasoline
+325,625,mitsubishi,colt,2004,135369,1300,at,2wd,rhd,gasoline
+326,625,toyota,porte,2007,90821,1300,at,2wd,rhd,gasoline
+327,625,toyota,passo,2009,148818,1300,at,2wd,rhd,gasoline
+328,625,nissan,march,2003,70259,1200,at,2wd,rhd,gasoline
+329,625,daihatsu,boon,2005,86154,1300,at,2wd,rhd,gasoline
+330,625,nissan,march,2002,71861,1200,at,2wd,rhd,gasoline
+331,625,honda,s-mx,1997,240961,2000,at,2wd,rhd,gasoline
+332,625,nissan,cube,2009,175065,1500,at,2wd,rhd,gasoline
+333,625,honda,step wgn,2005,156347,2000,at,2wd,rhd,gasoline
+334,625,mitsubishi,colt,2011,75528,1300,at,2wd,rhd,gasoline
+335,625,nissan,march,2003,68654,1240,at,2wd,rhd,gasoline
+336,625,chrysler,pt cruiser,2001,84174,2000,at,2wd,rhd,gasoline
+337,625,mitsubishi,colt,2009,87154,1300,at,2wd,rhd,gasoline
+338,625,nissan,march,2010,93741,1400,at,4wd,rhd,gasoline
+339,625,nissan,cube,2002,70875,1380,at,2wd,rhd,gasoline
+340,626,toyota,porte,2008,46800,1500,at,2wd,rhd,gasoline
+341,630,honda,fit,2010,92994,1290,at,2wd,rhd,gasoline
+342,630,toyota,passo,2005,47000,1000,at,2wd,rhd,gasoline
+343,630,honda,fit,2010,82000,1300,at,2wd,rhd,gasoline
+344,635,toyota,vitz,2007,71217,1000,at,2wd,rhd,gasoline
+345,635,mazda,demio,2009,46454,1300,at,2wd,rhd,gasoline
+346,635,suzuki,swift,2010,87800,1200,at,2wd,rhd,gasoline
+347,635,volkswagen,golf,2007,58263,1600,at,2wd,rhd,gasoline
+348,635,toyota,passo,2009,22749,1300,at,2wd,rhd,gasoline
+349,635,honda,fit,2009,62291,1300,at,2wd,rhd,gasoline
+350,635,toyota,raum,2009,63101,1500,at,2wd,rhd,gasoline
+351,635,suzuki,swift,2009,38407,1200,at,2wd,rhd,gasoline
+352,635,toyota,wish,2003,54358,1800,at,2wd,rhd,gasoline
+353,635,volkswagen,golf,2007,34782,1600,at,2wd,rhd,gasoline
+354,635,toyota,passo,2005,16890,1000,at,2wd,rhd,gasoline
+355,635,nissan,ad expert,2007,225216,1800,at,2wd,rhd,gasoline
+356,635,nissan,cube,2003,83848,1400,at,2wd,rhd,gasoline
+357,639,nissan,march,2004,117176,1400,at,4wd,rhd,gasoline
+358,640,honda,insight,2009,107914,1290,at,2wd,rhd,gasoline
+359,643,toyota,vitz,2005,53427,1300,at,2wd,rhd,gasoline
+360,649,toyota,ractis,2008,62756,1300,at,2wd,rhd,gasoline
+361,650,honda,insight,2009,112764,1290,at,2wd,rhd,gasoline
+362,650,honda,fit hybrid,2011,239644,1290,at,2wd,rhd,gasoline
+363,650,honda,fit,2011,279232,1290,at,2wd,rhd,gasoline
+364,650,honda,fit,2010,102400,1300,at,2wd,rhd,gasoline
+365,650,honda,fit,2007,69000,1300,at,2wd,rhd,gasoline
+366,650,nissan,note,2011,80900,1500,at,2wd,rhd,gasoline
+367,650,honda,fit,2010,166224,1300,at,2wd,rhd,gasoline
+368,650,nissan,tiida,2011,106000,1500,at,2wd,rhd,gasoline
+369,650,toyota,vitz,2006,92250,1300,at,2wd,rhd,gasoline
+370,650,suzuki,swift,2007,104500,1200,at,2wd,rhd,gasoline
+371,650,toyota,passo,2011,40000,1000,at,2wd,rhd,gasoline
+372,650,mazda,demio,2003,47000,1500,at,2wd,rhd,gasoline
+373,650,mitsubishi,colt,2011,45600,1300,at,2wd,rhd,gasoline
+374,650,toyota,ractis,2009,184100,1500,at,2wd,rhd,gasoline
+375,650,mazda,demio,2003,46000,1300,at,2wd,rhd,gasoline
+376,650,mazda,demio,2003,99000,1300,at,2wd,rhd,gasoline
+377,650,nissan,serena,2009,159800,2000,at,2wd,rhd,gasoline
+378,650,toyota,passo,2007,36500,1000,at,2wd,rhd,gasoline
+379,650,honda,edix,2005,124252,1700,at,2wd,rhd,gasoline
+380,650,nissan,tiida,2011,145400,1500,at,2wd,rhd,gasoline
+381,650,nissan,moco,2013,139500,660,at,2wd,rhd,gasoline
+382,650,suzuki,wagon r,2004,80100,660,at,2wd,rhd,gasoline
+383,650,daihatsu,move custom,2004,64700,660,at,2wd,rhd,gasoline
+384,650,mazda,premacy,2012,175500,2000,at,2wd,rhd,gasoline
+385,650,subaru,impreza anesis,2009,133000,1500,at,2wd,rhd,gasoline
+386,650,honda,step wgn,2005,109534,1990,at,2wd,rhd,gasoline
+387,653,toyota,passo,2007,73000,1000,at,2wd,rhd,gasoline
+388,653,toyota,voxy,2005,137084,1990,at,2wd,rhd,gasoline
+389,653,nissan,tiida,2004,73041,1500,at,2wd,rhd,gasoline
+390,653,mazda,premacy,2007,55101,2000,at,2wd,rhd,gasoline
+391,653,nissan,note,2008,99000,1500,at,2wd,rhd,gasoline
+392,653,honda,edix,2004,71000,1700,at,2wd,rhd,gasoline
+393,653,toyota,ractis,2006,89000,1300,at,2wd,rhd,gasoline
+394,653,toyota,ractis,2006,91000,1300,at,2wd,rhd,gasoline
+395,653,toyota,estima,2003,70250,2400,at,2wd,rhd,gasoline
+396,653,honda,stream,2005,100400,2000,at,2wd,rhd,gasoline
+397,655,honda,fit,2005,105892,1300,at,2wd,rhd,gasoline
+398,660,honda,fit,2001,82000,1330,at,2wd,rhd,gasoline
+399,660,honda,fit,2005,79000,1330,at,2wd,rhd,gasoline
+400,660,toyota,passo,2006,121000,990,at,2wd,rhd,gasoline
+401,660,nissan,sunny,2003,28000,1490,at,2wd,rhd,gasoline
+402,660,toyota,passo,2006,135000,990,at,2wd,rhd,gasoline
+403,660,nissan,march,2006,92000,1240,at,2wd,rhd,gasoline
+404,660,toyota,passo,2005,137000,990,at,2wd,rhd,gasoline
+405,660,daihatsu,terios kid,2001,176000,650,mt,4wd,rhd,gasoline
+406,660,nissan,tiida latio,2006,40000,1490,at,2wd,rhd,gasoline
+407,660,toyota,passo,2008,57000,1290,at,2wd,rhd,gasoline
+408,660,toyota,platz,2005,67000,1290,at,4wd,rhd,gasoline
+409,660,suzuki,carry truck,2002,92000,650,at,2wd,rhd,gasoline
+410,660,mitsubishi,pajero mini,1996,109750,660,mt,2wd,rhd,gasoline
+411,663,honda,fit,2009,40898,1300,at,2wd,rhd,gasoline
+412,663,toyota,vitz,2006,30673,1500,at,2wd,rhd,gasoline
+413,670,nissan,x-trail,2001,163691,1990,at,4wd,rhd,gasoline
+414,670,honda,insight,2009,161809,1290,at,2wd,rhd,gasoline
+415,670,volkswagen,polo,2003,57000,1400,at,2wd,rhd,gasoline
+416,670,suzuki,solio,2011,200000,1200,at,2wd,rhd,gasoline
+417,672,toyota,passo,2004,23835,1300,at,2wd,rhd,gasoline
+418,679,suzuki,carry truck,2001,57083,660,mt,2wd,rhd,gasoline
+419,680,toyota,ractis,2006,58000,1290,at,2wd,rhd,gasoline
+420,680,mazda,mpv,2005,189800,2200,at,4wd,rhd,gasoline
+421,680,mazda,demio,2003,100000,1500,at,2wd,rhd,gasoline
+422,680,mazda,verisa,2007,69000,1500,at,2wd,rhd,gasoline
+423,680,nissan,cube cubic,2004,96400,1400,at,2wd,rhd,gasoline
+424,681,toyota,platz,2004,42692,1500,at,2wd,rhd,gasoline
+425,681,toyota,sienta,2007,62079,1500,at,2wd,rhd,gasoline
+426,681,toyota,vitz,2007,58112,1000,at,2wd,rhd,gasoline
+427,681,honda,fit,2009,69987,1300,at,2wd,rhd,gasoline
+428,681,toyota,ractis,2006,66783,1500,at,2wd,rhd,gasoline
+429,681,toyota,vitz,2009,40722,1000,at,2wd,rhd,gasoline
+430,681,toyota,vitz,2009,62120,1000,at,2wd,rhd,gasoline
+431,681,toyota,raum,2009,55423,1500,at,2wd,rhd,gasoline
+432,681,toyota,vitz,2007,27000,1300,at,2wd,rhd,gasoline
+433,681,nissan,vanette van,2009,115973,1800,at,2wd,rhd,gasoline
+434,689,toyota,vitz,2007,35025,1000,at,2wd,rhd,gasoline
+435,690,honda,insight,2009,200283,1290,at,2wd,rhd,gasoline
+436,690,honda,accord,2006,109450,1990,at,4wd,rhd,gasoline
+437,690,mazda,tribute,2002,54587,1990,at,2wd,rhd,gasoline
+438,690,suzuki,swift,2010,98000,1200,at,2wd,rhd,gasoline
+439,690,toyota,porte,2004,86409,1500,at,2wd,rhd,gasoline
+440,690,nissan,note,2009,90000,1500,at,2wd,rhd,gasoline
+441,690,toyota,passo,2012,95000,1000,at,2wd,rhd,gasoline
+442,690,toyota,vitz,2010,28100,1300,at,2wd,rhd,gasoline
+443,690,toyota,passo,2010,115000,1000,at,2wd,rhd,gasoline
+444,690,toyota,passo,2010,117000,1000,at,2wd,rhd,gasoline
+445,690,mitsubishi,pajero io,1999,153100,1800,at,4wd,rhd,gasoline
+446,690,toyota,noah,2003,104848,2000,at,2wd,rhd,gasoline
+447,690,honda,step wgn,2009,119200,2000,at,2wd,rhd,gasoline
+448,690,nissan,vanette truck,1995,98500,1500,mt,2wd,rhd,gasoline
+449,690,mitsubishi,delica truck,1997,102600,2000,at,2wd,rhd,gasoline
+450,698,nissan,x-trail,2007,253446,1990,at,4wd,rhd,gasoline
+451,699,honda,fit,2010,83430,1300,at,2wd,rhd,gasoline
+452,699,nissan,serena,2011,142886,2000,at,2wd,rhd,gasoline
+453,700,toyota,platz,2000,10340,1000,at,2wd,rhd,gasoline
+454,700,honda,fit,2003,104000,1300,at,2wd,rhd,gasoline
+455,700,honda,fit,2011,102000,1300,at,2wd,rhd,gasoline
+456,700,suzuki,swift,2010,147000,1200,at,2wd,rhd,gasoline
+457,700,nissan,tiida,2011,114000,1500,at,2wd,rhd,gasoline
+458,700,mitsubishi,ek wagon,2013,87600,660,at,2wd,rhd,gasoline
+459,700,daihatsu,move,2013,105000,660,at,2wd,rhd,gasoline
+460,700,mazda,tribute,2001,127000,3000,at,4wd,rhd,gasoline
+461,700,honda,life,2013,162500,660,at,2wd,rhd,gasoline
+462,700,mitsubishi,lancer cargo,2013,66000,1500,at,2wd,rhd,gasoline
+463,700,mazda,demio,2010,247000,1300,at,2wd,rhd,gasoline
+464,700,toyota,ractis,2009,36300,1300,at,2wd,rhd,gasoline
+465,700,daihatsu,move,2013,143300,660,at,2wd,rhd,gasoline
+466,700,mazda,atenza wagon,2007,115500,2300,at,2wd,rhd,gasoline
+467,700,mazda,atenza sport,2007,115500,2300,at,2wd,rhd,gasoline
+468,700,mazda,atenza,2007,115500,2300,at,2wd,rhd,gasoline
+469,700,nissan,cube,2009,93850,1500,at,2wd,rhd,gasoline
+470,700,mitsubishi,ek wagon,2013,65700,660,mt,2wd,rhd,gasoline
+471,700,nissan,vanette truck,1996,74000,1800,mt,2wd,rhd,gasoline
+472,700,honda,fit,2006,157195,1330,at,2wd,rhd,gasoline
+473,700,toyota,raum,2005,103051,1500,at,2wd,rhd,gasoline
+474,700,honda,vamos,2000,124848,660,at,2wd,rhd,gasoline
+475,700,honda,odyssey,2000,21481,2300,at,2wd,rhd,gasoline
+476,707,nissan,vanette van,2002,88695,1800,mt,2wd,rhd,gasoline
+477,710,honda,insight,2009,156904,1290,at,2wd,rhd,gasoline
+478,710,honda,fit,2007,69000,1330,at,2wd,rhd,gasoline
+479,710,subaru,r2,2004,70000,660,at,2wd,rhd,gasoline
+480,715,nissan,cube,2011,118536,1500,at,2wd,rhd,gasoline
+481,720,honda,insight,2009,71274,1290,at,2wd,rhd,gasoline
+482,720,toyota,fun cargo,2002,79600,1300,at,2wd,rhd,gasoline
+483,725,honda,airwave,2006,95406,1500,at,2wd,rhd,gasoline
+484,728,toyota,ractis,2007,69787,1300,at,2wd,rhd,gasoline
+485,728,toyota,passo,2011,31504,1000,at,2wd,rhd,gasoline
+486,728,suzuki,swift,2007,50775,1300,at,2wd,rhd,gasoline
+487,728,honda,fit,2009,57647,1300,at,2wd,rhd,gasoline
+488,728,honda,fit,2009,54370,1300,at,2wd,rhd,gasoline
+489,728,mitsubishi,pajero io,2003,80276,2000,at,4wd,rhd,gasoline
+490,728,toyota,ipsum,2003,89593,2400,at,2wd,rhd,gasoline
+491,728,toyota,passo,2006,109941,1000,at,2wd,rhd,gasoline
+492,728,toyota,passo,2004,21466,1000,at,2wd,rhd,gasoline
+493,728,nissan,serena,2008,165000,2000,at,2wd,rhd,gasoline
+494,730,honda,airwave,2007,105994,1490,at,2wd,rhd,gasoline
+495,732,toyota,ractis,2006,49171,1500,at,2wd,rhd,gasoline
+496,740,toyota,fun cargo,2003,120000,1500,at,4wd,rhd,gasoline
+497,740,toyota,vitz,2007,7461,1300,at,2wd,rhd,gasoline
+498,740,mazda,demio,2003,91000,1500,at,2wd,rhd,gasoline
+499,746,suzuki,carry truck,1999,87816,660,mt,4wd,rhd,gasoline
+500,747,daihatsu,terios kid,2004,100000,660,at,2wd,rhd,gasoline
+501,747,toyota,vitz,2005,31479,1296,at,2wd,rhd,gasoline
+502,747,toyota,raum,2003,89028,1496,at,2wd,rhd,gasoline
+503,747,toyota,passo,2005,10535,1297,at,2wd,rhd,gasoline
+504,747,toyota,verossa,2001,110800,2500,at,2wd,rhd,gasoline
+505,747,nissan,tiida,2006,64900,1500,at,2wd,rhd,gasoline
+506,747,toyota,wish,2009,92177,1800,at,4wd,rhd,gasoline
+507,747,toyota,voxy,2007,149000,2000,at,4wd,rhd,gasoline
+508,747,smart,forfour,2003,114945,690,at,2wd,rhd,gasoline
+509,747,toyota,ractis,2006,92000,1300,at,2wd,rhd,gasoline
+510,747,toyota,vitz,2007,83000,1300,at,2wd,rhd,gasoline
+511,747,nissan,elgrand,2005,142000,3500,at,4wd,rhd,gasoline
+512,747,nissan,elgrand,2005,140000,3500,at,2wd,rhd,gasoline
+513,750,honda,fit,2011,248328,1290,at,2wd,rhd,gasoline
+514,750,suzuki,swift,2010,95000,1200,at,2wd,rhd,gasoline
+515,750,toyota,vitz,2007,52150,1300,at,2wd,rhd,gasoline
+516,750,nissan,note,2011,76300,1500,at,2wd,rhd,gasoline
+517,750,suzuki,swift,2010,106000,1200,at,2wd,rhd,gasoline
+518,750,toyota,vitz,2007,73700,1300,at,2wd,rhd,gasoline
+519,750,toyota,ist,2003,214420,1300,at,2wd,rhd,gasoline
+520,750,toyota,raum,2003,46714,1500,at,2wd,rhd,gasoline
+521,750,mazda,demio,2011,126800,1300,at,2wd,rhd,gasoline
+522,750,toyota,fun cargo,2003,48207,1300,at,2wd,rhd,gasoline
+523,750,toyota,raum,2003,123300,1500,at,2wd,rhd,gasoline
+524,750,toyota,raum,2003,97581,1500,at,2wd,rhd,gasoline
+525,750,mazda,demio,2005,113000,1500,at,2wd,rhd,gasoline
+526,750,nissan,note,2011,50492,1500,at,2wd,rhd,gasoline
+527,750,toyota,raum,2004,103448,1500,at,2wd,rhd,gasoline
+528,750,nissan,note,2010,82882,1500,at,2wd,rhd,gasoline
+529,750,nissan,march,2009,175000,1200,at,2wd,rhd,gasoline
+530,750,suzuki,swift,2010,97400,1200,at,2wd,rhd,gasoline
+531,750,toyota,ractis,2006,146315,1500,at,2wd,rhd,gasoline
+532,750,toyota,bb,2003,106000,1300,at,2wd,rhd,gasoline
+533,750,nissan,x-trail,2004,138000,2000,at,4wd,rhd,gasoline
+534,750,suzuki,swift,2006,125004,1320,at,2wd,rhd,gasoline
+535,750,mitsubishi,ek wagon,2013,59000,660,at,2wd,rhd,gasoline
+536,750,honda,fit,2008,105700,1300,at,2wd,rhd,gasoline
+537,750,mazda,carol,2013,27100,660,mt,2wd,rhd,gasoline
+538,750,mitsubishi,mirage,2012,133700,1000,at,2wd,rhd,gasoline
+539,750,gm,chevrolet others,2002,70800,1320,at,2wd,rhd,gasoline
+540,756,toyota,corolla spacio,2002,41807,1500,at,2wd,rhd,gasoline
+541,758,nissan,tiida,2009,66000,1500,at,2wd,rhd,gasoline
+542,760,nissan,march,2007,46000,1240,at,2wd,rhd,gasoline
+543,760,toyota,vitz,2005,96000,990,at,2wd,rhd,gasoline
+544,760,suzuki,aerio,2005,120000,1790,at,2wd,rhd,gasoline
+545,760,toyota,altezza,2002,53000,1980,at,2wd,rhd,gasoline
+546,760,honda,fit,2009,120000,1490,at,2wd,rhd,gasoline
+547,760,opel,vectra,2006,97000,2190,at,2wd,rhd,gasoline
+548,760,toyota,altezza,2003,64000,1980,at,2wd,rhd,gasoline
+549,760,toyota,passo,2007,30000,990,at,2wd,rhd,gasoline
+550,760,toyota,sienta,2007,182000,1490,at,2wd,rhd,gasoline
+551,760,suzuki,every,2002,173000,650,at,2wd,rhd,gasoline
+552,760,honda,fit,2005,78000,1330,at,2wd,rhd,gasoline
+553,760,mitsubishi,minicab truck,1998,79000,650,mt,2wd,rhd,gasoline
+554,760,toyota,avensis,2004,78000,1990,at,2wd,rhd,gasoline
+555,760,subaru,outback,2005,112000,2450,at,4wd,rhd,gasoline
+556,760,toyota,porte,2011,85700,1300,at,2wd,rhd,gasoline
+557,760,daihatsu,mira,2011,104000,660,at,2wd,rhd,gasoline
+558,766,nissan,tiida,2009,45000,1500,at,2wd,rhd,gasoline
+559,770,toyota,vitz,2007,68000,1000,at,2wd,rhd,gasoline
+560,770,toyota,ractis,2006,168000,1500,at,2wd,rhd,gasoline
+561,770,toyota,passo,2008,145000,1000,at,2wd,rhd,gasoline
+562,770,volkswagen,golf,1999,58491,1800,at,2wd,rhd,gasoline
+563,772,toyota,ractis,2009,81059,1500,at,2wd,rhd,gasoline
+564,772,toyota,mark x,2005,40787,2500,at,2wd,rhd,gasoline
+565,774,toyota,gaia,1999,103985,2000,at,2wd,rhd,gasoline
+566,774,toyota,passo,2011,53660,1000,at,2wd,rhd,gasoline
+567,774,toyota,vitz,2008,60283,1300,at,2wd,rhd,gasoline
+568,775,toyota,alphard,2003,105292,2400,at,2wd,rhd,gasoline
+569,775,mazda,demio,2011,33751,1300,at,2wd,rhd,gasoline
+570,775,mitsubishi,pajero mini,2003,92445,660,at,2wd,rhd,gasoline
+571,775,toyota,raum,2005,24112,1500,at,2wd,rhd,gasoline
+572,775,toyota,vitz,2006,76454,1300,at,2wd,rhd,gasoline
+573,775,suzuki,swift,2007,43914,1200,at,2wd,rhd,gasoline
+574,775,suzuki,swift,2005,53839,1500,at,2wd,rhd,gasoline
+575,775,toyota,passo,2011,35679,1000,at,2wd,rhd,gasoline
+576,775,suzuki,swift,2005,33444,1500,at,2wd,rhd,gasoline
+577,775,toyota,passo,2011,43847,1000,at,2wd,rhd,gasoline
+578,775,toyota,vitz,2007,38637,1300,at,2wd,rhd,gasoline
+579,775,toyota,corolla spacio,2005,46618,1800,at,2wd,rhd,gasoline
+580,775,toyota,corolla spacio,2002,45504,1500,at,2wd,rhd,gasoline
+581,775,toyota,passo,2011,58858,1000,at,2wd,rhd,gasoline
+582,775,toyota,caldina,2004,93626,1800,at,2wd,rhd,gasoline
+583,775,nissan,cube cubic,2007,122967,1500,at,2wd,rhd,gasoline
+584,779,mazda,tribute,2003,117000,2300,at,4wd,rhd,gasoline
+585,780,toyota,alphard g,2003,240069,2390,at,2wd,rhd,gasoline
+586,780,honda,fit hybrid,2011,133365,1290,at,2wd,rhd,gasoline
+587,780,honda,fit,2011,136600,1300,at,2wd,rhd,gasoline
+588,780,honda,fit,2010,121000,1300,at,2wd,rhd,gasoline
+589,780,toyota,sienta,2005,81000,1500,at,2wd,rhd,gasoline
+590,780,mazda,verisa,2005,85000,1500,at,2wd,rhd,gasoline
+591,783,toyota,raum,2009,31744,1500,at,2wd,rhd,gasoline
+592,784,toyota,passo,2004,31089,1000,at,2wd,rhd,gasoline
+593,784,toyota,passo,2006,103782,1000,at,2wd,rhd,gasoline
+594,784,toyota,passo,2006,122676,1000,at,2wd,rhd,gasoline
+595,784,toyota,passo,2004,30913,1000,at,2wd,rhd,gasoline
+596,790,honda,fit,2011,114611,1290,at,2wd,rhd,gasoline
+597,790,suzuki,swift,2000,55000,1320,at,2wd,rhd,gasoline
+598,790,honda,fit hybrid,2011,125000,1300,at,2wd,rhd,hybrid
+599,790,nissan,tiida,2007,83700,1500,at,2wd,rhd,gasoline
+600,790,suzuki,swift,2010,92000,1200,at,2wd,rhd,gasoline
+601,790,honda,fit,2003,82000,1500,at,2wd,rhd,gasoline
+602,790,honda,fit,2006,110000,1300,at,2wd,rhd,gasoline
+604,790,toyota,ractis,2005,88500,1290,at,2wd,rhd,gasoline
+605,790,honda,fit,2003,122000,1500,at,2wd,rhd,gasoline
+606,790,honda,fit,2007,95000,1500,at,2wd,rhd,gasoline
+607,790,honda,fit,2003,24000,1500,at,2wd,rhd,gasoline
+608,790,honda,fit,2005,86000,1300,at,2wd,rhd,gasoline
+609,790,honda,fit,2003,66000,1300,at,2wd,rhd,gasoline
+610,790,honda,fit,2003,71000,1500,at,2wd,rhd,gasoline
+612,790,honda,fit,2006,87000,1500,at,2wd,rhd,gasoline
+613,790,honda,fit,2003,107000,1300,at,2wd,rhd,gasoline
+615,790,honda,fit,2006,104000,1300,at,2wd,rhd,gasoline
+616,790,honda,fit,2003,96000,1300,at,2wd,rhd,gasoline
+617,790,honda,fit,2005,99000,1300,at,2wd,rhd,gasoline
+618,790,honda,fit,2007,45000,1300,at,2wd,rhd,gasoline
+619,790,honda,fit,2006,80000,1300,at,2wd,rhd,gasoline
+620,790,honda,fit,2009,71000,1400,at,2wd,rhd,gasoline
+621,790,mazda,verisa,2007,56000,1500,at,2wd,rhd,gasoline
+622,790,honda,fit,2005,49000,1300,at,2wd,rhd,gasoline
+623,790,honda,fit,2006,38000,1500,at,2wd,rhd,gasoline
+624,790,honda,fit,2005,79000,1300,at,2wd,rhd,gasoline
+625,790,honda,fit,2007,118000,1300,at,2wd,rhd,gasoline
+626,790,honda,fit,2007,120000,1300,at,2wd,rhd,gasoline
+627,790,honda,fit,2005,90000,1300,at,2wd,rhd,gasoline
+628,790,honda,fit,2006,33000,1300,at,2wd,rhd,gasoline
+629,790,honda,fit,2006,49000,1300,at,2wd,rhd,gasoline
+630,790,honda,fit,2003,92000,1300,at,2wd,rhd,gasoline
+631,790,honda,fit,2005,70000,1300,at,2wd,rhd,gasoline
+632,790,honda,fit,2003,69000,1300,at,2wd,rhd,gasoline
+633,790,honda,fit,2005,34000,1300,at,2wd,rhd,gasoline
+634,790,honda,fit,2002,171000,1300,at,2wd,rhd,gasoline
+635,790,honda,fit,2005,81000,1300,at,2wd,rhd,gasoline
+636,790,honda,fit,2005,64000,1300,at,2wd,rhd,gasoline
+637,790,honda,fit,2005,55000,1300,at,2wd,rhd,gasoline
+639,790,honda,fit,2005,68000,1300,at,2wd,rhd,gasoline
+640,790,honda,fit,2003,84000,1300,at,2wd,rhd,gasoline
+641,790,honda,fit,2005,30000,1300,at,2wd,rhd,gasoline
+642,790,mazda,premacy,2012,112000,2000,at,2wd,rhd,gasoline
+643,790,honda,fit,2003,77000,1300,at,2wd,rhd,gasoline
+644,790,honda,fit,2005,128000,1300,at,2wd,rhd,gasoline
+645,790,honda,fit,2004,109000,1300,at,2wd,rhd,gasoline
+646,790,honda,fit,2003,68000,1300,at,2wd,rhd,gasoline
+647,790,honda,fit,2005,111000,1300,at,2wd,rhd,gasoline
+648,790,honda,fit,2007,102000,1300,at,2wd,rhd,gasoline
+649,790,honda,fit,2007,113000,1300,at,2wd,rhd,gasoline
+650,790,honda,fit,2003,104000,1300,at,2wd,rhd,gasoline
+651,790,honda,fit,2004,78000,1500,at,2wd,rhd,gasoline
+652,790,honda,fit,2004,65000,1300,at,2wd,rhd,gasoline
+653,790,honda,fit,2006,108000,1300,at,2wd,rhd,gasoline
+654,790,honda,fit,2004,85000,1300,at,2wd,rhd,gasoline
+655,790,honda,fit,2002,48000,1500,at,2wd,rhd,gasoline
+656,790,honda,fit,2007,90000,1300,at,2wd,rhd,gasoline
+657,790,honda,fit,2003,75000,1500,at,2wd,rhd,gasoline
+658,792,toyota,mark x,2005,49050,2500,at,2wd,rhd,gasoline
+659,793,toyota,brevis,2003,97000,2500,at,2wd,rhd,gasoline
+660,793,toyota,ractis,2005,106000,1300,at,2wd,rhd,gasoline
+661,793,toyota,ractis,2006,51000,1500,at,2wd,rhd,gasoline
+662,798,toyota,raum,2007,158919,1500,at,2wd,rhd,gasoline
+663,799,honda,fit,2009,71450,1300,at,2wd,rhd,gasoline
+664,800,nissan,tiida,2008,77000,1500,at,2wd,rhd,gasoline
+665,800,suzuki,mr wagon,2006,122000,660,at,2wd,rhd,gasoline
+666,800,honda,fit,2005,115000,1330,at,2wd,rhd,gasoline
+667,800,honda,fit,2005,67000,1330,at,2wd,rhd,gasoline
+668,800,toyota,vitz,2006,124000,990,at,2wd,rhd,gasoline
+669,800,toyota,ractis,2006,87000,1490,at,2wd,rhd,gasoline
+670,800,bmw,mini,2003,110000,1590,at,2wd,rhd,gasoline
+671,800,toyota,brevis,2004,140000,2490,at,2wd,rhd,gasoline
+672,800,mazda,axela sport,2005,122000,1490,at,2wd,rhd,gasoline
+673,800,suzuki,swift,2010,72000,1200,at,2wd,rhd,gasoline
+674,800,suzuki,swift,2010,96000,1200,at,2wd,rhd,gasoline
+675,800,toyota,vitz,2009,135000,1000,at,2wd,rhd,gasoline
+676,800,toyota,alphard v,2003,85800,2400,at,2wd,rhd,gasoline
+677,800,toyota,alphard,2003,85800,2400,at,2wd,rhd,gasoline
+678,800,toyota,raum,2003,28965,1500,at,2wd,rhd,gasoline
+679,800,honda,fit,2007,54496,1300,at,2wd,rhd,gasoline
+680,800,subaru,pleo,2013,155100,660,at,2wd,rhd,gasoline
+681,800,toyota,raum,2009,90000,1500,at,2wd,rhd,gasoline
+682,800,suzuki,swift,2003,133362,1300,mt,2wd,rhd,gasoline
+683,800,toyota,noah,2005,127500,2000,at,4wd,rhd,gasoline
+684,800,daihatsu,move,2013,165700,660,at,2wd,rhd,gasoline
+685,800,daihatsu,mira,2013,118300,660,at,2wd,rhd,gasoline
+686,800,subaru,pleo,2013,119000,660,at,2wd,rhd,gasoline
+687,800,honda,life,2013,119000,660,at,2wd,rhd,gasoline
+688,800,mazda,demio,2005,97000,1500,at,2wd,rhd,gasoline
+689,800,mazda,tribute,2005,108600,2300,at,4wd,rhd,gasoline
+690,800,mitsubishi,minicab van,2013,119700,660,at,2wd,rhd,gasoline
+691,800,toyota,passo,2005,84000,1300,at,2wd,rhd,gasoline
+692,800,honda,edix,2005,203000,1700,at,2wd,rhd,gasoline
+693,800,mazda,demio,2006,185000,1300,at,2wd,rhd,gasoline
+694,800,toyota,sienta,2005,195000,1500,at,2wd,rhd,gasoline
+695,800,mitsubishi,ek wagon,2013,79200,660,at,2wd,rhd,gasoline
+696,800,subaru,pleo,2013,193100,660,at,2wd,rhd,gasoline
+697,800,nissan,nv100clipper,2013,140100,660,at,2wd,rhd,gasoline
+698,800,mazda,demio,2005,116000,1300,at,2wd,rhd,gasoline
+699,800,mitsubishi,pajero io,2003,115100,1800,at,4wd,rhd,gasoline
+700,800,honda,fit,2006,99000,1300,at,2wd,rhd,gasoline
+701,800,suzuki,alto,2013,93100,660,at,4wd,rhd,gasoline
+702,800,nissan,ad van,2014,158000,1500,at,2wd,rhd,gasoline
+703,800,toyota,voxy,2004,100817,2000,at,2wd,rhd,gasoline
+704,800,mitsubishi,minicab truck,1999,154400,660,mt,4wd,rhd,gasoline
+705,803,toyota,vitz,2007,53543,1300,at,2wd,rhd,gasoline
+706,808,toyota,ractis,2007,55000,1500,at,2wd,rhd,gasoline
+707,810,mazda,demio,2006,111000,1500,at,2wd,rhd,gasoline
+708,812,toyota,wish,2003,148600,1800,at,4wd,rhd,gasoline
+709,820,toyota,raum,2004,78440,1500,at,2wd,rhd,gasoline
+710,820,volkswagen,golf,2005,10000,2000,at,2wd,rhd,gasoline
+711,820,toyota,vitz,2007,63000,1300,at,2wd,rhd,gasoline
+712,820,mazda,verisa,2004,98000,1500,at,2wd,rhd,gasoline
+713,821,toyota,vitz,2007,68678,1300,at,2wd,rhd,gasoline
+714,821,honda,fit,2009,82386,1300,at,2wd,rhd,gasoline
+715,821,toyota,vitz,2009,20204,1000,at,2wd,rhd,gasoline
+716,821,toyota,ractis,2010,76466,1300,at,2wd,rhd,gasoline
+717,821,honda,accord,2005,59263,2000,at,2wd,rhd,gasoline
+718,821,toyota,vitz,2009,63029,1300,at,2wd,rhd,gasoline
+719,821,toyota,passo,2007,36342,1000,at,2wd,rhd,gasoline
+720,821,toyota,passo,2008,42807,1000,at,2wd,rhd,gasoline
+721,821,mazda,demio,2006,48000,1300,at,2wd,rhd,gasoline
+722,824,toyota,ist,2003,81036,1500,at,2wd,rhd,gasoline
+723,825,mazda,demio,2007,90300,1500,at,2wd,rhd,gasoline
+724,830,nissan,march,2012,170000,1200,at,2wd,rhd,gasoline
+725,831,toyota,brevis,2001,99000,2500,at,2wd,rhd,gasoline
+726,831,suzuki,swift,2007,78400,1300,at,2wd,rhd,gasoline
+727,831,toyota,raum,2004,106100,1500,at,2wd,rhd,gasoline
+728,831,toyota,raum,2006,54000,1500,at,2wd,rhd,gasoline
+729,835,toyota,noah,2003,86000,2000,at,2wd,rhd,gasoline
+730,840,nissan,note,2011,105000,1500,at,2wd,rhd,gasoline
+731,840,subaru,legacy b4,2007,143494,2000,at,4wd,rhd,gasoline
+732,840,toyota,raum,2009,71935,1496,at,4wd,rhd,gasoline
+733,840,toyota,mark x,2005,42133,2499,at,2wd,rhd,gasoline
+734,840,toyota,ractis,2007,44653,1296,at,2wd,rhd,gasoline
+735,840,toyota,ipsum,1997,96224,2000,at,2wd,rhd,gasoline
+736,840,suzuki,sx4,2007,100422,1500,at,2wd,rhd,gasoline
+737,840,honda,fit,2005,90747,1500,mt,2wd,rhd,gasoline
+738,840,nissan,note,2010,159000,1500,at,2wd,rhd,gasoline
+739,840,volkswagen,golf,2007,78740,1600,at,2wd,rhd,gasoline
+740,840,nissan,x-trail,2005,116737,2000,at,4wd,rhd,gasoline
+741,840,toyota,passo,2006,85799,1000,at,2wd,rhd,gasoline
+742,840,volkswagen,polo,2009,63000,1400,at,2wd,rhd,gasoline
+743,840,honda,edix,2004,60000,2000,at,2wd,rhd,gasoline
+744,840,volkswagen,polo,2008,62900,1400,at,2wd,rhd,gasoline
+745,840,toyota,passo,2004,34451,1000,at,2wd,rhd,gasoline
+746,840,subaru,legacy,2004,51080,2000,at,4wd,rhd,gasoline
+747,840,mazda,tribute,2004,191900,2300,at,4wd,rhd,gasoline
+748,840,suzuki,carry truck,1990,55189,660,mt,2wd,rhd,gasoline
+749,840,nissan,vanette van,2010,194613,1990,mt,2wd,rhd,diesel
+750,840,honda,cr-v,2002,180722,1990,at,4wd,rhd,gasoline
+751,840,mitsubishi,pajero io,2001,77472,1990,at,4wd,rhd,gasoline
+752,840,toyota,vitz,2005,68000,1000,at,2wd,rhd,gasoline
+753,840,bmw,mini,2003,84000,1600,at,2wd,rhd,gasoline
+754,841,toyota,mark x,2005,67776,2500,at,2wd,rhd,gasoline
+755,845,nissan,tiida,2010,47872,1500,at,2wd,rhd,gasoline
+756,848,honda,stream,2006,97300,1799,at,2wd,rhd,gasoline
+757,849,nissan,vanette truck,1996,241608,1800,mt,2wd,rhd,gasoline
+758,850,mazda,bongo truck,1991,122798,1490,mt,2wd,rhd,gasoline
+759,850,toyota,alphard,2002,156622,2990,at,4wd,rhd,gasoline
+760,850,toyota,alphard v,2002,156622,2990,at,4wd,rhd,gasoline
+761,850,toyota,alphard g,2002,156622,2990,at,4wd,rhd,gasoline
+762,850,toyota,vitz,2009,77739,1300,cvt,2wd,rhd,gasoline
+763,850,toyota,noah,2003,139050,2000,at,2wd,rhd,gasoline
+764,850,toyota,aristo,1999,88016,3000,at,2wd,rhd,gasoline
+765,850,toyota,fun cargo,2003,51055,1300,at,2wd,rhd,gasoline
+766,850,toyota,wish,2003,60491,1800,at,2wd,rhd,gasoline
+767,850,toyota,vitz,2006,71000,990,at,2wd,rhd,gasoline
+768,850,toyota,raum,2003,73000,1490,at,2wd,rhd,gasoline
+769,850,toyota,sienta,2007,81000,1490,at,2wd,rhd,gasoline
+770,850,suzuki,alto,2013,70700,660,at,2wd,rhd,gasoline
+771,850,toyota,wish,2005,58380,1800,at,2wd,rhd,gasoline
+772,850,toyota,wish,2007,248742,1800,at,2wd,rhd,gasoline
+773,850,toyota,ractis,2009,126045,1500,cvt,2wd,rhd,gasoline
+774,850,toyota,wish,2005,155127,1800,at,2wd,rhd,gasoline
+775,850,toyota,wish,2003,148842,1800,at,2wd,rhd,gasoline
+776,850,toyota,fun cargo,2003,47217,1300,at,2wd,rhd,gasoline
+777,850,toyota,wish,2006,111252,1800,at,2wd,rhd,gasoline
+778,850,toyota,wish,2005,120590,1800,at,2wd,rhd,gasoline
+779,850,toyota,vitz,2007,29991,1300,cvt,2wd,rhd,gasoline
+780,850,toyota,noah,2003,143442,2000,at,2wd,rhd,gasoline
+781,850,toyota,noah,2005,62045,2000,cvt,2wd,rhd,gasoline
+782,850,toyota,wish,2003,179499,1800,at,2wd,rhd,gasoline
+783,850,toyota,noah,2004,92706,2000,cvt,2wd,rhd,gasoline
+784,850,toyota,sienta,2004,55036,1500,cvt,2wd,rhd,gasoline
+785,850,toyota,vitz,2006,55158,1300,cvt,2wd,rhd,gasoline
+786,850,toyota,vitz,2005,82689,1300,cvt,2wd,rhd,gasoline
+787,850,toyota,fun cargo,2001,94444,1300,at,2wd,rhd,gasoline
+788,850,toyota,wish,2005,90951,1800,at,2wd,rhd,gasoline
+789,850,toyota,vitz,2007,52783,1300,cvt,2wd,rhd,gasoline
+790,850,toyota,wish,2005,120121,1800,at,2wd,rhd,gasoline
+791,850,toyota,vitz,2005,76698,1500,cvt,2wd,rhd,gasoline
+792,850,toyota,wish,2003,133404,1800,at,2wd,rhd,gasoline
+793,850,toyota,vitz,2005,89456,1500,cvt,2wd,rhd,gasoline
+794,850,toyota,ractis,2009,98141,1300,cvt,2wd,rhd,gasoline
+795,850,toyota,wish,2007,82322,1800,at,2wd,rhd,gasoline
+796,850,toyota,wish,2003,131292,1800,at,2wd,rhd,gasoline
+797,850,toyota,vitz,2010,86086,1500,cvt,2wd,rhd,gasoline
+798,850,toyota,wish,2005,186368,1800,at,2wd,rhd,gasoline
+799,850,honda,fit,2005,95000,1330,at,2wd,rhd,gasoline
+800,850,honda,fit,2005,61000,1330,at,2wd,rhd,gasoline
+801,850,honda,fit,2001,71000,1330,at,2wd,rhd,gasoline
+802,850,toyota,raum,2003,143000,1490,at,2wd,rhd,gasoline
+803,850,toyota,sienta,2006,56000,1490,at,2wd,rhd,gasoline
+804,850,suzuki,swift,2004,77000,1320,at,2wd,rhd,gasoline
+805,850,suzuki,swift,2002,81000,1320,at,2wd,rhd,gasoline
+806,850,toyota,platz,2003,35000,1290,at,2wd,rhd,gasoline
+807,850,toyota,vitz,2004,102000,990,at,2wd,rhd,gasoline
+808,850,toyota,wish,2007,147272,1800,at,2wd,rhd,gasoline
+809,850,toyota,ractis,2005,101977,1500,cvt,2wd,rhd,gasoline
+810,850,toyota,noah,2006,157802,2000,at,2wd,rhd,gasoline
+811,850,mazda,demio,2011,52600,1300,at,2wd,rhd,gasoline
+812,850,nissan,vanette van,2005,143000,1780,at,2wd,rhd,gasoline
+813,850,toyota,sienta,2007,88396,1500,cvt,2wd,rhd,gasoline
+814,850,toyota,vitz,2005,122105,1300,cvt,2wd,rhd,gasoline
+815,850,mazda,demio,2011,62612,1300,at,2wd,rhd,gasoline
+816,850,nissan,lafesta,2011,112000,2000,at,2wd,rhd,gasoline
+817,850,nissan,cube,2013,158000,1500,at,2wd,rhd,gasoline
+818,850,mitsubishi,minicab van,2013,145100,660,at,2wd,rhd,gasoline
+819,850,mazda,demio,2009,790000,1300,at,2wd,rhd,gasoline
+820,850,honda,fit,2007,231000,1300,at,2wd,rhd,gasoline
+821,850,suzuki,palette,2013,181500,660,at,2wd,rhd,gasoline
+822,850,honda,fit,2008,195000,1300,at,2wd,rhd,gasoline
+823,850,mitsubishi,delica d2,2013,119400,1200,at,2wd,rhd,gasoline
+824,850,suzuki,swift,2010,119130,1200,at,2wd,rhd,gasoline
+825,850,suzuki,swift,2010,110650,1200,at,2wd,rhd,gasoline
+826,850,isuzu,wizard,1997,244500,3100,at,4wd,rhd,diesel
+827,850,nissan,ad van,2014,99300,1500,at,2wd,rhd,gasoline
+828,850,subaru,forester,2003,153039,2000,at,4wd,rhd,gasoline
+829,853,toyota,ist,2005,65731,1300,at,2wd,rhd,gasoline
+830,854,toyota,ractis,2007,70174,1500,at,2wd,rhd,gasoline
+831,859,suzuki,grand escudo,2001,186509,2730,at,4wd,rhd,gasoline
+832,859,volkswagen,jetta,2007,57800,1480,at,2wd,rhd,gasoline
+833,860,toyota,alphard g,2007,185170,2400,at,2wd,rhd,gasoline
+834,860,mazda,demio,2009,71000,1300,at,2wd,rhd,gasoline
+835,861,toyota,vitz,2007,39649,1500,at,2wd,rhd,gasoline
+836,866,mazda,demio,2010,30464,1300,at,2wd,rhd,gasoline
+837,868,toyota,corolla axio,2008,53805,1500,mt,2wd,rhd,gasoline
+838,868,mazda,verisa,2006,34746,1500,at,2wd,rhd,gasoline
+839,868,toyota,ractis,2008,31606,1300,at,2wd,rhd,gasoline
+840,868,toyota,passo,2011,66964,1000,at,2wd,rhd,gasoline
+841,868,toyota,corolla spacio,2002,45826,1500,at,2wd,rhd,gasoline
+842,868,mitsubishi,pajero io,2003,87992,2000,at,4wd,rhd,gasoline
+843,868,honda,insight,2009,80015,1300,at,2wd,rhd,gasoline
+844,868,mitsubishi,minicab truck,2002,149000,660,at,2wd,rhd,gasoline
+845,870,toyota,vitz,2005,91000,1000,at,2wd,rhd,gasoline
+846,870,honda,fit,2002,68000,1300,at,2wd,rhd,gasoline
+847,870,toyota,bb,2008,78200,1500,at,2wd,rhd,gasoline
+848,873,toyota,vitz,2006,110000,1000,at,2wd,rhd,gasoline
+849,875,suzuki,carry truck,1999,22548,660,mt,2wd,rhd,gasoline
+850,876,land rover,discovery,1994,117482,3530,at,2wd,rhd,gasoline
+851,877,honda,accord,2007,65000,1990,at,2wd,rhd,gasoline
+852,877,toyota,brevis,2001,133000,2500,at,2wd,rhd,gasoline
+853,878,toyota,ractis,2006,61893,1500,at,2wd,rhd,gasoline
+854,880,toyota,vitz,2005,110000,1000,at,2wd,rhd,gasoline
+855,880,toyota,vitz,2005,22000,1000,at,2wd,rhd,gasoline
+856,880,nissan,elgrand,2005,176000,2500,at,2wd,rhd,gasoline
+857,880,honda,fit,2004,160000,1300,at,2wd,rhd,gasoline
+858,880,honda,fit,2002,99000,1300,at,2wd,rhd,gasoline
+859,880,mazda,verisa,2004,50500,1500,at,2wd,rhd,gasoline
+860,885,toyota,fun cargo,2001,80000,1500,at,2wd,rhd,gasoline
+861,887,toyota,passo,2007,75765,1300,at,2wd,rhd,gasoline
+862,887,nissan,stagea,2004,133629,2490,at,4wd,rhd,gasoline
+863,890,nissan,note,2011,49100,1500,at,2wd,rhd,gasoline
+864,890,nissan,note,2011,48000,1500,at,2wd,rhd,gasoline
+865,890,nissan,march,2011,139000,1200,at,2wd,rhd,gasoline
+866,890,volkswagen,polo,2005,26000,1400,at,2wd,rhd,gasoline
+867,890,toyota,avensis,2005,195000,2000,at,2wd,rhd,gasoline
+868,890,toyota,vitz,2007,66000,1000,at,2wd,rhd,gasoline
+869,890,suzuki,swift,2006,88400,1300,at,2wd,rhd,gasoline
+870,890,mitsubishi,minicab truck,1993,48000,660,mt,2wd,rhd,gasoline
+871,891,nissan,march,2002,76000,1200,at,2wd,rhd,gasoline
+872,896,toyota,passo,2006,93584,1000,at,2wd,rhd,gasoline
+873,898,honda,fit hybrid,2011,163085,1290,at,2wd,rhd,gasoline
+874,898,toyota,ractis,2006,129300,1296,cvt,2wd,rhd,gasoline
+875,900,nissan,note,2007,172000,1500,at,2wd,rhd,gasoline
+876,900,daihatsu,move,2006,95000,660,at,2wd,rhd,gasoline
+877,900,toyota,ractis,2006,96000,1500,at,4wd,rhd,gasoline
+878,900,mitsubishi,dion,2003,67000,2000,at,2wd,rhd,gasoline
+879,900,toyota,vitz,2006,58000,990,at,2wd,rhd,gasoline
+880,900,daihatsu,mira avy,2003,92000,660,at,2wd,rhd,gasoline
+881,900,nissan,note,2005,47000,1500,at,2wd,rhd,gasoline
+882,900,honda,fit,2011,92000,1500,at,2wd,rhd,gasoline
+883,900,honda,airwave,2008,178000,1500,at,2wd,rhd,gasoline
+884,900,honda,fit,2009,183000,1300,at,2wd,rhd,gasoline
+885,900,toyota,mark ii,2000,117000,2000,at,4wd,rhd,gasoline
+886,900,toyota,wish,2003,98000,1990,at,2wd,rhd,gasoline
+887,900,daihatsu,terios kid,2004,115000,650,at,4wd,rhd,gasoline
+888,900,toyota,ist,2005,58000,1300,at,2wd,rhd,gasoline
+889,900,nissan,tiida,2011,123000,1500,at,2wd,rhd,gasoline
+890,900,suzuki,swift,2010,138000,1200,at,2wd,rhd,gasoline
+891,900,nissan,x-trail,2005,89000,2000,at,4wd,rhd,gasoline
+892,900,toyota,corolla runx,2001,130355,1500,at,2wd,rhd,gasoline
+893,900,daihatsu,hijet cargo,2013,156100,660,at,2wd,rhd,gasoline
+894,900,nissan,ad van,2015,108700,1500,at,2wd,rhd,gasoline
+895,900,volkswagen,polo,2003,71000,1400,at,2wd,rhd,gasoline
+896,900,mazda,biante,2010,154700,2000,at,2wd,rhd,gasoline
+897,900,nissan,cube,2013,118800,1500,at,2wd,rhd,gasoline
+898,900,suzuki,palette,2013,88800,660,at,2wd,rhd,gasoline
+899,900,suzuki,jimny,2001,100000,660,at,4wd,rhd,gasoline
+900,900,toyota,vitz,2007,75700,1300,at,2wd,rhd,gasoline
+901,900,mazda,verisa,2005,61000,1500,at,2wd,rhd,gasoline
+902,900,toyota,vitz,2007,205000,1300,at,2wd,rhd,gasoline
+903,900,toyota,ractis,2009,197000,1300,at,2wd,rhd,gasoline
+904,900,honda,fit,2007,190000,1300,at,2wd,rhd,gasoline
+905,900,toyota,fun cargo,2003,125000,1290,at,2wd,rhd,gasoline
+906,900,honda,fit,2000,64000,1300,at,2wd,rhd,gasoline
+907,900,mazda,verisa,2011,106600,1500,at,2wd,rhd,gasoline
+908,900,nissan,march,2006,75900,1240,at,2wd,rhd,gasoline
+909,900,toyota,vitz,2001,114900,1000,at,2wd,rhd,gasoline
+910,900,mazda,demio,2002,79000,1300,at,2wd,rhd,gasoline
+911,900,mazda,carol eco,2013,87700,660,at,2wd,rhd,gasoline
+912,900,nissan,march,2008,97000,1200,at,2wd,rhd,gasoline
+913,900,toyota,passo,2004,45000,1000,at,2wd,rhd,gasoline
+914,900,honda,step wgn,2006,124000,1990,at,2wd,rhd,gasoline
+915,900,nissan,cube,2009,78500,1500,at,2wd,rhd,gasoline
+916,900,mazda,axela,2007,72916,1490,at,2wd,rhd,lpg
+917,900,toyota,vitz,2005,84500,1000,at,2wd,rhd,gasoline
+918,900,suzuki,swift,2008,218620,1200,at,2wd,rhd,gasoline
+919,903,honda,step wgn,2001,110000,1970,at,2wd,rhd,gasoline
+920,905,toyota,alphard,2005,136658,2400,at,2wd,rhd,gasoline
+921,905,honda,cr-v,1999,137000,2000,at,4wd,rhd,gasoline
+922,910,nissan,x-trail,2004,95300,2000,at,2wd,rhd,gasoline
+923,910,toyota,vitz,2005,79000,1000,at,2wd,rhd,gasoline
+924,910,toyota,fun cargo,2002,75000,1300,at,2wd,rhd,gasoline
+925,910,toyota,fun cargo,2001,80000,1300,at,2wd,rhd,gasoline
+926,913,mazda,demio,2011,134000,1300,at,2wd,rhd,gasoline
+927,913,toyota,raum,2007,88007,1500,at,2wd,rhd,gasoline
+928,915,mazda,verisa,2009,69852,1500,at,2wd,rhd,gasoline
+929,915,toyota,ractis,2009,77256,1500,at,2wd,rhd,gasoline
+930,915,toyota,wish,2005,59357,1800,at,2wd,rhd,gasoline
+931,915,toyota,ist,2003,68233,1300,at,2wd,rhd,gasoline
+932,915,honda,fit,2011,44766,1300,at,2wd,rhd,gasoline
+933,915,toyota,alphard,2005,111760,2400,at,2wd,rhd,gasoline
+934,920,honda,stream,2009,136000,1800,at,4wd,rhd,gasoline
+935,920,toyota,vitz,2003,115000,1300,mt,4wd,rhd,gasoline
+936,920,toyota,ist,2002,198900,1500,at,2wd,rhd,gasoline
+937,920,toyota,vitz,2007,92000,1000,at,2wd,rhd,gasoline
+938,920,toyota,vitz,2005,77000,1000,at,2wd,rhd,gasoline
+939,920,toyota,vitz,2007,90000,1000,at,2wd,rhd,gasoline
+940,920,honda,fit,2003,23000,1300,at,2wd,rhd,gasoline
+941,922,toyota,corolla spacio,2003,35000,1500,at,2wd,rhd,gasoline
+942,923,toyota,ist,2005,89542,1500,at,2wd,rhd,gasoline
+943,924,toyota,passo,2012,86000,1000,at,2wd,rhd,gasoline
+944,924,honda,fit,2010,78128,1300,at,2wd,rhd,gasoline
+945,924,toyota,brevis,2001,118000,2500,at,2wd,rhd,gasoline
+946,924,mitsubishi,pajero io,1999,107750,1800,at,4wd,rhd,gasoline
+947,924,toyota,vitz,2005,101000,1300,at,2wd,rhd,gasoline
+948,924,suzuki,carry truck,1995,12000,660,mt,2wd,rhd,gasoline
+949,924,subaru,forester,2004,78000,2000,at,4wd,rhd,gasoline
+950,924,toyota,ractis,2006,91900,1500,at,2wd,rhd,gasoline
+951,924,nissan,vanette truck,2003,111947,1780,at,2wd,rhd,gasoline
+952,929,toyota,ractis,2009,122241,1300,at,2wd,rhd,gasoline
+953,929,toyota,vitz,2005,79734,1000,at,2wd,rhd,gasoline
+954,930,toyota,ist,2005,159000,1500,at,2wd,rhd,gasoline
+955,930,honda,fit,2006,108000,1300,at,2wd,rhd,gasoline
+956,933,toyota,ractis,2009,82353,1296,at,2wd,rhd,gasoline
+957,933,toyota,mark x,2005,74453,2499,at,2wd,rhd,gasoline
+958,933,toyota,corolla spacio,2004,69817,1496,at,2wd,rhd,gasoline
+959,933,toyota,wish,2004,78229,1794,at,2wd,rhd,gasoline
+960,933,toyota,vitz,2005,46369,1296,at,2wd,rhd,gasoline
+961,933,toyota,vitz,2009,26768,1296,at,2wd,rhd,gasoline
+962,933,toyota,cami,2004,113812,1297,at,4wd,rhd,gasoline
+963,933,toyota,ist,2004,161241,1300,at,2wd,rhd,gasoline
+964,933,daihatsu,hijet truck,1998,46628,660,mt,4wd,rhd,gasoline
+965,933,toyota,mark ii,2004,107915,2000,at,2wd,rhd,gasoline
+966,933,mercedes-benz,e-class,2001,159010,3200,at,2wd,rhd,gasoline
+967,933,honda,hr-v,2004,118370,1590,at,2wd,rhd,gasoline
+968,933,nissan,serena,2007,135416,2000,at,2wd,rhd,gasoline
+969,933,mazda,axela,2006,115454,2260,at,2wd,rhd,gasoline
+970,933,honda,fit,2005,113665,1300,at,2wd,rhd,gasoline
+971,933,honda,fit,2007,75617,1300,at,2wd,rhd,gasoline
+972,933,toyota,fun cargo,2001,171547,1300,at,2wd,rhd,gasoline
+973,933,toyota,fun cargo,2003,34968,1300,at,2wd,rhd,gasoline
+974,933,mazda,demio,2003,149749,1300,at,2wd,rhd,gasoline
+975,933,honda,fit,2003,103465,1300,at,2wd,rhd,gasoline
+976,933,honda,fit,2005,59475,1300,at,2wd,rhd,gasoline
+977,933,honda,fit,2003,63492,1300,at,2wd,rhd,gasoline
+978,933,honda,elysion,2007,201060,2350,at,4wd,rhd,gasoline
+979,933,toyota,crown comfort,2003,497408,2000,at,2wd,rhd,lpg
+980,933,toyota,passo,2007,92124,1000,at,2wd,rhd,gasoline
+981,933,suzuki,every,2005,131700,660,at,4wd,rhd,gasoline
+982,933,toyota,wish,2004,116000,1800,at,2wd,rhd,gasoline
+983,933,toyota,wish,2004,139800,1800,at,2wd,rhd,gasoline
+984,933,mazda,demio,2009,97000,1300,at,2wd,rhd,gasoline
+985,933,toyota,voxy,2006,130000,2000,at,2wd,rhd,gasoline
+986,933,toyota,vitz,2005,43000,1300,at,2wd,rhd,gasoline
+987,933,mitsubishi,canter,2000,82160,2350,at,2wd,rhd,lpg
+990,935,toyota,sienta,2009,58619,1500,at,2wd,rhd,gasoline
+991,939,toyota,sienta,2009,156580,1500,at,2wd,rhd,gasoline
+992,939,subaru,impreza,2003,64251,1500,at,2wd,rhd,gasoline
+993,939,subaru,impreza sportswagon,2003,64251,1500,at,2wd,rhd,gasoline
+994,940,toyota,raum,2007,124000,1490,at,2wd,rhd,gasoline
+995,940,toyota,sienta,2006,53000,1490,at,2wd,rhd,gasoline
+996,940,toyota,raum,2009,167000,1490,at,2wd,rhd,gasoline
+997,940,toyota,vitz,2005,42000,990,at,2wd,rhd,gasoline
+998,940,nissan,march,2009,74000,1240,at,2wd,rhd,gasoline
+999,940,toyota,corolla ii,1997,34000,1330,at,2wd,rhd,gasoline
+1000,940,toyota,vitz,2006,100000,990,at,2wd,rhd,gasoline
+1001,940,toyota,ist,2003,62000,1290,at,2wd,rhd,gasoline
+1002,940,toyota,raum,2003,125000,1490,at,2wd,rhd,gasoline
+1003,940,toyota,ractis,2006,60000,1490,at,2wd,rhd,gasoline
+1004,940,suzuki,swift,2008,70000,1240,at,2wd,rhd,gasoline
+1005,940,nissan,march,2010,56000,1190,at,2wd,rhd,gasoline
+1006,940,nissan,serena,2008,157000,1990,at,2wd,rhd,gasoline
+1007,940,honda,stream,2009,155000,1790,at,2wd,rhd,gasoline
+1008,940,honda,hr-v,2002,150000,1590,at,2wd,rhd,gasoline
+1009,940,mitsubishi,colt,2011,37000,1330,at,2wd,rhd,gasoline
+1010,940,peugeot,207,2011,31000,1590,at,2wd,rhd,gasoline
+1011,940,subaru,impreza,2008,268000,1490,at,2wd,rhd,gasoline
+1012,940,suzuki,sx4 sedan,2008,109000,1490,at,2wd,rhd,gasoline
+1013,940,toyota,vitz,2004,92000,990,mt,2wd,rhd,gasoline
+1014,940,toyota,vitz,2004,185000,990,mt,2wd,rhd,gasoline
+1015,940,mazda,atenza,2009,143000,1990,at,2wd,rhd,gasoline
+1016,940,toyota,townace van,2001,200000,2180,mt,4wd,rhd,diesel
+1017,940,toyota,alphard g,2007,170002,2400,at,2wd,rhd,gasoline
+1018,940,toyota,sienta,2007,105000,1490,at,2wd,rhd,gasoline
+1019,940,toyota,passo,2007,195000,1300,at,2wd,rhd,gasoline
+1020,940,suzuki,swift,2010,62666,1200,at,2wd,rhd,gasoline
+1021,940,honda,fit,2006,116000,1300,at,2wd,rhd,gasoline
+1022,940,suzuki,swift,2009,84335,1300,mt,2wd,rhd,gasoline
+1023,940,toyota,passo,2005,66000,1000,at,2wd,rhd,gasoline
+1024,940,honda,fit,2004,94000,1300,at,2wd,rhd,gasoline
+1025,940,honda,fit,2007,124000,1300,at,2wd,rhd,gasoline
+1026,940,nissan,march,2007,135000,1200,at,2wd,rhd,gasoline
+1027,945,toyota,allion,2006,60885,1990,at,2wd,rhd,gasoline
+1028,945,toyota,passo sette,2009,64916,1500,at,2wd,rhd,gasoline
+1029,950,toyota,wish,2003,152000,1800,at,4wd,rhd,gasoline
+1030,950,toyota,crown,2005,145000,2990,at,2wd,rhd,gasoline
+1031,950,toyota,ist,2003,117222,1300,at,2wd,rhd,gasoline
+1032,950,honda,fit hybrid,2011,111000,1300,at,2wd,rhd,gasoline
+1033,950,suzuki,swift,2010,94000,1200,at,2wd,rhd,gasoline
+1034,950,toyota,noah,2007,170000,2000,at,4wd,rhd,gasoline
+1035,950,toyota,ist,2004,130860,1500,at,2wd,rhd,gasoline
+1036,950,toyota,vitz,2009,132450,1300,at,2wd,rhd,gasoline
+1037,950,suzuki,swift,2010,110000,1200,at,2wd,rhd,gasoline
+1038,950,toyota,vitz,2011,53800,1000,at,2wd,rhd,gasoline
+1039,950,suzuki,swift,2010,112000,1200,at,2wd,rhd,gasoline
+1040,950,toyota,voxy,2007,97468,2000,cvt,2wd,rhd,gasoline
+1041,950,toyota,wish,2003,137209,1800,at,2wd,rhd,gasoline
+1042,950,toyota,noah,2005,116614,2000,cvt,2wd,rhd,gasoline
+1043,950,toyota,noah,2004,90671,2000,cvt,2wd,rhd,gasoline
+1044,950,toyota,noah,2005,97443,2000,cvt,2wd,rhd,gasoline
+1045,950,toyota,noah,2007,157356,2000,cvt,2wd,rhd,gasoline
+1046,950,toyota,noah,2003,118060,2000,at,4wd,rhd,gasoline
+1047,950,toyota,bb,2001,149846,1500,at,2wd,rhd,gasoline
+1048,950,toyota,corolla spacio,2001,97000,1500,at,2wd,rhd,gasoline
+1049,950,nissan,lafesta,2011,93000,2000,at,2wd,rhd,gasoline
+1050,950,nissan,tiida,2011,73000,1500,at,2wd,rhd,gasoline
+1051,950,honda,elysion,2004,126000,2400,at,2wd,rhd,gasoline
+1052,950,toyota,vitz,2005,46000,1000,at,2wd,rhd,gasoline
+1053,950,toyota,noah,2007,148100,2000,at,2wd,rhd,gasoline
+1054,950,toyota,brevis,2001,76000,2990,at,2wd,rhd,gasoline
+1055,950,toyota,vitz,2008,60510,990,at,2wd,rhd,gasoline
+1056,950,honda,civic ferio,2004,130454,1660,mt,2wd,rhd,gasoline
+1057,952,toyota,passo,2006,75509,1000,at,2wd,rhd,gasoline
+1058,952,toyota,mark ii,2004,121000,2000,at,2wd,rhd,gasoline
+1059,953,toyota,mark x,2006,88615,2500,at,2wd,rhd,gasoline
+1060,957,nissan,march,2006,19000,1200,at,2wd,rhd,gasoline
+1061,960,honda,fit,2009,195000,1300,at,2wd,rhd,gasoline
+1062,960,volkswagen,golf,2005,94000,2000,at,2wd,rhd,gasoline
+1063,961,toyota,ist,2002,25477,1300,at,2wd,rhd,gasoline
+1064,961,toyota,ractis,2007,83951,1500,at,2wd,rhd,gasoline
+1065,961,toyota,mark x,2005,59931,2500,at,2wd,rhd,gasoline
+1066,961,toyota,ipsum,2001,82625,2400,at,2wd,rhd,gasoline
+1067,961,honda,fit,2011,61655,1300,at,2wd,rhd,gasoline
+1068,961,toyota,cami,2003,78709,1300,at,2wd,rhd,gasoline
+1069,961,toyota,vitz,2010,18995,1300,at,2wd,rhd,gasoline
+1070,961,toyota,ipsum,2005,64364,2400,at,2wd,rhd,gasoline
+1071,961,toyota,ist,2005,67202,1300,at,2wd,rhd,gasoline
+1072,961,toyota,corolla runx,2003,52234,1500,at,2wd,rhd,gasoline
+1073,961,toyota,wish,2005,143000,1800,at,2wd,rhd,gasoline
+1074,963,toyota,wish,2005,48019,2000,at,2wd,rhd,gasoline
+1075,965,suzuki,carry truck,1999,51127,660,mt,4wd,rhd,gasoline
+1076,968,suzuki,carry truck,1999,58300,660,mt,4wd,rhd,gasoline
+1077,970,toyota,ractis,2007,76000,1500,at,2wd,rhd,gasoline
+1078,970,toyota,ractis,2006,85000,1500,at,2wd,rhd,gasoline
+1079,970,nissan,fuga,2004,95000,2500,at,2wd,rhd,gasoline
+1080,970,toyota,vitz,2007,53000,1000,at,2wd,rhd,gasoline
+1081,970,mazda,demio,2009,78000,1300,at,2wd,rhd,gasoline
+1082,970,honda,fit,2003,103000,1500,at,2wd,rhd,gasoline
+1083,970,toyota,vitz,2007,90000,1000,at,2wd,rhd,gasoline
+1084,971,toyota,passo,2005,72000,1300,at,2wd,rhd,gasoline
+1085,971,toyota,passo,2005,63800,1300,at,2wd,rhd,gasoline
+1086,971,nissan,vanette van,2005,236660,1800,mt,2wd,rhd,gasoline
+1087,979,mazda,bongo van,2011,172085,1800,mt,2wd,rhd,gasoline
+1088,979,subaru,legacy,2006,96938,2000,at,4wd,rhd,gasoline
+1089,979,subaru,legacy touring wagon,2006,96938,2000,at,4wd,rhd,gasoline
+1090,980,hyundai,tucson,2005,170207,2000,at,2wd,lhd,diesel
+1091,980,nissan,note,2005,29243,1490,at,2wd,rhd,gasoline
+1092,980,nissan,gloria hardtop,2003,132700,3000,at,2wd,rhd,gasoline
+1093,980,subaru,legacy touring wagon,2006,132100,2000,mt,4wd,rhd,gasoline
+1094,980,nissan,elgrand,2005,203000,3500,at,4wd,rhd,gasoline
+1095,980,mazda,verisa,2007,175000,1500,at,2wd,rhd,gasoline
+1096,980,bmw,3 series,2003,43000,2200,at,2wd,rhd,gasoline
+1097,980,honda,fit,2006,89000,1300,at,2wd,rhd,gasoline
+1098,980,honda,fit,2004,104000,1300,at,2wd,rhd,gasoline
+1099,980,nissan,cube,2014,120300,1500,at,2wd,rhd,gasoline
+1100,980,toyota,wish,2003,151000,2000,at,2wd,rhd,gasoline
+1101,980,daihatsu,hijet truck,1993,62500,660,mt,4wd,rhd,gasoline
+1102,981,kia motors,x-trek,2004,80019,1991,at,2wd,lhd,diesel
+1103,981,toyota,ist,2007,103443,1500,at,2wd,rhd,gasoline
+1104,990,mitsubishi,canter,1998,147910,1990,mt,2wd,rhd,gasoline
+1105,990,suzuki,swift,2006,38900,1500,at,2wd,rhd,gasoline
+1106,990,toyota,brevis,2003,154000,2500,at,2wd,rhd,gasoline
+1107,990,toyota,ist,2004,126160,1300,at,2wd,rhd,gasoline
+1108,990,toyota,ractis,2006,84000,1490,at,2wd,rhd,gasoline
+1109,990,nissan,serena,2010,131400,2000,at,2wd,rhd,gasoline
+1110,990,subaru,stella,2009,54000,660,at,2wd,rhd,gasoline
+1111,990,toyota,voxy,2004,58096,2000,at,2wd,rhd,gasoline
+1112,990,toyota,ractis,2008,86000,1490,at,2wd,rhd,gasoline
+1113,990,toyota,passo,2008,167000,1290,at,2wd,rhd,gasoline
+1114,990,toyota,corolla runx,2003,103200,1500,at,2wd,rhd,gasoline
+1115,990,toyota,ist,2003,108040,1300,at,2wd,rhd,gasoline
+1116,990,honda,fit,2008,107000,1300,at,2wd,rhd,gasoline
+1117,990,toyota,ist,2003,110260,1500,at,2wd,rhd,gasoline
+1118,990,honda,fit,2010,121000,1300,at,2wd,rhd,gasoline
+1119,990,mazda,bongo,2001,112000,2000,at,2wd,rhd,gasoline
+1120,990,subaru,forester,2003,73800,2000,at,4wd,rhd,gasoline
+1121,990,mazda,bongo friendee,2001,112000,2000,at,2wd,rhd,gasoline
+1122,990,honda,step wgn,2005,100000,2400,at,2wd,rhd,gasoline
+1123,990,audi,a4,2005,63020,1800,at,4wd,rhd,gasoline
+1124,990,audi,a4 avant,2005,63020,1800,at,4wd,rhd,gasoline
+1125,990,honda,fit shuttle,2011,173000,1500,at,2wd,rhd,gasoline
+1126,990,toyota,ractis,2009,195000,1500,at,2wd,rhd,gasoline
+1127,990,honda,fit,2003,139000,1500,at,2wd,rhd,gasoline
+1128,990,toyota,vitz,2005,81000,1000,at,2wd,rhd,gasoline
+1129,990,honda,fit,2004,140000,1300,at,2wd,rhd,gasoline
+1130,990,honda,fit,2007,120000,1300,at,2wd,rhd,gasoline
+1131,990,honda,fit,2006,78000,1300,at,2wd,rhd,gasoline
+1132,990,honda,fit,2007,67000,1300,at,2wd,rhd,gasoline
+1133,990,honda,fit,2007,61000,1300,at,2wd,rhd,gasoline
+1134,990,toyota,passo,2006,45000,1000,at,2wd,rhd,gasoline
+1135,990,honda,acty truck,1992,118000,660,mt,4wd,rhd,gasoline
+1136,990,subaru,sambar truck,1997,107000,660,mt,4wd,rhd,gasoline
+1137,990,honda,freed,2010,117500,1500,at,2wd,rhd,gasoline
+1138,990,suzuki,carry truck,1987,17800,550,mt,4wd,rhd,gasoline
+1139,992,nissan,x-trail,2004,178562,2000,at,4wd,rhd,gasoline
+1140,994,nissan,march,2011,84030,1200,at,4wd,rhd,gasoline
+1141,995,mazda,bongo van,2005,177610,1800,mt,2wd,rhd,gasoline
+1142,995,mazda,bongo van,2004,79070,1800,mt,2wd,rhd,gasoline
+1143,995,suzuki,swift,2011,119195,1200,at,2wd,rhd,gasoline
+1144,995,toyota,crown,2004,219960,2500,at,2wd,rhd,gasoline
+1145,998,toyota,isis,2005,97200,2000,at,2wd,rhd,gasoline
+1146,998,subaru,exiga,2008,147417,2000,at,4wd,rhd,gasoline
+1147,998,toyota,passo,2006,115074,1000,at,2wd,rhd,gasoline
+1148,998,toyota,brevis,2003,108541,2500,at,2wd,rhd,gasoline
+1149,998,toyota,raum,2003,105737,1500,at,2wd,rhd,gasoline
+1150,998,toyota,noah,2004,139136,2000,at,2wd,rhd,gasoline
+1151,999,nissan,march,2011,149000,1200,at,2wd,rhd,gasoline
+1152,999,toyota,altezza,2001,94100,2000,at,2wd,lhd,gasoline
+1153,1000,toyota,ist,2005,99000,1500,at,2wd,rhd,gasoline
+1154,1000,toyota,raum,2005,80500,1500,at,2wd,rhd,gasoline
+1155,1000,toyota,ist,2005,56000,1300,at,2wd,rhd,gasoline
+1156,1000,nissan,bluebird sylphy,2010,150000,1500,cvt,2wd,rhd,gasoline
+1157,1000,honda,fit,2006,112264,1500,at,4wd,rhd,gasoline
+1158,1000,toyota,passo,2005,141210,1300,at,2wd,rhd,gasoline
+1159,1000,mazda,demio,2008,116000,1300,at,2wd,rhd,gasoline
+1160,1000,toyota,ist,2003,158000,1300,at,2wd,rhd,gasoline
+1161,1000,mazda,verisa,2010,74127,1500,at,2wd,rhd,gasoline
+1162,1000,honda,airwave,2006,175000,1500,at,2wd,rhd,gasoline
+1163,1000,honda,fit,2010,185000,1300,at,2wd,rhd,gasoline
+1164,1000,toyota,noah,2003,199000,1990,at,2wd,rhd,gasoline
+1165,1000,honda,fit,2007,103000,1300,at,2wd,rhd,gasoline
+1166,1000,nissan,march,2010,82621,1200,at,2wd,rhd,gasoline
+1167,1000,honda,fit,2002,140000,1300,at,2wd,rhd,gasoline
+1168,1000,toyota,bb,2009,151000,1290,at,2wd,rhd,gasoline
+1169,1000,nissan,bluebird sylphy,2006,122000,1990,at,2wd,rhd,gasoline
+1170,1000,mazda,bongo truck,1988,137419,1410,mt,2wd,rhd,gasoline
+1171,1000,nissan,skyline,2004,95199,2500,at,2wd,rhd,gasoline
+1172,1008,toyota,mark x,2005,68491,2500,at,2wd,rhd,gasoline
+1173,1008,toyota,mark x,2005,57014,2500,at,2wd,rhd,gasoline
+1174,1008,toyota,ist,2004,40380,1300,at,2wd,rhd,gasoline
+1175,1008,mazda,verisa,2009,11855,1500,at,2wd,rhd,gasoline
+1176,1008,honda,fit,2011,43201,1300,at,2wd,rhd,gasoline
+1177,1008,toyota,alphard,2003,103338,2400,at,2wd,rhd,gasoline
+1178,1008,toyota,ist,2004,80109,1300,at,2wd,rhd,gasoline
+1179,1008,toyota,allex,2005,31110,1800,at,2wd,rhd,gasoline
+1180,1008,toyota,alphard,2005,98367,2400,at,2wd,rhd,gasoline
+1181,1009,mitsubishi,minicab truck,1994,37000,650,mt,2wd,rhd,gasoline
+1182,1009,subaru,sambar,1993,96000,650,mt,4wd,rhd,gasoline
+1183,1009,honda,step wgn,1997,95000,1970,at,2wd,rhd,gasoline
+1184,1010,toyota,ractis,2009,80000,1290,at,2wd,rhd,gasoline
+1185,1010,mazda,demio,2008,85000,1300,at,2wd,rhd,gasoline
+1186,1010,toyota,vitz,2005,72000,1000,at,2wd,rhd,gasoline
+1187,1010,toyota,crown,2007,124540,2500,at,2wd,rhd,gasoline
+1188,1010,toyota,vitz,2007,127000,1300,at,2wd,rhd,gasoline
+1189,1010,honda,fit,2007,139000,1500,at,2wd,rhd,gasoline
+1190,1010,honda,fit,2003,56000,1300,at,2wd,rhd,gasoline
+1191,1010,nissan,march,2003,62000,1200,at,2wd,rhd,gasoline
+1192,1010,toyota,passo,2007,96000,1000,at,2wd,rhd,gasoline
+1193,1010,toyota,passo,2007,63000,1000,at,2wd,rhd,gasoline
+1194,1016,honda,fit,2009,109000,1300,at,2wd,rhd,gasoline
+1195,1017,toyota,ist,2003,59212,1500,at,2wd,rhd,gasoline
+1196,1017,toyota,vitz,2007,72000,1000,at,2wd,rhd,gasoline
+1197,1017,honda,fit,2009,115000,1300,at,2wd,rhd,gasoline
+1198,1017,daihatsu,mira,2005,112260,660,at,2wd,rhd,gasoline
+1199,1019,toyota,brevis,2001,54830,2500,at,2wd,rhd,gasoline
+1200,1019,toyota,brevis,2003,23809,2500,at,2wd,rhd,gasoline
+1201,1020,toyota,ractis,2006,39163,1500,at,2wd,rhd,gasoline
+1202,1020,mazda,demio,2009,77494,1300,at,2wd,rhd,gasoline
+1203,1020,volkswagen,golf,2006,63000,1600,at,2wd,rhd,gasoline
+1204,1020,toyota,vitz,2005,59000,1300,at,2wd,rhd,gasoline
+1205,1020,toyota,vitz,2007,98000,1000,cvt,2wd,rhd,gasoline
+1206,1026,toyota,ractis,2008,53052,1296,at,2wd,rhd,gasoline
+1207,1026,toyota,mark x,2007,123620,2499,at,2wd,rhd,gasoline
+1208,1026,toyota,ist,2003,62210,1496,at,2wd,rhd,gasoline
+1209,1026,toyota,ractis,2007,31800,1496,at,2wd,rhd,gasoline
+1210,1026,mazda,verisa,2005,46675,1500,at,2wd,rhd,gasoline
+1211,1026,toyota,mark ii,1998,81571,2000,mt,2wd,rhd,gasoline
+1212,1026,suzuki,splash,2009,106097,1242,at,2wd,rhd,gasoline
+1213,1026,nissan,note,2007,105687,1498,at,2wd,rhd,gasoline
+1214,1026,toyota,passo,2005,53183,1300,at,2wd,rhd,gasoline
+1215,1026,nissan,tiida,2009,100044,1490,at,2wd,rhd,gasoline
+1216,1026,toyota,vitz,2009,91000,1300,at,2wd,rhd,gasoline
+1217,1026,mazda,verisa,2004,59055,1490,at,2wd,rhd,gasoline
+1218,1026,toyota,mark x,2005,112200,2500,at,2wd,rhd,gasoline
+1219,1026,mazda,titan dash,2007,229788,1990,at,2wd,rhd,gasoline
+1220,1026,nissan,march,2002,44610,1200,at,2wd,rhd,gasoline
+1221,1026,toyota,mark ii,2001,99800,2000,at,2wd,rhd,gasoline
+1222,1027,toyota,voxy,2009,129880,1986,at,2wd,rhd,gasoline
+1223,1029,nissan,clipper truck,2007,101000,660,mt,2wd,rhd,gasoline
+1224,1030,honda,fit,2010,58000,1300,at,2wd,rhd,gasoline
+1225,1030,toyota,vitz,2005,84000,1000,at,2wd,rhd,gasoline
+1226,1030,honda,fit,2003,157000,1500,at,2wd,rhd,gasoline
+1227,1030,toyota,passo,2009,20000,1000,at,2wd,rhd,gasoline
+1228,1030,honda,airwave,2006,98000,1500,at,2wd,rhd,gasoline
+1229,1030,honda,fit,2007,114000,1300,at,2wd,rhd,gasoline
+1230,1030,honda,fit,2005,141000,1500,at,2wd,rhd,gasoline
+1231,1030,honda,airwave,2005,103000,1500,at,2wd,rhd,gasoline
+1232,1036,suzuki,swift,2008,89000,1200,at,2wd,rhd,gasoline
+1233,1040,toyota,passo,2007,36000,1290,at,2wd,rhd,gasoline
+1234,1040,toyota,vitz,2005,76000,990,at,2wd,rhd,gasoline
+1235,1040,toyota,passo,2009,68000,990,at,2wd,rhd,gasoline
+1236,1040,toyota,vitz,2005,6000,990,at,2wd,rhd,gasoline
+1237,1040,toyota,vitz,2005,106000,1290,at,2wd,rhd,gasoline
+1238,1040,toyota,sienta,2007,95000,1490,at,2wd,rhd,gasoline
+1239,1040,toyota,raum,2006,84000,1490,at,2wd,rhd,gasoline
+1240,1040,toyota,avensis,2005,70000,1990,at,2wd,rhd,gasoline
+1241,1040,nissan,tiida,2009,100000,1490,at,2wd,rhd,gasoline
+1242,1040,nissan,lafesta,2007,53000,1990,at,2wd,rhd,gasoline
+1243,1040,toyota,ractis,2005,47000,1490,at,2wd,rhd,gasoline
+1244,1040,toyota,corolla spacio,2003,78000,1490,at,2wd,rhd,gasoline
+1245,1040,toyota,ractis,2007,91000,1290,at,2wd,rhd,gasoline
+1246,1040,nissan,x-trail,2005,165000,1990,at,4wd,rhd,gasoline
+1247,1040,nissan,march,2012,126000,1190,at,2wd,rhd,gasoline
+1248,1040,toyota,raum,2005,39000,1490,at,2wd,rhd,gasoline
+1249,1040,toyota,vitz,2005,38000,990,at,2wd,rhd,gasoline
+1250,1040,toyota,ist,2005,72000,1290,at,2wd,rhd,gasoline
+1251,1040,toyota,raum,2003,50000,1490,at,2wd,rhd,gasoline
+1252,1040,toyota,ractis,2007,93000,1290,at,2wd,rhd,gasoline
+1253,1040,toyota,ractis,2006,97000,1490,at,2wd,rhd,gasoline
+1254,1040,toyota,ractis,2007,92000,1490,at,2wd,rhd,gasoline
+1255,1040,toyota,ist,2005,175000,1290,at,2wd,rhd,gasoline
+1256,1040,toyota,ractis,2009,82000,1490,at,2wd,rhd,gasoline
+1257,1040,toyota,mark x,2004,167000,2490,at,2wd,rhd,gasoline
+1258,1040,toyota,noah,2004,158000,1990,at,2wd,rhd,gasoline
+1259,1040,toyota,brevis,2001,53000,2490,at,2wd,rhd,gasoline
+1260,1040,toyota,allion,2004,152000,1790,at,4wd,rhd,gasoline
+1261,1040,honda,fit,2004,112000,1500,at,2wd,rhd,gasoline
+1262,1040,honda,fit,2003,121000,1300,at,2wd,rhd,gasoline
+1263,1040,toyota,voxy,2005,115000,2000,at,2wd,rhd,gasoline
+1264,1040,toyota,altezza,2000,43000,2000,at,2wd,rhd,gasoline
+1265,1040,honda,fit,2006,36000,1300,at,2wd,rhd,gasoline
+1266,1040,honda,inspire,2004,42000,2990,at,2wd,rhd,gasoline
+1267,1040,honda,airwave,2008,80000,1490,at,2wd,rhd,gasoline
+1268,1041,nissan,vanette van,2003,208434,1800,mt,2wd,rhd,gasoline
+1269,1049,suzuki,alto,2005,107000,660,at,2wd,rhd,gasoline
+1270,1050,suzuki,mr wagon,2013,180585,660,at,2wd,rhd,gasoline
+1271,1050,suzuki,swift,2009,84000,1300,at,2wd,rhd,gasoline
+1272,1050,suzuki,swift,2010,141000,1200,at,2wd,rhd,gasoline
+1273,1050,suzuki,swift,2010,42000,1200,at,2wd,rhd,gasoline
+1274,1050,honda,fit,2009,95000,1400,at,2wd,rhd,gasoline
+1275,1050,toyota,ist,2005,36000,1300,at,2wd,rhd,gasoline
+1276,1050,toyota,corolla spacio,2002,71000,1500,at,2wd,rhd,gasoline
+1277,1050,mazda,tribute,2004,105962,2300,at,4wd,rhd,gasoline
+1278,1050,honda,stream,2010,119000,1800,at,2wd,rhd,gasoline
+1279,1050,honda,fit,2007,44000,1300,at,2wd,rhd,gasoline
+1280,1050,daihatsu,move,2013,157422,660,at,4wd,rhd,gasoline
+1281,1050,nissan,elgrand,2005,193000,2500,at,2wd,rhd,gasoline
+1282,1050,honda,fit,2004,56000,1300,at,2wd,rhd,gasoline
+1283,1050,nissan,cube,2003,72350,1400,at,2wd,rhd,gasoline
+1284,1050,nissan,note,2007,31000,1500,at,2wd,rhd,gasoline
+1285,1050,toyota,chaser,2001,74000,2000,at,2wd,rhd,gasoline
+1286,1050,honda,fit,2004,101000,1300,at,2wd,rhd,gasoline
+1287,1050,honda,fit,2003,92000,1300,at,2wd,rhd,gasoline
+1288,1050,toyota,vitz,2009,100054,1000,at,2wd,rhd,gasoline
+1289,1050,suzuki,swift,2009,137600,1240,at,2wd,rhd,gasoline
+1290,1054,toyota,corolla runx,2004,43832,1500,at,2wd,rhd,gasoline
+1291,1054,nissan,x-trail,2001,75165,2000,at,4wd,rhd,gasoline
+1292,1054,toyota,wish,2004,40654,1800,at,2wd,rhd,gasoline
+1293,1054,toyota,wish,2005,54651,1800,at,2wd,rhd,gasoline
+1294,1054,toyota,vitz,2006,95721,1300,at,2wd,rhd,gasoline
+1295,1054,toyota,vitz,2006,37171,1000,at,2wd,rhd,gasoline
+1296,1054,toyota,vitz,2005,74610,1000,at,2wd,rhd,gasoline
+1297,1054,toyota,vitz,2006,125445,1300,at,2wd,rhd,gasoline
+1298,1054,toyota,passo,2010,96309,1000,at,2wd,rhd,gasoline
+1299,1054,toyota,raum,2003,134343,1500,at,2wd,rhd,gasoline
+1300,1054,toyota,crown,2004,183950,2500,at,2wd,rhd,gasoline
+1301,1054,toyota,voltz,2002,136535,1800,mt,2wd,rhd,gasoline
+1302,1054,honda,fit,2002,37858,1330,at,2wd,rhd,gasoline
+1303,1054,toyota,mark x,2005,106400,2500,at,2wd,rhd,gasoline
+1304,1059,suzuki,alto,2005,68000,660,at,2wd,rhd,gasoline
+1305,1060,subaru,legacy touring wagon,2004,110000,2000,at,2wd,rhd,gasoline
+1306,1060,toyota,noah,2003,87000,2000,at,2wd,rhd,gasoline
+1307,1060,mazda,demio,2009,81000,1300,at,2wd,rhd,gasoline
+1308,1060,toyota,vitz,2005,89000,1000,at,2wd,rhd,gasoline
+1309,1060,mazda,demio,2009,92000,1300,at,2wd,rhd,gasoline
+1310,1060,toyota,vitz,2007,108000,1000,at,2wd,rhd,gasoline
+1311,1060,honda,fit,2007,82000,1300,at,2wd,rhd,gasoline
+1312,1064,toyota,alphard,2005,104571,2400,at,2wd,rhd,gasoline
+1313,1067,toyota,mark x,2007,10275,3000,at,2wd,rhd,gasoline
+1314,1070,honda,insight,2009,152000,1300,at,2wd,rhd,gasoline
+1315,1070,nissan,cube,2005,19800,1400,at,4wd,rhd,gasoline
+1316,1070,toyota,wish,2005,48447,1800,at,2wd,rhd,gasoline
+1317,1070,toyota,vitz,2007,59000,1000,at,2wd,rhd,gasoline
+1318,1070,mazda,demio,2009,32000,1300,at,2wd,rhd,gasoline
+1319,1070,honda,fit,2005,88000,1300,at,2wd,rhd,gasoline
+1320,1070,honda,fit,2003,51000,1500,at,2wd,rhd,gasoline
+1321,1072,toyota,ist,2003,177000,1300,at,2wd,rhd,gasoline
+1322,1073,toyota,vitz,2005,125332,1300,at,2wd,rhd,gasoline
+1323,1073,volkswagen,golf,2008,31558,1400,at,2wd,rhd,gasoline
+1324,1076,toyota,allion,2004,70750,1790,at,2wd,rhd,gasoline
+1325,1076,kia motors,visto,2000,132023,798,at,2wd,lhd,gasoline
+1326,1078,nissan,tiida,2009,52000,1500,at,2wd,rhd,gasoline
+1327,1080,honda,civic hybrid,2006,56000,1300,at,2wd,rhd,gasoline
+1328,1080,toyota,raum,2003,84000,1490,at,2wd,rhd,gasoline
+1329,1080,toyota,sienta,2007,115000,1490,at,2wd,rhd,gasoline
+1330,1080,toyota,ractis,2007,97000,1490,at,2wd,rhd,gasoline
+1331,1080,toyota,raum,2003,83000,1490,at,2wd,rhd,gasoline
+1332,1080,toyota,avensis,2004,79000,1990,at,2wd,rhd,gasoline
+1333,1080,toyota,crown,2005,144000,2490,at,2wd,rhd,gasoline
+1334,1080,nissan,march,2012,109000,1190,at,2wd,rhd,gasoline
+1335,1080,honda,elysion,2005,216000,2400,at,2wd,rhd,gasoline
+1336,1080,honda,fit,2008,106000,1300,at,2wd,rhd,gasoline
+1337,1080,toyota,noah,2003,94000,2000,at,2wd,rhd,gasoline
+1338,1080,toyota,noah,2003,184000,2000,at,4wd,rhd,gasoline
+1339,1080,toyota,raum,2005,111082,1500,at,4wd,rhd,gasoline
+1340,1080,mazda,atenza,2003,110000,2300,at,2wd,rhd,gasoline
+1341,1080,toyota,vitz,2005,95000,1000,at,2wd,rhd,gasoline
+1342,1080,toyota,voxy,2003,100000,2000,at,2wd,rhd,gasoline
+1343,1080,honda,fit,2003,80000,1300,at,2wd,rhd,gasoline
+1344,1080,mazda,demio,2005,44000,1300,at,2wd,rhd,gasoline
+1345,1080,toyota,vitz,2005,91000,1000,at,2wd,rhd,gasoline
+1346,1080,toyota,sienta,2005,158000,1500,at,2wd,rhd,gasoline
+1347,1080,toyota,vitz,2006,36000,1300,at,2wd,rhd,gasoline
+1348,1080,volkswagen,polo,2004,40000,1400,at,2wd,rhd,gasoline
+1349,1080,honda,fit,2001,34000,1300,at,2wd,rhd,gasoline
+1350,1080,toyota,ipsum,2008,68550,2400,at,2wd,rhd,gasoline
+1351,1082,toyota,voltz,2004,174233,1790,mt,2wd,rhd,gasoline
+1352,1082,toyota,ist,2005,75147,1300,at,2wd,rhd,gasoline
+1353,1082,suzuki,lapin,2002,102460,660,at,4wd,rhd,gasoline
+1358,1088,toyota,alphard v,2003,120758,2400,at,2wd,rhd,gasoline
+1361,1090,toyota,bb,2010,113000,1300,at,2wd,rhd,gasoline
+1362,1090,toyota,voxy,2005,45442,2000,at,2wd,rhd,gasoline
+1363,1090,toyota,isis,2005,88317,2000,at,2wd,rhd,gasoline
+1364,1090,toyota,vitz,2007,68000,1000,at,2wd,rhd,gasoline
+1365,1090,toyota,ractis,2011,67000,1300,at,2wd,rhd,gasoline
+1366,1090,toyota,noah,2003,98000,2000,at,2wd,rhd,gasoline
+1367,1090,honda,fit,2005,75000,1300,at,2wd,rhd,gasoline
+1368,1090,honda,fit hybrid,2012,55000,1300,at,2wd,rhd,hybrid
+1369,1090,suzuki,carry truck,2012,60000,660,mt,4wd,rhd,gasoline
+1370,1090,honda,fit,2007,17000,1300,at,2wd,rhd,gasoline
+1371,1090,honda,fit,2005,23000,1500,at,2wd,rhd,gasoline
+1372,1092,mitsubishi,minicab truck,1995,107766,650,mt,4wd,rhd,gasoline
+1373,1100,honda,stream,2010,114000,1800,at,2wd,rhd,gasoline
+1374,1100,honda,fit,2010,87654,1300,at,2wd,rhd,gasoline
+1375,1100,honda,stream,2010,79000,1800,at,2wd,rhd,gasoline
+1376,1100,toyota,wish,2003,105000,1800,at,2wd,rhd,gasoline
+1377,1100,honda,fit,2009,119500,1300,at,2wd,rhd,gasoline
+1378,1100,mazda,verisa,2011,89000,1500,at,2wd,rhd,gasoline
+1379,1100,suzuki,swift,2011,79000,1200,at,2wd,rhd,gasoline
+1380,1100,honda,fit,2010,127000,1300,at,2wd,rhd,gasoline
+1381,1100,nissan,wingroad,2013,157600,1500,at,2wd,rhd,gasoline
+1382,1100,mazda,demio,2008,60000,1300,at,2wd,rhd,gasoline
+1383,1100,honda,fit,2010,44000,1300,at,2wd,rhd,gasoline
+1384,1100,toyota,ist,2005,65573,1300,at,2wd,rhd,gasoline
+1385,1100,suzuki,swift,2009,184247,1200,at,2wd,rhd,gasoline
+1386,1100,toyota,vitz,2005,93000,1000,at,2wd,rhd,gasoline
+1387,1100,honda,fit,2009,105832,1300,at,2wd,rhd,gasoline
+1388,1100,volkswagen,golf,2005,67000,2000,at,2wd,rhd,gasoline
+1389,1100,toyota,vitz,2005,68000,1000,at,2wd,rhd,gasoline
+1390,1100,mazda,tribute,2002,198000,2000,at,2wd,rhd,gasoline
+1391,1100,volkswagen,polo,2003,158000,1400,at,2wd,rhd,gasoline
+1392,1100,toyota,altezza,2000,125000,2000,at,2wd,rhd,gasoline
+1393,1100,toyota,mark ii,2003,195000,2000,at,2wd,rhd,gasoline
+1394,1100,honda,fit,2005,52000,1300,at,2wd,rhd,gasoline
+1395,1100,toyota,ist,2005,65122,1300,at,2wd,rhd,gasoline
+1396,1100,honda,acty truck,1997,122000,660,mt,2wd,rhd,gasoline
+1397,1100,nissan,murano,2005,153400,2500,at,2wd,rhd,gasoline
+1398,1100,mazda,premacy,2013,220000,2000,at,2wd,rhd,gasoline
+1399,1100,honda,fit,2004,85000,1500,at,2wd,rhd,gasoline
+1400,1100,toyota,wish,2008,97000,1790,at,2wd,rhd,gasoline
+1401,1100,honda,accord,2005,127000,1990,at,2wd,rhd,gasoline
+1402,1100,bmw,mini,2005,92556,1600,at,2wd,rhd,gasoline
+1403,1100,nissan,bluebird sylphy,2004,33100,1490,mt,2wd,rhd,gasoline
+1404,1100,toyota,vitz,2010,180800,1300,at,2wd,rhd,gasoline
+1405,1100,toyota,vitz,2007,90500,1000,at,2wd,rhd,gasoline
+1406,1100,toyota,avensis,2003,63000,1990,at,2wd,rhd,gasoline
+1407,1100,toyota,voxy,2005,177400,2000,at,2wd,rhd,gasoline
+1408,1100,honda,step wgn,2005,158000,2000,at,2wd,rhd,gasoline
+1409,1100,toyota,probox,2004,81516,1500,at,2wd,rhd,cng
+1410,1100,toyota,altezza,2001,149895,2000,at,2wd,rhd,gasoline
+1411,1100,toyota,mark x,2005,102788,2500,at,2wd,rhd,gasoline
+1412,1101,audi,a4,2005,59930,2000,at,2wd,rhd,gasoline
+1413,1101,toyota,ractis,2007,64688,1300,at,2wd,rhd,gasoline
+1414,1101,mercedes-benz,c-class,2001,77155,2000,at,2wd,rhd,gasoline
+1415,1101,toyota,wish,2007,64094,1800,at,2wd,rhd,gasoline
+1416,1101,toyota,mark x,2006,62040,2500,at,2wd,rhd,gasoline
+1417,1101,toyota,mark x,2005,22690,2500,at,2wd,rhd,gasoline
+1418,1101,toyota,vitz,2011,41011,1000,at,2wd,rhd,gasoline
+1419,1101,toyota,alphard,2005,79401,2400,at,2wd,rhd,gasoline
+1420,1101,toyota,ist,2005,47320,1500,at,2wd,rhd,gasoline
+1421,1101,toyota,ist,2005,50155,1500,at,2wd,rhd,gasoline
+1422,1101,toyota,corolla runx,2003,77151,1500,at,2wd,rhd,gasoline
+1423,1101,toyota,ist,2005,71616,1300,at,2wd,rhd,gasoline
+1424,1101,toyota,corolla sedan,2003,22150,1500,mt,2wd,rhd,gasoline
+1425,1101,toyota,vitz,2011,52046,1000,at,2wd,rhd,gasoline
+1426,1101,nissan,x-trail,2004,102000,1990,at,2wd,rhd,gasoline
+1427,1101,mitsubishi,ek wagon,2007,97250,660,at,2wd,rhd,gasoline
+1428,1104,mitsubishi,minicab truck,1998,96000,650,mt,2wd,rhd,gasoline
+1429,1104,daihatsu,esse,2010,102000,650,at,2wd,rhd,gasoline
+1430,1104,daihatsu,mira,2005,67000,650,at,2wd,rhd,gasoline
+1431,1104,citroen,xsara picasso,2004,72000,1990,at,2wd,rhd,gasoline
+1432,1110,toyota,vitz,2005,20000,990,at,2wd,rhd,gasoline
+1433,1110,toyota,ractis,2007,99000,1490,at,2wd,rhd,gasoline
+1434,1110,toyota,mark x,2007,69782,2500,at,2wd,rhd,gasoline
+1435,1110,mazda,premacy,2011,43862,2000,at,2wd,rhd,gasoline
+1436,1110,toyota,noah,2005,100000,2000,at,2wd,rhd,gasoline
+1437,1110,toyota,mark x,2009,68909,2500,at,2wd,rhd,gasoline
+1438,1110,honda,fit,2003,111000,1500,at,2wd,rhd,gasoline
+1439,1110,honda,fit,2007,77000,1300,at,2wd,rhd,gasoline
+1440,1110,toyota,voxy,2004,125000,2000,at,2wd,rhd,gasoline
+1441,1110,nissan,x-trail,2004,136021,1990,at,4wd,rhd,gasoline
+1442,1110,toyota,passo,2006,92052,1000,at,2wd,rhd,gasoline
+1443,1110,toyota,allex,2005,78720,1500,at,2wd,rhd,gasoline
+1444,1110,toyota,porte,2004,61932,1500,at,2wd,rhd,gasoline
+1445,1110,toyota,vitz,2005,46500,1000,at,2wd,rhd,gasoline
+1446,1110,toyota,vitz,2006,64352,1000,at,2wd,rhd,gasoline
+1447,1110,toyota,vitz,2006,59266,1300,at,2wd,rhd,gasoline
+1448,1112,toyota,vitz,2006,125647,1000,cvt,2wd,rhd,gasoline
+1449,1120,toyota,vitz,2009,107189,1296,at,2wd,rhd,gasoline
+1450,1120,toyota,mark x,2006,53702,2499,at,2wd,rhd,gasoline
+1451,1120,toyota,corolla spacio,1999,29668,1587,at,2wd,rhd,gasoline
+1452,1120,nissan,tiida,2009,23576,1498,at,2wd,rhd,gasoline
+1453,1120,toyota,mark x,2004,73129,2499,at,2wd,rhd,gasoline
+1454,1120,toyota,mark x,2005,102000,2500,at,2wd,rhd,gasoline
+1455,1120,toyota,ist,2005,59196,1496,at,2wd,rhd,gasoline
+1456,1120,toyota,vitz,2009,104901,1300,at,2wd,rhd,gasoline
+1457,1120,mazda,rx-8,2004,129119,1300,mt,2wd,rhd,gasoline
+1458,1120,toyota,mark x,2007,65503,2500,at,2wd,rhd,gasoline
+1459,1120,toyota,ist,2003,74428,1500,at,2wd,rhd,gasoline
+1460,1120,toyota,corona premio,2000,72733,2000,at,2wd,rhd,gasoline
+1461,1120,toyota,vitz,2000,67197,1300,at,2wd,rhd,gasoline
+1462,1120,nissan,tiida latio,2012,162734,1500,at,2wd,rhd,gasoline
+1463,1120,toyota,ist,2003,103709,1300,at,2wd,rhd,gasoline
+1464,1120,mazda,premacy,2008,106970,1998,at,2wd,rhd,gasoline
+1465,1120,toyota,platz,2001,51135,1500,at,2wd,rhd,gasoline
+1466,1120,toyota,vitz,2005,43449,1000,at,2wd,rhd,gasoline
+1467,1120,toyota,alphard,2003,107892,3000,at,4wd,rhd,gasoline
+1468,1120,mazda,premacy,2006,113197,1998,at,2wd,rhd,gasoline
+1469,1120,bmw,mini,2003,86000,1600,at,2wd,rhd,gasoline
+1470,1120,honda,fit,2005,92956,1500,at,2wd,rhd,gasoline
+1471,1120,toyota,ist,2003,90300,1500,at,4wd,rhd,gasoline
+1472,1120,smart,forfour,2003,114945,690,at,2wd,rhd,gasoline
+1473,1120,toyota,bb,2006,131723,1500,at,2wd,rhd,gasoline
+1474,1120,toyota,vitz,2007,61460,1300,at,2wd,rhd,gasoline
+1475,1120,toyota,comfort,2003,497408,1990,at,2wd,rhd,lpg
+1476,1120,suzuki,swift,2010,125000,1200,at,2wd,rhd,gasoline
+1477,1120,honda,fit,2003,72500,1300,at,2wd,rhd,gasoline
+1478,1120,toyota,porte,2005,110981,1300,at,2wd,rhd,gasoline
+1479,1120,nissan,serena,2009,150400,2000,at,2wd,rhd,gasoline
+1480,1120,honda,fit,2008,108136,1330,at,2wd,rhd,gasoline
+1481,1120,honda,fit,2009,105753,1330,at,2wd,rhd,gasoline
+1482,1120,nissan,x-trail,2004,112000,2000,at,4wd,rhd,gasoline
+1483,1120,suzuki,alto,2006,97788,660,at,4wd,rhd,gasoline
+1484,1120,daihatsu,miragino,2002,153000,660,at,2wd,rhd,gasoline
+1485,1120,volkswagen,new beetle,2003,125872,2000,at,2wd,rhd,gasoline
+1486,1120,toyota,fun cargo,2001,105398,1490,at,2wd,rhd,gasoline
+1487,1120,mitsuoka,viewt,1996,110472,1270,at,2wd,rhd,gasoline
+1488,1120,toyota,mark x,2005,119000,2500,at,2wd,rhd,gasoline
+1489,1120,nissan,x-trail,2003,83500,2000,at,4wd,rhd,gasoline
+1490,1120,honda,odyssey,2003,178000,2400,at,2wd,rhd,gasoline
+1491,1120,toyota,passo,2006,105000,1000,at,2wd,rhd,gasoline
+1492,1120,suzuki,every,2010,168894,650,at,2wd,rhd,gasoline
+1493,1120,mitsubishi,canter guts,1997,125895,2350,at,2wd,rhd,lpg
+1494,1120,nissan,bluebird sylphy,2005,66996,1800,at,2wd,rhd,gasoline
+1495,1120,honda,odyssey,2004,125700,2400,cvt,2wd,rhd,gasoline
+1496,1120,nissan,bluebird sylphy,2006,42000,1990,at,2wd,rhd,gasoline
+1497,1120,mazda,atenza,2007,115000,2300,at,2wd,rhd,gasoline
+1498,1120,honda,fit,2004,18000,1300,at,2wd,rhd,gasoline
+1499,1120,honda,fit,2003,30000,1500,at,2wd,rhd,gasoline
+1500,1120,honda,fit,2003,54000,1300,at,2wd,rhd,gasoline
+1501,1120,honda,fit,2005,36000,1300,at,2wd,rhd,gasoline
+1502,1120,honda,fit,2005,54000,1300,at,2wd,rhd,gasoline
+1503,1120,nissan,note,2007,102000,1500,at,2wd,rhd,gasoline
+1504,1120,suzuki,carry truck,1997,56800,660,mt,4wd,rhd,gasoline
+1505,1121,toyota,ractis,2007,32775,1500,at,2wd,rhd,gasoline
+1506,1122,toyota,regius wagon,1999,75012,2700,at,2wd,rhd,gasoline
+1507,1123,nissan,sunny,2003,79000,1500,at,2wd,rhd,gasoline
+1508,1127,nissan,tiida,2007,75000,1500,at,2wd,rhd,gasoline
+1509,1129,toyota,corolla runx,2001,30165,1500,at,2wd,rhd,gasoline
+1510,1129,toyota,ist,2004,114025,1290,at,2wd,rhd,gasoline
+1511,1129,toyota,alphard,2004,145500,2400,at,2wd,rhd,gasoline
+1512,1130,toyota,ractis,2007,71000,1290,at,2wd,rhd,gasoline
+1513,1130,nissan,note,2011,100000,1490,at,2wd,rhd,gasoline
+1514,1130,toyota,vitz,2005,46000,1290,at,2wd,rhd,gasoline
+1515,1130,toyota,raum,2007,99000,1490,at,2wd,rhd,gasoline
+1516,1130,subaru,legacy b4,2006,88000,1990,at,4wd,rhd,gasoline
+1517,1130,toyota,wish,2003,196000,1790,at,2wd,rhd,gasoline
+1518,1130,toyota,ist,2003,52000,1290,at,2wd,rhd,gasoline
+1519,1130,volkswagen,golf,2009,33000,1380,at,2wd,rhd,gasoline
+1520,1130,toyota,avensis,2004,55000,1990,at,2wd,rhd,gasoline
+1521,1130,volkswagen,golf,2009,67000,1380,at,2wd,rhd,gasoline
+1522,1130,suzuki,sx4,2008,139000,1490,at,2wd,rhd,gasoline
+1523,1130,toyota,ractis,2007,95000,1490,at,2wd,rhd,gasoline
+1524,1130,toyota,ractis,2007,99000,1490,at,2wd,rhd,gasoline
+1525,1130,suzuki,aerio,2007,103000,1490,at,2wd,rhd,gasoline
+1526,1130,toyota,vitz,2007,67000,1290,at,2wd,rhd,gasoline
+1527,1130,toyota,ractis,2006,98000,1490,at,2wd,rhd,gasoline
+1528,1130,toyota,ractis,2007,87000,1490,at,2wd,rhd,gasoline
+1529,1130,toyota,corolla spacio,2003,85000,1490,at,2wd,rhd,gasoline
+1530,1130,volvo,v70,2008,171000,2520,at,2wd,rhd,gasoline
+1531,1130,honda,hr-v,2005,130000,1590,at,2wd,rhd,gasoline
+1532,1130,toyota,alphard,2003,154000,2360,at,4wd,rhd,gasoline
+1533,1130,suzuki,swift,2008,128000,1240,at,2wd,rhd,gasoline
+1534,1130,toyota,corolla sedan,1999,112000,1490,at,2wd,rhd,gasoline
+1535,1130,nissan,march,2012,112000,1190,at,2wd,rhd,gasoline
+1536,1130,toyota,vitz,2004,34000,990,mt,2wd,rhd,gasoline
+1537,1130,toyota,allion,2006,220000,1790,at,4wd,rhd,gasoline
+1538,1130,toyota,caldina,1999,76000,1990,at,2wd,rhd,gasoline
+1539,1130,toyota,raum,2009,89615,1500,at,2wd,rhd,gasoline
+1540,1130,toyota,noah,2002,85000,1990,at,2wd,rhd,gasoline
+1541,1130,toyota,mark x,2005,13737,2500,at,2wd,rhd,gasoline
+1542,1130,toyota,vitz,2007,87000,1000,at,2wd,rhd,gasoline
+1543,1130,honda,fit,2005,77000,1300,at,2wd,rhd,gasoline
+1544,1130,toyota,vitz,2011,100888,1000,at,2wd,rhd,gasoline
+1545,1130,toyota,noah,2002,162000,2000,at,2wd,rhd,gasoline
+1546,1130,honda,fit,2004,80000,1300,at,2wd,rhd,gasoline
+1547,1130,honda,fit,2003,113000,1300,at,2wd,rhd,gasoline
+1548,1130,honda,fit,2002,94000,1500,at,2wd,rhd,gasoline
+1549,1130,honda,fit,2002,134000,1300,at,2wd,rhd,gasoline
+1550,1130,honda,fit,2006,53000,1300,at,2wd,rhd,gasoline
+1551,1135,toyota,ractis,2007,50000,1500,at,2wd,rhd,gasoline
+1552,1136,toyota,vitz,2005,51730,1300,at,2wd,rhd,gasoline
+1553,1138,toyota,passo,2007,79377,1000,at,2wd,rhd,gasoline
+1554,1139,toyota,allion,2004,60000,1500,at,2wd,rhd,gasoline
+1555,1140,toyota,noah,2003,112000,2000,at,2wd,rhd,gasoline
+1556,1140,toyota,sienta,2005,181000,1500,at,2wd,rhd,gasoline
+1557,1140,toyota,voxy,2003,166000,2000,at,2wd,rhd,gasoline
+1558,1140,honda,fit,2007,154000,1300,at,2wd,rhd,gasoline
+1559,1140,toyota,corolla spacio,2002,172499,1500,at,2wd,rhd,gasoline
+1560,1143,toyota,wish,2007,97557,1800,at,2wd,rhd,gasoline
+1561,1143,toyota,wish,2008,107784,1800,at,2wd,rhd,gasoline
+1562,1143,toyota,raum,2007,80845,1500,at,2wd,rhd,gasoline
+1563,1148,toyota,allex,2001,73823,1500,at,2wd,rhd,gasoline
+1564,1148,subaru,impreza,2007,81494,1500,at,2wd,rhd,gasoline
+1565,1148,toyota,corolla runx,2001,59430,1500,at,2wd,rhd,gasoline
+1566,1148,toyota,corolla spacio,2004,56024,1500,at,2wd,rhd,gasoline
+1567,1148,nissan,x-trail,2005,63376,2000,at,4wd,rhd,gasoline
+1568,1148,toyota,corolla runx,2004,39639,1500,at,2wd,rhd,gasoline
+1569,1150,nissan,tiida latio,2005,132746,1500,at,4wd,rhd,gasoline
+1570,1150,nissan,bluebird sylphy,2010,157000,2000,at,2wd,rhd,gasoline
+1571,1150,toyota,noah,2003,189000,2000,at,2wd,rhd,gasoline
+1572,1150,volkswagen,polo,2008,70000,1600,at,2wd,rhd,gasoline
+1573,1150,toyota,alphard v,2004,83000,2400,at,2wd,rhd,gasoline
+1574,1150,toyota,alphard,2004,83000,2400,at,2wd,rhd,gasoline
+1575,1150,toyota,vitz,2005,41000,1300,at,2wd,rhd,gasoline
+1576,1150,toyota,wish,2004,114000,1800,at,2wd,rhd,gasoline
+1577,1150,toyota,alphard,2003,135600,2400,at,2wd,rhd,gasoline
+1578,1150,toyota,alphard g,2003,135600,2400,at,2wd,rhd,gasoline
+1579,1150,nissan,march,2008,56200,1300,at,2wd,rhd,gasoline
+1580,1150,honda,fit,2007,103000,1500,at,2wd,rhd,gasoline
+1581,1150,mazda,axela,2004,51000,2300,at,2wd,rhd,gasoline
+1582,1150,honda,fit,2007,94000,1300,at,2wd,rhd,gasoline
+1583,1150,honda,fit,2004,154000,1300,at,2wd,rhd,gasoline
+1584,1150,honda,fit,2007,83000,1300,at,2wd,rhd,gasoline
+1585,1150,honda,fit,2006,146000,1300,at,2wd,rhd,gasoline
+1586,1150,toyota,ipsum,2004,121000,2360,at,2wd,rhd,gasoline
+1587,1150,mazda,tribute,2005,128510,2300,at,4wd,rhd,gasoline
+1588,1151,mazda,bongo van,2011,296910,1800,mt,2wd,rhd,gasoline
+1589,1153,toyota,estima,2000,198350,2360,at,4wd,rhd,gasoline
+1590,1155,toyota,alphard,2002,76161,2400,at,2wd,rhd,gasoline
+1591,1155,toyota,alphard,2003,83373,2400,at,2wd,rhd,gasoline
+1592,1155,daihatsu,hijet truck,1992,20986,660,mt,4wd,rhd,gasoline
+1593,1159,daihatsu,mira es,2013,159750,660,at,2wd,rhd,gasoline
+1594,1159,daihatsu,mira,2013,159750,660,at,2wd,rhd,gasoline
+1595,1159,toyota,mark x,2007,44850,2490,at,2wd,rhd,gasoline
+1596,1160,toyota,ractis,2007,61000,1490,at,2wd,rhd,gasoline
+1597,1160,honda,acty van,1995,112300,660,mt,2wd,rhd,gasoline
+1598,1160,nissan,elgrand,2002,135000,3500,at,2wd,rhd,gasoline
+1599,1160,honda,fit,2009,81000,1300,at,2wd,rhd,gasoline
+1600,1160,honda,fit,2006,105000,1500,at,2wd,rhd,gasoline
+1601,1160,honda,fit,2004,134000,1300,at,2wd,rhd,gasoline
+1602,1160,nissan,elgrand,2005,119000,2500,at,2wd,rhd,gasoline
+1603,1165,toyota,ractis,2010,600000,1300,at,2wd,rhd,gasoline
+1604,1165,toyota,duet,2001,54760,1000,at,2wd,rhd,gasoline
+1605,1165,honda,fit,2010,153083,1300,at,2wd,rhd,gasoline
+1606,1166,mercedes-benz,b-class,2009,72788,1700,at,2wd,rhd,gasoline
+1607,1166,toyota,vitz,2007,34359,1300,at,2wd,rhd,gasoline
+1608,1166,suzuki,carry truck,2011,79000,660,mt,4wd,rhd,gasoline
+1609,1166,toyota,sienta,2007,103161,1500,at,2wd,rhd,gasoline
+1610,1166,toyota,raum,2003,102088,1500,at,2wd,rhd,gasoline
+1611,1166,toyota,cami,2001,131400,1300,at,2wd,rhd,gasoline
+1612,1166,toyota,passo,2011,75000,1000,at,2wd,rhd,gasoline
+1613,1166,toyota,brevis,2005,65421,2500,at,2wd,rhd,gasoline
+1614,1166,toyota,corolla spacio,2002,88000,1800,at,2wd,rhd,gasoline
+1615,1166,toyota,wish,2004,105000,1800,at,2wd,rhd,gasoline
+1616,1166,daihatsu,mira es,2012,96968,650,at,2wd,rhd,gasoline
+1617,1170,nissan,skyline,2005,74000,2500,at,2wd,rhd,gasoline
+1618,1170,honda,fit,2005,172000,1300,at,2wd,rhd,gasoline
+1619,1170,toyota,sienta,2005,130000,1500,at,2wd,rhd,gasoline
+1620,1170,toyota,sienta,2005,120000,1500,at,2wd,rhd,gasoline
+1621,1170,honda,fit,2007,38000,1300,at,2wd,rhd,gasoline
+1622,1170,toyota,voxy,2004,2000,2000,at,2wd,rhd,gasoline
+1623,1172,honda,acty truck,1991,82338,660,mt,2wd,rhd,gasoline
+1624,1175,toyota,vitz,2005,46854,1000,cvt,2wd,rhd,gasoline
+1625,1175,peugeot,307,2007,332926,1997,at,2wd,lhd,diesel
+1626,1176,daihatsu,terios kid,2001,172570,660,mt,4wd,rhd,gasoline
+1627,1179,nissan,vanette van,2001,95931,1800,mt,2wd,rhd,gasoline
+1628,1180,mazda,premacy,2011,134500,2000,at,2wd,rhd,gasoline
+1629,1180,toyota,vitz,2007,62000,1290,at,2wd,rhd,gasoline
+1630,1180,toyota,belta,2006,56000,1290,at,2wd,rhd,gasoline
+1631,1180,toyota,voxy,2007,81000,2000,at,2wd,rhd,gasoline
+1632,1180,toyota,ist,2003,190000,1290,at,2wd,rhd,gasoline
+1633,1180,mitsubishi,pajero io,1999,98000,1830,at,4wd,rhd,gasoline
+1634,1180,toyota,corolla spacio,2003,140000,1490,at,2wd,rhd,gasoline
+1635,1180,toyota,corolla spacio,2002,111000,1490,at,2wd,rhd,gasoline
+1636,1180,nissan,cube,2010,160000,1490,at,2wd,rhd,gasoline
+1637,1180,nissan,cube,2010,143000,1490,at,2wd,rhd,gasoline
+1638,1180,toyota,noah,2007,192000,1990,at,2wd,rhd,gasoline
+1639,1180,toyota,ist,2005,134000,1290,at,2wd,rhd,gasoline
+1640,1180,toyota,vitz,2006,82000,1300,at,2wd,rhd,gasoline
+1641,1180,toyota,vitz,2005,71039,1000,at,2wd,rhd,gasoline
+1642,1180,nissan,elgrand,2005,200000,2500,at,2wd,rhd,gasoline
+1643,1180,nissan,x-trail,2004,194000,2000,at,4wd,rhd,gasoline
+1644,1180,honda,elysion,2005,94000,2400,at,2wd,rhd,gasoline
+1645,1180,volkswagen,polo,2004,52000,1400,at,2wd,rhd,gasoline
+1646,1180,mazda,demio,2009,114000,1300,at,2wd,rhd,gasoline
+1647,1180,bmw,3 series,2002,58600,2000,at,2wd,rhd,gasoline
+1648,1185,toyota,vitz,2005,112384,1300,at,2wd,rhd,gasoline
+1649,1185,honda,acty truck,1996,63940,660,mt,4wd,rhd,gasoline
+1650,1185,suzuki,mr wagon,2006,109198,660,at,2wd,rhd,gasoline
+1651,1190,mazda,premacy,2011,144700,2000,at,2wd,rhd,gasoline
+1652,1190,bmw,3 series,2005,31000,1990,at,2wd,rhd,gasoline
+1653,1190,honda,fit,2008,71000,1300,at,2wd,rhd,gasoline
+1654,1190,toyota,vitz,2005,86000,1000,at,2wd,rhd,gasoline
+1655,1190,toyota,vitz,2007,99000,1000,at,2wd,rhd,gasoline
+1656,1190,honda,airwave,2005,165000,1500,at,2wd,rhd,gasoline
+1657,1190,toyota,wish,2004,140650,1800,at,2wd,rhd,gasoline
+1658,1194,toyota,fun cargo,2001,138305,1300,at,2wd,rhd,gasoline
+1659,1194,bmw,3 series,2005,51730,2000,at,2wd,rhd,gasoline
+1660,1194,honda,accord,2007,58985,2000,at,2wd,rhd,gasoline
+1661,1194,bmw,3 series,2005,58553,2000,at,2wd,rhd,gasoline
+1662,1194,toyota,corolla spacio,2005,87904,1500,at,2wd,rhd,gasoline
+1663,1194,toyota,ist,2007,81661,1500,at,2wd,rhd,gasoline
+1664,1194,toyota,allex,2005,78021,1500,at,2wd,rhd,gasoline
+1665,1194,suzuki,wagon r,2006,95057,660,at,2wd,rhd,gasoline
+1666,1195,toyota,ractis,2010,68000,1300,at,2wd,rhd,gasoline
+1667,1198,toyota,ist,2005,119021,1300,at,2wd,rhd,gasoline
+1668,1198,toyota,ist,2005,55186,1300,at,2wd,rhd,gasoline
+1669,1198,nissan,murano,2006,96000,2490,at,2wd,rhd,gasoline
+1670,1199,toyota,voxy,2009,133000,2000,at,2wd,rhd,gasoline
+1671,1199,toyota,mark x,2006,108500,2490,at,2wd,rhd,gasoline
+1672,1200,nissan,otti,2013,133000,660,mt,4wd,rhd,gasoline
+1673,1200,toyota,corolla sedan,1999,124000,1490,at,2wd,rhd,gasoline
+1674,1200,toyota,ractis,2009,105388,1296,at,2wd,rhd,gasoline
+1675,1200,toyota,belta,2008,152777,1300,at,4wd,rhd,gasoline
+1676,1200,bmw,3 series,2005,54233,2000,at,2wd,rhd,gasoline
+1677,1200,nissan,march,2009,107000,1200,at,2wd,rhd,gasoline
+1678,1200,honda,fit,2007,174147,1300,at,4wd,rhd,gasoline
+1679,1200,subaru,impreza,2004,77000,1500,at,2wd,rhd,gasoline
+1680,1200,bmw,mini cooper,2003,79020,1590,mt,2wd,rhd,gasoline
+1681,1200,suzuki,jimny,2001,196447,660,mt,4wd,rhd,gasoline
+1682,1200,toyota,raum,2000,91300,1500,at,2wd,rhd,gasoline
+1683,1200,toyota,sienta,2003,105000,1500,at,2wd,rhd,gasoline
+1684,1200,nissan,x-trail,2005,268000,2000,at,4wd,rhd,gasoline
+1685,1200,toyota,ist,2005,63520,1300,at,2wd,rhd,gasoline
+1686,1200,nissan,elgrand,2003,152000,3500,at,2wd,rhd,gasoline
+1687,1200,mazda,axela,2005,186000,2000,at,2wd,rhd,gasoline
+1688,1200,nissan,elgrand,2003,175000,3500,at,2wd,rhd,gasoline
+1689,1200,honda,fit,2007,153000,1500,at,2wd,rhd,gasoline
+1690,1200,toyota,ipsum,2007,178000,2400,at,2wd,rhd,gasoline
+1691,1200,toyota,ist,2003,43180,1300,at,2wd,rhd,gasoline
+1692,1200,suzuki,carry truck,1997,117845,660,mt,2wd,rhd,gasoline
+1693,1200,nissan,murano,2005,129000,2500,at,2wd,rhd,gasoline
+1694,1200,toyota,raum,2005,100920,1500,at,2wd,rhd,gasoline
+1695,1200,toyota,vitz,2005,78000,1300,at,2wd,rhd,gasoline
+1696,1200,mazda,bongo van,2013,131700,1800,at,2wd,rhd,gasoline
+1697,1200,honda,acty truck,1997,91000,660,mt,4wd,rhd,gasoline
+1698,1200,honda,acty truck,1990,52500,660,mt,4wd,rhd,gasoline
+1699,1200,toyota,ist,2004,95000,1300,at,2wd,rhd,gasoline
+1700,1200,toyota,ist,2004,80000,1300,at,2wd,rhd,gasoline
+1701,1200,suzuki,wagon r,2006,72000,660,at,2wd,rhd,gasoline
+1702,1200,toyota,voxy,2005,59965,1990,at,2wd,rhd,gasoline
+1703,1204,toyota,ist,2005,69850,1300,at,2wd,rhd,gasoline
+1704,1204,mitsubishi,ek sport,2002,107460,660,at,2wd,rhd,gasoline
+1705,1204,daihatsu,move,2005,143795,660,at,2wd,rhd,gasoline
+1706,1204,mazda,demio,2009,94000,1300,at,2wd,rhd,gasoline
+1707,1204,toyota,ist,2003,195000,1300,at,2wd,rhd,gasoline
+1708,1204,honda,life,2005,114900,660,at,2wd,rhd,gasoline
+1709,1204,suzuki,lapin,2004,85310,660,at,2wd,rhd,gasoline
+1710,1204,honda,life,2004,111000,660,at,2wd,rhd,gasoline
+1711,1204,volkswagen,new beetle,2000,74700,2000,at,2wd,rhd,gasoline
+1712,1204,volkswagen,new beetle,2001,70100,2000,at,2wd,rhd,gasoline
+1713,1204,volkswagen,new beetle,2001,41900,2000,at,2wd,rhd,gasoline
+1714,1209,toyota,passo,2008,89497,1000,at,2wd,rhd,gasoline
+1715,1210,toyota,vitz,2007,58000,1290,at,2wd,rhd,gasoline
+1716,1210,toyota,ist,2002,103000,1490,at,2wd,rhd,gasoline
+1717,1210,honda,fit,2010,148000,1400,at,2wd,rhd,gasoline
+1718,1210,mitsubishi,colt,2006,36000,1330,at,2wd,rhd,gasoline
+1719,1210,daihatsu,hijet truck,1991,44000,650,mt,2wd,rhd,gasoline
+1720,1211,toyota,ist,2005,86465,1500,at,2wd,rhd,gasoline
+1721,1213,toyota,mark x,2007,44850,2490,at,2wd,rhd,gasoline
+1722,1213,mazda,bongo van,2008,155000,2000,mt,2wd,rhd,diesel
+1723,1213,suzuki,escudo,1999,78000,2000,at,4wd,rhd,gasoline
+1724,1213,toyota,mark x,2006,64620,2499,at,2wd,rhd,gasoline
+1725,1213,toyota,corona premio,2001,83112,1762,at,2wd,rhd,gasoline
+1726,1213,honda,fit,2005,48754,1300,at,2wd,rhd,gasoline
+1727,1213,honda,fit,2007,52206,1300,at,2wd,rhd,gasoline
+1728,1213,honda,fit,2012,167256,1300,at,2wd,rhd,gasoline
+1729,1213,honda,fit,2011,623765,1300,at,2wd,rhd,gasoline
+1730,1213,toyota,noah,2007,74325,2000,at,2wd,rhd,gasoline
+1731,1213,toyota,succeed van,2005,99850,1500,at,2wd,rhd,gasoline
+1732,1213,mazda,biante,2009,80666,2000,at,2wd,rhd,gasoline
+1733,1213,toyota,ractis,2010,14757,1300,at,2wd,rhd,gasoline
+1734,1213,toyota,allex,2004,112912,1500,at,2wd,rhd,gasoline
+1735,1213,suzuki,carry truck,1999,30057,650,mt,4wd,rhd,gasoline
+1736,1213,toyota,altezza,2004,133584,1980,at,2wd,rhd,gasoline
+1737,1213,toyota,wish,2004,106092,1790,at,2wd,rhd,gasoline
+1738,1213,honda,fit,2009,129717,1300,at,2wd,rhd,gasoline
+1739,1213,toyota,sienta,2004,142946,1500,at,2wd,rhd,gasoline
+1740,1213,nissan,note,2005,91600,1500,at,2wd,rhd,gasoline
+1741,1213,toyota,bb,2007,54907,1300,at,2wd,rhd,gasoline
+1742,1213,daihatsu,atrai wagon,2000,91400,660,mt,awd,rhd,gasoline
+1743,1213,daihatsu,atrai,2000,91400,660,mt,awd,rhd,gasoline
+1744,1213,nissan,note,2010,76215,1500,at,2wd,rhd,gasoline
+1745,1213,daihatsu,hijet truck,1997,268873,660,mt,2wd,rhd,gasoline
+1746,1213,nissan,x-trail,2004,110077,2000,at,4wd,rhd,gasoline
+1747,1213,honda,zest,2008,127000,660,at,2wd,rhd,gasoline
+1748,1213,toyota,corolla runx,2001,179000,1500,at,2wd,rhd,gasoline
+1749,1213,toyota,corolla runx,2001,99900,1500,at,4wd,rhd,gasoline
+1750,1213,honda,fit,2009,127000,1300,at,2wd,rhd,gasoline
+1751,1213,toyota,ist,2003,76000,1300,at,2wd,rhd,gasoline
+1752,1213,mazda,rx-8,2004,115700,1300,mt,2wd,rhd,gasoline
+1753,1213,honda,fit,2005,112000,1490,at,2wd,rhd,gasoline
+1754,1213,subaru,r2,2005,78592,660,at,2wd,rhd,gasoline
+1755,1213,toyota,passo,2006,100000,1000,at,2wd,rhd,gasoline
+1756,1213,toyota,mark x,2005,131600,2500,at,2wd,rhd,gasoline
+1757,1213,toyota,mark x,2006,75600,2500,at,2wd,rhd,gasoline
+1758,1219,toyota,mark x,2005,61154,2500,at,2wd,rhd,gasoline
+1759,1220,toyota,belta,2007,86000,1290,at,2wd,rhd,gasoline
+1760,1220,toyota,vitz,2007,56000,1290,at,2wd,rhd,gasoline
+1761,1220,toyota,vitz,2009,30000,990,at,2wd,rhd,gasoline
+1762,1220,toyota,ist,2004,97000,1290,at,2wd,rhd,gasoline
+1763,1220,toyota,passo,2009,11000,990,at,2wd,rhd,gasoline
+1764,1220,toyota,noah,2005,89000,1990,at,2wd,rhd,gasoline
+1765,1220,toyota,vitz,2009,25000,990,at,2wd,rhd,gasoline
+1766,1220,toyota,vitz,2007,62000,1290,at,2wd,rhd,gasoline
+1767,1220,toyota,crown,2005,115000,2490,at,2wd,rhd,gasoline
+1768,1220,toyota,vitz,2007,63000,1290,at,2wd,rhd,gasoline
+1769,1220,toyota,vitz,2006,68000,1290,at,2wd,rhd,gasoline
+1770,1220,toyota,vitz,2007,107000,1290,at,2wd,rhd,gasoline
+1771,1220,toyota,succeed van,2004,186000,1490,at,2wd,rhd,gasoline
+1772,1220,toyota,mark x,2007,167000,2490,at,2wd,rhd,gasoline
+1773,1220,toyota,mark x,2007,66000,2490,at,2wd,rhd,gasoline
+1774,1220,toyota,isis,2007,116000,1990,at,2wd,rhd,gasoline
+1775,1220,suzuki,swift,2010,127000,1240,at,2wd,rhd,gasoline
+1776,1220,volkswagen,polo,2009,152000,1590,at,2wd,rhd,gasoline
+1777,1220,nissan,murano,2007,115000,2480,at,2wd,rhd,gasoline
+1778,1220,bmw,3 series,2005,35000,1990,at,2wd,rhd,gasoline
+1779,1220,honda,civic ferio,2001,12000,1490,at,2wd,rhd,gasoline
+1780,1220,nissan,note,2010,71000,1490,at,2wd,rhd,gasoline
+1781,1220,toyota,belta,2007,84000,1290,at,2wd,rhd,gasoline
+1782,1220,nissan,cube,2010,135000,1490,at,2wd,rhd,gasoline
+1783,1220,honda,step wgn,2009,97000,1990,at,2wd,rhd,gasoline
+1784,1220,nissan,serena,2009,129000,1990,at,2wd,rhd,gasoline
+1785,1220,toyota,noah,2004,86000,1990,at,2wd,rhd,gasoline
+1786,1220,toyota,ist,2003,65000,1290,at,2wd,rhd,gasoline
+1787,1220,suzuki,sx4,2009,171000,1990,at,4wd,rhd,gasoline
+1788,1220,honda,mdx,2003,123000,3470,at,4wd,rhd,gasoline
+1789,1220,toyota,voltz,2004,129000,1790,at,2wd,rhd,gasoline
+1790,1220,toyota,belta,2006,62000,1290,at,2wd,rhd,gasoline
+1791,1220,subaru,legacy,2010,113000,2450,at,4wd,rhd,gasoline
+1792,1220,toyota,voxy,2008,119000,1980,at,2wd,rhd,gasoline
+1793,1220,mitsubishi,galant fortis,2009,132000,1990,at,2wd,rhd,gasoline
+1794,1220,mitsubishi,galant fortis,2009,150000,1990,at,2wd,rhd,gasoline
+1795,1220,nissan,skyline,2009,257000,3690,at,2wd,rhd,gasoline
+1796,1220,daihatsu,terios kid,1999,50000,660,at,4wd,rhd,gasoline
+1797,1220,subaru,legacy touring wagon,2007,117000,2000,at,4wd,rhd,gasoline
+1798,1220,toyota,gaia,1999,162000,2000,at,2wd,rhd,gasoline
+1799,1220,volkswagen,polo,2007,66000,1400,at,2wd,rhd,gasoline
+1800,1220,toyota,noah,2005,76000,2000,at,2wd,rhd,gasoline
+1801,1220,toyota,sienta,2007,47000,1500,at,2wd,rhd,gasoline
+1802,1220,volkswagen,golf,2005,72000,2000,at,2wd,rhd,gasoline
+1803,1220,volkswagen,polo,2008,85000,1400,at,2wd,rhd,gasoline
+1804,1222,toyota,sienta,2007,137432,1500,at,2wd,rhd,gasoline
+1805,1222,nissan,tiida,2009,75000,1500,at,2wd,rhd,gasoline
+1806,1222,toyota,passo,2005,73190,1300,at,2wd,rhd,gasoline
+1807,1222,toyota,brevis,2003,65608,2500,at,2wd,rhd,gasoline
+1808,1222,toyota,brevis,2004,47924,2500,at,2wd,rhd,gasoline
+1809,1222,toyota,passo,2010,59004,1000,at,2wd,rhd,gasoline
+1810,1222,toyota,wish,2006,172254,1800,at,2wd,rhd,gasoline
+1811,1222,toyota,wish,2007,129000,1800,at,2wd,rhd,gasoline
+1812,1229,toyota,sienta,2010,28698,1500,at,2wd,rhd,gasoline
+1813,1230,toyota,vitz,2009,4305,1000,at,2wd,rhd,gasoline
+1814,1230,volkswagen,polo,2007,86000,1600,at,2wd,rhd,gasoline
+1815,1230,honda,fit,2004,84000,1300,at,2wd,rhd,gasoline
+1816,1230,honda,fit,2007,85000,1500,at,2wd,rhd,gasoline
+1817,1230,honda,fit,2003,103000,1300,at,2wd,rhd,gasoline
+1818,1230,honda,fit,2005,160000,1300,at,2wd,rhd,gasoline
+1819,1230,honda,fit,2007,99000,1300,at,2wd,rhd,gasoline
+1820,1230,honda,fit,2003,50000,1300,at,2wd,rhd,gasoline
+1821,1230,honda,fit,2003,98000,1500,at,2wd,rhd,gasoline
+1822,1230,honda,fit,2003,81000,1300,at,2wd,rhd,gasoline
+1823,1230,honda,fit,2007,106000,1300,at,2wd,rhd,gasoline
+1824,1230,honda,fit,2003,43000,1300,at,2wd,rhd,gasoline
+1825,1232,toyota,ractis,2009,103000,1300,at,2wd,rhd,gasoline
+1826,1232,toyota,alphard,2002,177935,2400,at,2wd,rhd,gasoline
+1827,1236,nissan,cube,2003,55500,1400,at,4wd,rhd,gasoline
+1828,1240,mazda,verisa,2009,71000,1500,at,2wd,rhd,gasoline
+1829,1240,toyota,regius wagon,1999,98125,2700,at,2wd,rhd,gasoline
+1830,1240,bmw,3 series,2004,30000,2200,at,2wd,rhd,gasoline
+1831,1240,honda,fit,2007,61000,1300,at,2wd,rhd,gasoline
+1832,1240,honda,fit,2005,109000,1300,at,2wd,rhd,gasoline
+1833,1240,honda,fit,2006,126000,1300,at,2wd,rhd,gasoline
+1834,1240,honda,fit,2002,128000,1500,at,2wd,rhd,gasoline
+1835,1240,honda,fit,2003,78000,1300,at,2wd,rhd,gasoline
+1836,1240,honda,fit,2003,81000,1500,at,2wd,rhd,gasoline
+1837,1240,toyota,sienta,2007,102000,1500,at,2wd,rhd,gasoline
+1838,1240,toyota,sienta,2005,85000,1500,at,2wd,rhd,gasoline
+1839,1240,toyota,sienta,2005,131000,1500,at,2wd,rhd,gasoline
+1840,1240,honda,fit,2005,68000,1300,at,2wd,rhd,gasoline
+1841,1240,honda,fit,2004,167000,1300,at,2wd,rhd,gasoline
+1842,1240,honda,fit,2004,47000,1300,at,2wd,rhd,gasoline
+1843,1240,toyota,ist,2004,121621,1300,at,2wd,rhd,gasoline
+1844,1241,toyota,sienta,2007,145654,1500,at,2wd,rhd,gasoline
+1845,1241,subaru,outback,2003,84854,3000,at,2wd,rhd,gasoline
+1846,1241,mazda,verisa,2011,83885,1500,at,2wd,rhd,gasoline
+1847,1241,toyota,allex,2001,85547,1500,at,2wd,rhd,gasoline
+1848,1241,toyota,vitz,2005,89000,1300,at,2wd,rhd,gasoline
+1849,1241,toyota,allion,2003,72867,1500,at,2wd,rhd,gasoline
+1850,1241,daihatsu,terios,2001,66445,1300,at,2wd,rhd,gasoline
+1851,1241,toyota,avensis,2003,58000,2000,at,2wd,rhd,gasoline
+1852,1241,honda,hr-v,2001,181000,1600,at,4wd,rhd,gasoline
+1853,1245,toyota,alphard,2007,156341,2990,at,2wd,rhd,gasoline
+1854,1250,bmw,3 series,2005,73230,2000,at,2wd,rhd,gasoline
+1855,1250,toyota,isis,2005,109000,1800,at,2wd,rhd,gasoline
+1856,1250,suzuki,swift,2011,145262,1200,at,4wd,rhd,gasoline
+1857,1250,daihatsu,mira es,2013,175262,660,at,2wd,rhd,gasoline
+1858,1250,toyota,vitz,2011,134000,1000,at,2wd,rhd,gasoline
+1859,1250,honda,fit,2008,103000,1300,at,2wd,rhd,gasoline
+1860,1250,toyota,ist,2005,77155,1500,at,2wd,rhd,gasoline
+1861,1250,nissan,bluebird sylphy,2011,118000,2000,at,2wd,rhd,gasoline
+1862,1250,volkswagen,polo,2007,76000,1600,at,2wd,rhd,gasoline
+1863,1250,volkswagen,polo,2008,65000,1600,at,2wd,rhd,gasoline
+1864,1250,nissan,clipper van,2013,151260,660,at,4wd,rhd,gasoline
+1865,1250,toyota,sienta,2005,163000,1500,at,2wd,rhd,gasoline
+1866,1250,honda,fit hybrid,2011,65000,1300,at,2wd,rhd,gasoline
+1867,1250,toyota,alphard g,2003,77100,2400,at,2wd,rhd,gasoline
+1868,1250,toyota,alphard,2003,77100,2400,at,2wd,rhd,gasoline
+1869,1250,toyota,allion,2002,148000,1800,at,2wd,rhd,gasoline
+1870,1250,toyota,ractis,2011,127000,1300,at,2wd,rhd,gasoline
+1871,1250,toyota,voxy,2004,105000,2000,at,2wd,rhd,gasoline
+1872,1250,toyota,sienta,2005,79000,1500,at,2wd,rhd,gasoline
+1873,1250,subaru,forester,2004,112000,2000,at,4wd,rhd,gasoline
+1874,1255,toyota,alphard,2003,96984,2400,at,2wd,rhd,gasoline
+1875,1258,toyota,wish,2007,106569,1800,at,2wd,rhd,gasoline
+1876,1260,mitsubishi,pajero mini,1995,102650,660,at,4wd,rhd,gasoline
+1877,1260,suzuki,swift,2005,55607,1300,at,2wd,rhd,gasoline
+1878,1260,suzuki,swift,2007,83000,1200,cvt,2wd,rhd,gasoline
+1879,1260,honda,fit,2003,90723,1300,at,2wd,rhd,gasoline
+1880,1260,mazda,demio,2009,67136,1300,at,2wd,rhd,gasoline
+1881,1260,honda,fit,2006,76759,1300,at,2wd,rhd,gasoline
+1882,1260,daihatsu,mira es,2013,167933,660,at,2wd,rhd,gasoline
+1883,1260,toyota,fun cargo,2003,105759,1300,at,2wd,rhd,gasoline
+1884,1260,toyota,passo,2009,76221,1300,at,2wd,rhd,gasoline
+1885,1260,toyota,passo,2007,86884,1300,at,2wd,rhd,gasoline
+1886,1260,toyota,passo,2007,77436,1300,at,2wd,rhd,gasoline
+1887,1260,toyota,passo,2009,87720,1300,at,2wd,rhd,gasoline
+1888,1260,honda,fit,2004,49667,1300,at,2wd,rhd,gasoline
+1889,1260,honda,fit,2005,78084,1300,at,2wd,rhd,gasoline
+1890,1260,toyota,platz,2005,47914,1500,at,2wd,rhd,gasoline
+1891,1260,toyota,mark x,2004,67000,2500,at,2wd,rhd,gasoline
+1892,1260,suzuki,swift,2006,124000,1500,at,2wd,rhd,gasoline
+1893,1260,subaru,sambar truck,2001,54300,660,mt,4wd,rhd,gasoline
+1894,1260,toyota,ractis,2007,50000,1490,at,2wd,rhd,gasoline
+1895,1260,toyota,mark ii,2001,108000,2000,at,2wd,rhd,gasoline
+1896,1260,honda,stream,2008,114000,1990,at,2wd,rhd,gasoline
+1897,1260,suzuki,alto,2010,23700,660,at,2wd,rhd,gasoline
+1898,1262,toyota,noah,2007,170000,2000,at,2wd,rhd,gasoline
+1899,1262,toyota,noah,2005,63000,2000,at,2wd,rhd,gasoline
+1900,1263,toyota,raum,2007,87018,1500,at,2wd,rhd,gasoline
+1901,1265,toyota,ractis,2008,79000,1500,at,2wd,rhd,gasoline
+1902,1265,bmw,3 series,2006,43540,2000,at,2wd,rhd,gasoline
+1903,1267,toyota,bb,2007,130357,1290,at,2wd,rhd,gasoline
+1904,1269,toyota,crown,2004,131491,2500,at,2wd,rhd,gasoline
+1905,1269,daihatsu,hijet cargo,2006,150000,660,mt,2wd,rhd,gasoline
+1906,1269,toyota,sienta,2007,97974,1500,at,2wd,rhd,gasoline
+1907,1269,toyota,sienta,2007,120958,1500,at,2wd,rhd,gasoline
+1908,1269,toyota,wish,2006,94132,1800,at,2wd,rhd,gasoline
+1909,1269,toyota,raum,2005,84673,1500,at,2wd,rhd,gasoline
+1910,1269,toyota,raum,2004,133637,1500,at,2wd,rhd,gasoline
+1911,1269,toyota,sienta,2006,91908,1500,at,2wd,rhd,gasoline
+1912,1269,toyota,sienta,2006,52488,1500,at,2wd,rhd,gasoline
+1913,1269,toyota,noah,2005,85957,2000,at,2wd,rhd,gasoline
+1914,1270,nissan,cube,2010,104000,1490,at,2wd,rhd,gasoline
+1915,1270,nissan,tiida,2010,115000,1490,at,2wd,rhd,gasoline
+1916,1270,toyota,wish,2003,81000,1790,at,2wd,rhd,gasoline
+1917,1270,toyota,ist,2004,63000,1290,at,2wd,rhd,gasoline
+1918,1270,toyota,corolla spacio,2005,133000,1490,at,2wd,rhd,gasoline
+1919,1270,toyota,corolla spacio,2003,64000,1490,at,2wd,rhd,gasoline
+1920,1270,toyota,vitz,2009,80000,1290,at,2wd,rhd,gasoline
+1921,1270,toyota,corolla sedan,2000,51000,1490,at,2wd,rhd,gasoline
+1922,1270,toyota,belta,2007,111000,1290,at,2wd,rhd,gasoline
+1923,1270,bmw,1 series,2006,68000,1600,at,2wd,rhd,gasoline
+1924,1270,mazda,demio,2006,175000,1500,at,2wd,rhd,gasoline
+1925,1270,toyota,noah,2009,127619,2000,at,2wd,rhd,gasoline
+1926,1270,toyota,sienta,2005,85000,1500,at,2wd,rhd,gasoline
+1927,1272,nissan,bluebird sylphy,2006,122000,2000,at,2wd,rhd,gasoline
+1928,1278,toyota,corolla rumion,2010,108585,1500,at,2wd,rhd,gasoline
+1929,1278,subaru,sambar,1999,125617,650,at,2wd,rhd,gasoline
+1930,1278,toyota,sienta,2007,98720,1500,at,2wd,rhd,gasoline
+1931,1278,toyota,corolla spacio,2005,117000,1500,at,2wd,rhd,gasoline
+1932,1280,mazda,atenza,2005,111000,2300,at,2wd,rhd,gasoline
+1933,1280,volkswagen,polo,2007,41000,1600,at,2wd,rhd,gasoline
+1934,1280,toyota,sienta,2005,140000,1500,at,2wd,rhd,gasoline
+1935,1280,bmw,1 series,2004,63000,1600,at,2wd,rhd,gasoline
+1936,1280,mazda,demio,2009,10200,1300,at,2wd,rhd,gasoline
+1937,1280,toyota,alphard,2004,104822,2400,at,2wd,rhd,gasoline
+1938,1280,subaru,sambar truck,1996,61900,660,mt,4wd,rhd,gasoline
+1939,1283,toyota,passo,2007,77000,1000,at,2wd,rhd,gasoline
+1940,1287,toyota,townace noah,1998,70000,1990,at,2wd,rhd,gasoline
+1941,1288,toyota,noah,2002,69328,2000,at,2wd,rhd,gasoline
+1942,1288,bmw,3 series,2007,50681,2000,at,2wd,rhd,gasoline
+1943,1288,toyota,sienta,2007,109260,1500,at,2wd,rhd,gasoline
+1944,1288,nissan,murano,2006,76740,2480,at,2wd,rhd,gasoline
+1945,1288,toyota,premio,2002,49845,1500,at,2wd,rhd,gasoline
+1946,1288,toyota,corolla runx,2003,49349,1500,at,2wd,rhd,gasoline
+1947,1288,toyota,allion,2005,16595,1800,at,2wd,rhd,gasoline
+1948,1288,toyota,voltz,2002,64242,1800,at,2wd,rhd,gasoline
+1949,1290,toyota,corolla spacio,2003,55000,1490,at,2wd,rhd,gasoline
+1950,1290,toyota,ist,2003,8000,1290,at,2wd,rhd,gasoline
+1951,1290,mazda,bongo van,2014,102202,1800,at,2wd,rhd,gasoline
+1952,1290,toyota,passo,2006,84000,1300,at,2wd,rhd,gasoline
+1953,1290,toyota,wish,2003,75000,1800,at,2wd,rhd,gasoline
+1954,1290,toyota,ipsum,1999,168000,2000,at,2wd,rhd,gasoline
+1955,1290,volkswagen,polo,2007,58000,1400,at,2wd,rhd,gasoline
+1956,1290,toyota,ractis,2011,43000,1300,at,2wd,rhd,gasoline
+1957,1290,subaru,sambar truck,1990,55000,660,mt,4wd,rhd,gasoline
+1958,1290,nissan,elgrand,2003,72000,3490,at,2wd,rhd,gasoline
+1959,1290,honda,freed,2008,153000,1500,at,2wd,rhd,gasoline
+1960,1297,subaru,impreza,2007,108852,1500,at,2wd,rhd,gasoline
+1961,1297,toyota,sienta,2006,104071,1500,at,2wd,rhd,gasoline
+1962,1297,toyota,belta,2006,122100,1300,at,2wd,rhd,gasoline
+1963,1299,subaru,sambar truck,2002,82600,660,mt,4wd,rhd,gasoline
+1964,1300,nissan,bluebird sylphy,2010,36000,2000,at,2wd,rhd,gasoline
+1965,1300,mitsubishi,outlander,2007,203000,2400,at,4wd,rhd,gasoline
+1966,1300,toyota,belta,2007,51000,1290,at,2wd,rhd,gasoline
+1967,1300,toyota,ist,2005,34000,1290,at,2wd,rhd,gasoline
+1968,1300,toyota,ractis,2009,116417,1300,at,2wd,rhd,gasoline
+1969,1300,honda,cr-v,2003,91681,2000,at,4wd,rhd,gasoline
+1970,1300,suzuki,sx4,2008,134000,1500,at,2wd,rhd,gasoline
+1971,1300,toyota,opa,2001,119319,1800,at,2wd,rhd,gasoline
+1972,1300,subaru,legacy b4,2003,124950,2000,at,4wd,rhd,gasoline
+1973,1300,mazda,carol,2013,155778,660,at,2wd,rhd,gasoline
+1974,1300,toyota,ractis,2011,144400,1300,at,2wd,rhd,gasoline
+1975,1300,honda,insight,2009,136000,1300,at,2wd,rhd,gasoline
+1976,1300,toyota,corona premio,1999,94170,1600,at,2wd,rhd,gasoline
+1977,1300,toyota,wish,2007,195000,1800,at,4wd,rhd,gasoline
+1978,1300,toyota,alphard,2003,252000,2400,at,4wd,rhd,gasoline
+1979,1300,toyota,voxy,2007,195000,2000,at,2wd,rhd,gasoline
+1980,1300,volkswagen,golf,2007,135000,1600,at,2wd,rhd,gasoline
+1981,1300,volkswagen,polo,2009,175000,1400,at,2wd,rhd,gasoline
+1982,1300,daihatsu,hijet truck,1994,50200,660,mt,4wd,rhd,gasoline
+1983,1300,volkswagen,polo,2005,117000,1400,at,2wd,rhd,gasoline
+1984,1300,mazda,demio,2007,57000,1300,at,2wd,rhd,gasoline
+1985,1300,toyota,alphard v,2004,83800,2400,at,2wd,rhd,gasoline
+1986,1300,toyota,alphard,2004,83800,2400,at,2wd,rhd,gasoline
+1987,1300,bmw,3 series,2005,113565,2000,at,2wd,rhd,gasoline
+1988,1300,toyota,ist,2003,130670,1300,at,2wd,rhd,gasoline
+1989,1300,toyota,corolla spacio,2002,116300,1500,at,2wd,rhd,gasoline
+1990,1300,honda,fit hybrid,2013,179200,1300,at,2wd,rhd,gasoline
+1991,1300,nissan,note,2013,215400,1200,at,2wd,rhd,gasoline
+1992,1300,toyota,ipsum,2001,78000,2360,at,2wd,rhd,gasoline
+1993,1300,toyota,passo,2010,86000,990,at,2wd,rhd,gasoline
+1994,1300,subaru,forester,2002,81000,2000,at,4wd,rhd,gasoline
+1995,1300,suzuki,carry truck,2005,176700,660,mt,2wd,rhd,gasoline
+1996,1300,subaru,legacy b4,2002,167250,2000,mt,awd,rhd,gasoline
+1997,1300,mazda,bongo brawny truck,1998,159029,1780,mt,2wd,rhd,gasoline
+1998,1300,toyota,masterace surf,1990,199973,1990,at,2wd,rhd,gasoline
+1999,1300,toyota,wish,2005,132200,1800,at,2wd,rhd,gasoline
+2000,1300,isuzu,wizard,1998,100200,3160,at,4wd,rhd,gasoline
+2001,1306,mazda,demio,2006,59000,1340,at,2wd,rhd,gasoline
+2002,1306,daihatsu,move latte,2005,68000,650,at,2wd,rhd,gasoline
+2003,1306,toyota,sienta,2005,101000,1490,at,2wd,rhd,gasoline
+2004,1306,hyundai,tucson,2005,77252,1991,at,2wd,lhd,diesel
+2005,1306,hyundai,santa fe,2004,82333,1991,at,2wd,lhd,diesel
+2006,1306,hyundai,terracan,2001,65824,2476,mt,4wd,lhd,diesel
+2007,1306,toyota,sienta,2008,149260,1490,at,2wd,rhd,gasoline
+2008,1306,toyota,vitz,2001,79872,1300,at,2wd,rhd,gasoline
+2009,1306,toyota,vitz,2011,63645,996,at,2wd,rhd,gasoline
+2010,1306,toyota,allion,2005,65890,1794,at,2wd,rhd,gasoline
+2011,1306,toyota,fun cargo,2003,173521,1300,at,2wd,rhd,gasoline
+2012,1306,toyota,passo,2009,69859,1300,at,2wd,rhd,gasoline
+2013,1306,honda,fit,2005,41079,1300,at,2wd,rhd,gasoline
+2014,1306,toyota,vitz,2000,119315,1000,at,2wd,rhd,gasoline
+2015,1306,toyota,sienta,2007,104775,1500,at,2wd,rhd,gasoline
+2016,1306,toyota,belta,2006,44768,990,at,2wd,rhd,gasoline
+2017,1306,toyota,sienta,2007,197021,1500,at,2wd,rhd,gasoline
+2018,1306,mazda,demio,2007,112077,1300,at,2wd,rhd,gasoline
+2019,1306,toyota,vitz,2005,65403,1300,at,2wd,rhd,gasoline
+2020,1306,mazda,demio,2011,89237,1300,at,2wd,rhd,gasoline
+2021,1306,honda,fit,2009,129999,1300,at,2wd,rhd,gasoline
+2022,1306,toyota,sienta,2004,123665,1500,at,2wd,rhd,gasoline
+2023,1306,toyota,vitz,2007,72737,1300,at,2wd,rhd,gasoline
+2024,1306,honda,fit,2009,127165,1500,at,2wd,rhd,gasoline
+2025,1306,toyota,ist,2003,37900,1300,at,2wd,rhd,gasoline
+2026,1306,toyota,vitz,2007,27129,1300,at,2wd,rhd,gasoline
+2027,1306,honda,fit,2006,86574,1300,at,2wd,rhd,gasoline
+2028,1306,honda,fit,2006,83906,1300,at,2wd,rhd,gasoline
+2029,1306,honda,fit,2005,81958,1500,at,2wd,rhd,gasoline
+2030,1306,honda,fit,2005,94790,1300,at,2wd,rhd,gasoline
+2031,1306,toyota,vitz,2007,22220,1500,at,2wd,rhd,gasoline
+2032,1306,honda,fit,2001,85882,1300,at,2wd,rhd,gasoline
+2033,1306,toyota,raum,2003,53853,1500,at,4wd,rhd,gasoline
+2034,1306,toyota,vitz,2007,81638,1300,at,2wd,rhd,gasoline
+2035,1306,toyota,ist,2003,173940,1490,at,2wd,rhd,gasoline
+2036,1306,toyota,vitz,2011,43729,1300,at,2wd,rhd,gasoline
+2037,1306,honda,step wgn,2005,168341,2000,at,4wd,rhd,gasoline
+2038,1306,toyota,vitz,2008,60691,1300,at,2wd,rhd,gasoline
+2039,1306,toyota,vitz,2007,99275,1000,at,2wd,rhd,gasoline
+2040,1306,toyota,vitz,2007,73712,1300,at,2wd,rhd,gasoline
+2041,1306,toyota,vitz,2007,106449,1300,at,2wd,rhd,gasoline
+2042,1306,suzuki,swift,2009,111055,12340,at,2wd,rhd,gasoline
+2043,1306,toyota,platz,2001,74639,1500,at,2wd,rhd,gasoline
+2044,1306,mitsubishi,delica d2,2013,156177,1240,at,2wd,rhd,gasoline
+2045,1306,mazda,verisa,2007,69819,1500,at,2wd,rhd,gasoline
+2046,1306,mazda,mpv,2007,63430,2300,at,2wd,rhd,gasoline
+2047,1306,nissan,teana,2005,34560,2300,at,2wd,rhd,gasoline
+2048,1306,daihatsu,terios kid,2000,33460,660,mt,4wd,rhd,gasoline
+2049,1306,daihatsu,mira,1995,101000,660,mt,2wd,rhd,gasoline
+2050,1306,honda,fit,2010,119317,1300,at,2wd,rhd,gasoline
+2051,1306,volkswagen,polo,2007,71000,1400,at,2wd,rhd,gasoline
+2052,1306,volkswagen,polo,2007,57000,1400,at,2wd,rhd,gasoline
+2053,1306,nissan,cima,2001,64000,4500,at,2wd,rhd,gasoline
+2054,1306,suzuki,wagon r,2004,126000,660,at,4wd,rhd,gasoline
+2055,1306,mitsubishi,delica truck,2002,122438,1780,mt,2wd,rhd,gasoline
+2056,1306,toyota,estima,2001,126800,3000,at,2wd,rhd,gasoline
+2057,1306,honda,inspire,2004,130900,3000,at,2wd,rhd,gasoline
+2058,1307,nissan,sunny,1999,73000,1500,at,4wd,rhd,gasoline
+2059,1310,toyota,corolla spacio,2001,73000,1490,at,2wd,rhd,gasoline
+2060,1310,toyota,isis,2007,55000,2000,at,2wd,rhd,gasoline
+2061,1310,toyota,mark x,2006,151000,2500,at,2wd,rhd,gasoline
+2062,1310,bmw,mini,2004,100000,1600,at,2wd,rhd,gasoline
+2063,1310,suzuki,swift,2010,118160,1240,at,2wd,rhd,gasoline
+2064,1313,toyota,ist,2003,129000,1300,at,2wd,rhd,gasoline
+2065,1313,toyota,ipsum,2005,119000,2400,at,4wd,rhd,gasoline
+2066,1316,toyota,mark x,2007,104000,2500,at,2wd,rhd,gasoline
+2067,1319,suzuki,sx4,2007,100479,1500,at,2wd,rhd,gasoline
+2068,1320,toyota,sienta,2007,57000,1490,at,2wd,rhd,gasoline
+2069,1320,toyota,ractis,2007,83000,1490,at,2wd,rhd,gasoline
+2070,1320,toyota,mark x,2006,81000,2490,at,2wd,rhd,gasoline
+2071,1320,subaru,sambar truck,2008,182000,650,mt,2wd,rhd,gasoline
+2072,1320,suzuki,sx4,2009,123000,1490,at,2wd,rhd,gasoline
+2073,1320,volkswagen,golf,2005,42000,1980,at,2wd,rhd,gasoline
+2074,1320,mazda,demio,2007,67000,1490,mt,2wd,rhd,gasoline
+2075,1320,toyota,auris,2007,110000,1490,at,2wd,rhd,gasoline
+2076,1320,toyota,noah,2007,144000,1990,at,2wd,rhd,gasoline
+2077,1320,toyota,ractis,2007,92000,1490,at,2wd,rhd,gasoline
+2078,1320,nissan,tiida,2010,126000,1490,at,2wd,rhd,gasoline
+2079,1320,suzuki,sx4,2007,112000,1490,at,2wd,rhd,gasoline
+2080,1320,bmw,mini,2008,106000,1390,at,2wd,rhd,gasoline
+2081,1320,suzuki,swift,2010,152000,1240,mt,2wd,rhd,gasoline
+2082,1320,nissan,fuga,2009,181000,2490,at,2wd,rhd,gasoline
+2083,1320,suzuki,swift,2008,66000,1240,at,2wd,rhd,gasoline
+2084,1320,toyota,corolla sedan,1999,126000,1490,at,2wd,rhd,gasoline
+2085,1320,mazda,bongo van,2005,122000,1780,mt,2wd,rhd,gasoline
+2086,1320,toyota,crown,2006,277000,2490,at,2wd,rhd,gasoline
+2087,1320,toyota,crown,2004,153000,2490,at,2wd,rhd,gasoline
+2088,1320,toyota,vitz,2011,119000,990,at,2wd,rhd,gasoline
+2089,1320,toyota,corolla fielder,2006,136000,1490,at,2wd,rhd,gasoline
+2090,1320,bmw,mini,2009,112000,1590,at,2wd,rhd,gasoline
+2091,1320,toyota,belta,2007,33000,1290,at,2wd,rhd,gasoline
+2092,1320,toyota,mark x,2007,147000,2490,at,2wd,rhd,gasoline
+2093,1320,nissan,ad,2013,164000,1490,at,2wd,rhd,gasoline
+2094,1320,bmw,1 series,2005,57000,1990,at,2wd,rhd,gasoline
+2095,1320,nissan,note,2011,70000,1490,at,2wd,rhd,gasoline
+2096,1320,toyota,ist,2004,110000,1290,at,2wd,rhd,gasoline
+2097,1320,toyota,mark x,2006,80000,2490,at,2wd,rhd,gasoline
+2098,1320,nissan,cube,2010,98000,1490,at,2wd,rhd,gasoline
+2099,1320,nissan,bluebird sylphy,2009,120000,1990,at,2wd,rhd,gasoline
+2100,1320,nissan,cube,2010,68000,1490,at,2wd,rhd,gasoline
+2101,1320,toyota,corolla sedan,1999,125000,1490,at,2wd,rhd,gasoline
+2102,1320,toyota,corolla sedan,1998,124000,1490,at,2wd,rhd,gasoline
+2103,1320,subaru,exiga,2011,105000,1990,at,2wd,rhd,gasoline
+2104,1320,nissan,march,2012,72000,1190,at,2wd,rhd,gasoline
+2105,1320,volkswagen,polo,2003,95000,1600,at,2wd,rhd,gasoline
+2106,1320,honda,fit,2009,90000,1300,at,2wd,rhd,gasoline
+2107,1320,honda,fit,2009,108000,1400,at,2wd,rhd,gasoline
+2108,1323,nissan,tiida,2007,33441,1490,at,2wd,rhd,gasoline
+2109,1325,nissan,x-trail,2004,94000,1990,at,4wd,rhd,gasoline
+2110,1325,land rover,freelander,2006,46770,2490,at,4wd,rhd,gasoline
+2111,1325,toyota,raum,2007,128187,1500,at,2wd,rhd,gasoline
+2112,1325,toyota,raum,2006,110522,1500,at,2wd,rhd,gasoline
+2113,1325,toyota,ist,2005,129304,1500,at,4wd,rhd,gasoline
+2114,1325,toyota,ist,2003,150377,1300,at,2wd,rhd,gasoline
+2115,1325,toyota,raum,2007,73074,1500,at,2wd,rhd,gasoline
+2116,1325,toyota,ist,2002,142438,1500,at,4wd,rhd,gasoline
+2117,1325,toyota,ist,2004,134899,1300,at,2wd,rhd,gasoline
+2118,1325,toyota,corolla spacio,2005,184598,1500,at,2wd,rhd,gasoline
+2119,1328,toyota,succeed van,2011,233661,1500,at,2wd,rhd,gasoline
+2120,1330,mitsubishi,town box,2006,94000,660,at,2wd,rhd,gasoline
+2121,1330,mazda,demio,2011,136000,1300,at,2wd,rhd,gasoline
+2122,1330,toyota,ractis,2008,88000,1490,at,2wd,rhd,gasoline
+2123,1330,toyota,alphard,2003,142000,2360,at,4wd,rhd,gasoline
+2124,1330,volkswagen,polo,2007,41000,1400,at,2wd,rhd,gasoline
+2125,1330,mazda,axela,2005,101000,1500,at,2wd,rhd,gasoline
+2126,1330,toyota,noah,2003,113000,2000,at,2wd,rhd,gasoline
+2127,1334,subaru,impreza,2009,99434,1500,at,2wd,rhd,gasoline
+2128,1334,toyota,alphard,2005,89930,2360,at,2wd,rhd,gasoline
+2129,1334,toyota,probox van,2011,110274,1300,at,2wd,rhd,gasoline
+2130,1334,toyota,ractis,2010,15272,1500,at,2wd,rhd,gasoline
+2131,1334,toyota,belta,2006,53580,1000,at,2wd,rhd,gasoline
+2132,1334,toyota,corolla sedan,2002,62668,1500,at,2wd,rhd,gasoline
+2133,1334,nissan,x-trail,2007,81928,2000,at,4wd,rhd,gasoline
+2134,1334,toyota,allion,2003,84469,1500,at,2wd,rhd,gasoline
+2135,1334,toyota,allex,2005,76371,1500,at,2wd,rhd,gasoline
+2136,1334,toyota,allion,2007,80285,1800,at,2wd,rhd,gasoline
+2137,1334,toyota,auris,2007,45292,1500,at,2wd,rhd,gasoline
+2138,1334,toyota,voltz,2002,76257,1800,at,2wd,rhd,gasoline
+2139,1335,suzuki,alto,2012,160000,660,at,2wd,rhd,gasoline
+2140,1337,toyota,succeed van,2010,205094,1500,at,2wd,rhd,gasoline
+2141,1340,mazda,demio,2010,86000,1300,at,2wd,rhd,gasoline
+2142,1340,volkswagen,golf variant,2009,131000,1400,at,2wd,rhd,gasoline
+2143,1340,toyota,windom,2002,106050,3000,at,2wd,rhd,gasoline
+2144,1340,honda,fit,2009,90000,1400,at,2wd,rhd,gasoline
+2145,1340,honda,fit,2008,107000,1400,at,2wd,rhd,gasoline
+2146,1340,mazda,demio,2009,137000,1300,at,2wd,rhd,gasoline
+2147,1342,kia motors,cerato,2005,148991,1599,at,2wd,lhd,gasoline
+2148,1343,kia motors,pride,2007,147009,1493,at,2wd,lhd,diesel
+2149,1343,hyundai,tucson,2004,76354,1991,at,2wd,lhd,diesel
+2150,1343,hyundai,santa fe,2004,83335,1991,at,2wd,lhd,diesel
+2151,1344,subaru,sambar truck,1992,21432,650,mt,4wd,rhd,gasoline
+2152,1346,toyota,ractis,2008,131352,1300,at,2wd,rhd,gasoline
+2153,1350,volkswagen,jetta,2007,42800,2000,at,2wd,rhd,gasoline
+2154,1350,toyota,alphard,2003,134000,2360,at,2wd,rhd,gasoline
+2155,1350,suzuki,splash,2011,138784,1200,at,2wd,rhd,gasoline
+2156,1350,nissan,serena,2010,140000,2000,at,2wd,rhd,gasoline
+2157,1350,suzuki,wagon r,2013,181000,660,at,2wd,rhd,gasoline
+2158,1350,nissan,bluebird sylphy,2011,93000,1500,at,2wd,rhd,gasoline
+2159,1350,toyota,sienta,2012,109400,1500,at,2wd,rhd,gasoline
+2160,1350,toyota,sienta,2006,43000,1500,at,2wd,rhd,gasoline
+2161,1350,ford,escape,2004,86000,2300,at,2wd,rhd,gasoline
+2162,1350,nissan,bluebird sylphy,2012,34863,2000,at,2wd,rhd,gasoline
+2163,1350,suzuki,landy,2013,255800,2000,at,2wd,rhd,gasoline
+2164,1350,volkswagen,polo,2006,175000,1400,at,2wd,rhd,gasoline
+2165,1350,toyota,alphard v,2004,79100,2400,at,2wd,rhd,gasoline
+2166,1350,toyota,alphard g,2004,79100,2400,at,2wd,rhd,gasoline
+2167,1350,honda,fit,2009,61000,1400,at,2wd,rhd,gasoline
+2168,1350,honda,step wgn,2006,121000,1990,at,2wd,rhd,gasoline
+2169,1350,daihatsu,hijet truck,2007,140000,660,mt,2wd,rhd,gasoline
+2170,1352,toyota,succeed van,2011,145062,1500,mt,4wd,rhd,gasoline
+2171,1353,toyota,vitz,2006,44015,1500,at,2wd,rhd,gasoline
+2172,1353,toyota,vitz,2005,120588,1300,at,2wd,rhd,gasoline
+2173,1353,toyota,altezza,1999,124810,2000,mt,2wd,rhd,gasoline
+2174,1353,honda,step wgn,2009,98461,2000,at,2wd,rhd,gasoline
+2175,1353,mazda,demio,2008,127413,1300,at,2wd,rhd,gasoline
+2176,1353,mazda,demio,2009,41383,1300,at,2wd,rhd,gasoline
+2177,1353,toyota,vitz,2005,105804,1300,at,2wd,rhd,gasoline
+2178,1353,honda,fit,2007,107470,1300,at,2wd,rhd,gasoline
+2179,1353,toyota,vitz,2006,70152,1300,at,2wd,rhd,gasoline
+2180,1353,toyota,ist,2003,81613,1500,at,2wd,rhd,gasoline
+2181,1353,mazda,demio,2009,46815,1300,at,2wd,rhd,gasoline
+2182,1353,honda,fit,2005,124132,1300,at,2wd,rhd,gasoline
+2183,1353,honda,fit,2005,36520,1300,at,2wd,rhd,gasoline
+2184,1353,mazda,demio,2009,66692,1300,at,2wd,rhd,gasoline
+2185,1353,mazda,demio,2010,78036,1300,at,2wd,rhd,gasoline
+2186,1353,nissan,skyline,2000,121888,2000,at,2wd,rhd,gasoline
+2187,1353,toyota,porte,2004,60076,1300,at,2wd,rhd,gasoline
+2188,1353,mitsubishi,pajero io,1998,76439,1800,at,4wd,rhd,gasoline
+2189,1353,toyota,wish,2003,174193,1800,at,2wd,rhd,gasoline
+2190,1353,toyota,wish,2003,98811,1800,at,2wd,rhd,gasoline
+2191,1353,subaru,vivio,1993,48350,660,mt,2wd,rhd,gasoline
+2192,1353,honda,fit,2005,112000,1490,at,2wd,rhd,gasoline
+2193,1353,toyota,spade,2002,149553,1790,at,4wd,rhd,gasoline
+2194,1353,nissan,x-trail,2006,153900,2000,at,4wd,rhd,gasoline
+2195,1355,suzuki,swift,2006,113000,1300,at,2wd,rhd,gasoline
+2196,1359,toyota,vitz,2005,92700,1300,at,2wd,rhd,gasoline
+2197,1359,toyota,vitz,2008,97000,1300,at,2wd,rhd,gasoline
+2198,1360,suzuki,swift,2009,107503,1200,at,2wd,rhd,gasoline
+2199,1360,suzuki,splash,2010,71841,1200,at,2wd,rhd,gasoline
+2200,1360,toyota,allex,2001,79000,1500,at,2wd,rhd,gasoline
+2201,1360,bmw,1 series,2005,34000,1600,at,2wd,rhd,gasoline
+2202,1360,toyota,ipsum,2001,74000,2000,at,2wd,rhd,gasoline
+2203,1360,honda,fit,2009,111000,1300,at,2wd,rhd,gasoline
+2204,1360,nissan,elgrand,2004,99000,3500,at,2wd,rhd,gasoline
+2205,1360,volkswagen,polo,2007,86000,1400,at,2wd,rhd,gasoline
+2206,1360,volkswagen,golf,2007,72000,1600,at,2wd,rhd,gasoline
+2207,1360,volkswagen,polo,2008,95000,1400,at,2wd,rhd,gasoline
+2208,1360,honda,fit,2009,116000,1400,at,2wd,rhd,gasoline
+2209,1360,honda,fit,2008,109000,1400,at,2wd,rhd,gasoline
+2210,1362,nissan,otti,2007,74000,660,at,2wd,rhd,gasoline
+2211,1362,nissan,clipper,2003,227000,660,at,2wd,rhd,gasoline
+2212,1362,honda,life,2004,123000,660,at,2wd,rhd,gasoline
+2213,1366,suzuki,alto,2010,113000,660,at,2wd,rhd,gasoline
+2214,1366,toyota,vitz,2005,92000,1000,at,2wd,rhd,gasoline
+2215,1366,suzuki,alto,2008,98000,660,at,2wd,rhd,gasoline
+2216,1370,nissan,wingroad,2010,67000,1800,at,2wd,rhd,gasoline
+2219,1370,nissan,note,2011,75000,1490,at,2wd,rhd,gasoline
+2220,1370,subaru,legacy b4,2002,116000,1990,mt,4wd,rhd,gasoline
+2221,1370,toyota,premio,2006,191000,1490,at,2wd,rhd,gasoline
+2222,1370,toyota,allex,2004,127000,1490,at,2wd,rhd,gasoline
+2223,1370,honda,fit,2009,157000,1400,at,2wd,rhd,gasoline
+2224,1370,volkswagen,polo,2007,66000,1400,at,2wd,rhd,gasoline
+2225,1370,mazda,axela,2004,157000,2300,at,2wd,rhd,gasoline
+2226,1370,toyota,ipsum,2002,111000,2400,at,2wd,rhd,gasoline
+2227,1371,toyota,ist,2007,91392,1300,at,2wd,rhd,gasoline
+2228,1372,hino,dutro,2006,567058,4890,mt,2wd,rhd,diesel
+2229,1372,toyota,sienta,2006,74725,1500,at,2wd,rhd,gasoline
+2230,1372,toyota,vitz,2007,21420,1300,at,2wd,rhd,gasoline
+2231,1372,isuzu,elf truck,2001,95347,3050,at,2wd,rhd,lpg
+2232,1372,daihatsu,move,2008,193000,660,at,2wd,rhd,gasoline
+2233,1373,toyota,wish,2007,72096,1800,at,2wd,rhd,gasoline
+2234,1373,toyota,wish,2007,112990,1800,at,2wd,rhd,gasoline
+2235,1373,toyota,wish,2005,128077,1800,at,2wd,rhd,gasoline
+2236,1375,toyota,porte,2009,83000,1300,at,2wd,rhd,gasoline
+2237,1380,toyota,ist,2006,75200,1300,at,2wd,rhd,gasoline
+2238,1380,nissan,x-trail,2001,123200,2000,at,4wd,rhd,gasoline
+2239,1380,toyota,mark x,2007,97000,2500,at,2wd,rhd,gasoline
+2240,1380,nissan,tiida latio,2007,63000,1500,at,2wd,rhd,gasoline
+2241,1380,toyota,sienta,2005,179000,1500,at,2wd,rhd,gasoline
+2242,1380,toyota,sienta,2005,94000,1500,at,2wd,rhd,gasoline
+2243,1381,toyota,carina,1999,69934,1800,at,2wd,rhd,gasoline
+2244,1381,toyota,ist,2006,70501,1300,at,2wd,rhd,gasoline
+2245,1381,toyota,probox van,2010,135911,1500,at,2wd,rhd,gasoline
+2246,1381,toyota,noah,2005,141515,2000,at,2wd,rhd,gasoline
+2247,1381,toyota,raum,2007,97535,1500,at,2wd,rhd,gasoline
+2248,1381,toyota,ractis,2011,43002,1300,at,2wd,rhd,gasoline
+2249,1381,toyota,raum,2005,18708,1500,at,2wd,rhd,gasoline
+2250,1381,toyota,raum,2006,79324,1500,at,2wd,rhd,gasoline
+2251,1381,toyota,ist,2002,86207,1300,at,2wd,rhd,gasoline
+2252,1381,toyota,raum,2008,17550,1500,at,2wd,rhd,gasoline
+2253,1381,toyota,ist,2002,108455,1500,at,2wd,rhd,gasoline
+2254,1381,toyota,ist,2004,103310,1300,at,2wd,rhd,gasoline
+2255,1381,toyota,ist,2003,59767,1300,at,2wd,rhd,gasoline
+2256,1381,toyota,ist,2003,160220,1300,at,2wd,rhd,gasoline
+2257,1381,toyota,ist,2003,114595,1500,at,4wd,rhd,gasoline
+2258,1381,toyota,ractis,2011,64758,1300,at,2wd,rhd,gasoline
+2259,1381,toyota,ist,2003,92000,1300,at,2wd,rhd,gasoline
+2260,1381,toyota,allion,2006,49813,1800,at,2wd,rhd,gasoline
+2261,1381,toyota,ist,2003,157385,1300,at,2wd,rhd,gasoline
+2262,1381,toyota,ist,2004,171582,1300,at,2wd,rhd,gasoline
+2263,1381,mazda,titan dash,2007,156010,1990,mt,2wd,rhd,gasoline
+2264,1381,toyota,ist,2002,109585,1300,at,2wd,rhd,gasoline
+2265,1381,toyota,ist,2003,58792,1300,at,2wd,rhd,gasoline
+2266,1381,toyota,ist,2004,135375,1300,at,2wd,rhd,gasoline
+2267,1381,toyota,ist,2004,130422,1500,at,4wd,rhd,gasoline
+2268,1381,toyota,ist,2003,59602,1300,at,2wd,rhd,gasoline
+2269,1381,subaru,impreza,2008,114029,2000,at,4wd,rhd,gasoline
+2270,1381,toyota,raum,2006,56610,1500,at,2wd,rhd,gasoline
+2271,1381,daihatsu,atrai,2000,172000,660,at,2wd,rhd,gasoline
+2272,1381,daihatsu,esse,2008,149000,660,at,2wd,rhd,gasoline
+2273,1381,honda,life,2000,84000,660,at,2wd,rhd,gasoline
+2274,1381,suzuki,wagon r rr,2005,202000,660,at,2wd,rhd,gasoline
+2275,1381,toyota,ist,2005,127897,1300,at,2wd,rhd,gasoline
+2276,1381,toyota,mark x,2007,74992,2500,at,2wd,rhd,gasoline
+2277,1381,toyota,ist,2005,45172,1500,at,2wd,rhd,gasoline
+2278,1381,toyota,vitz,2007,11000,1300,at,2wd,rhd,gasoline
+2279,1381,toyota,brevis,2002,30583,2500,at,2wd,rhd,gasoline
+2280,1381,toyota,passo,2007,90550,1000,at,2wd,rhd,gasoline
+2281,1385,jaguar,x-type,2006,93300,2100,at,2wd,rhd,gasoline
+2282,1386,hyundai,terracan,2003,75295,2497,at,2wd,lhd,diesel
+2283,1386,hyundai,santa fe,2005,78693,1991,at,2wd,lhd,diesel
+2284,1388,toyota,mark x,2005,83747,2500,at,2wd,rhd,gasoline
+2285,1389,honda,fit,2011,173000,1300,at,2wd,rhd,gasoline
+2286,1389,hyundai,trajet,2007,75393,1991,at,2wd,lhd,diesel
+2287,1390,toyota,vitz,2009,30000,1300,at,2wd,rhd,gasoline
+2288,1390,toyota,corolla spacio,2004,47000,1790,at,2wd,rhd,gasoline
+2289,1390,toyota,alphard,2004,94000,2360,at,2wd,rhd,gasoline
+2290,1390,bmw,3 series,2003,62652,2200,at,2wd,rhd,gasoline
+2291,1390,toyota,ist,2007,61546,1300,at,2wd,rhd,gasoline
+2292,1390,toyota,avensis,2004,20000,2000,at,2wd,rhd,gasoline
+2293,1390,honda,fit,2009,180000,1400,at,2wd,rhd,gasoline
+2294,1390,toyota,vitz,2000,94000,1300,mt,2wd,rhd,gasoline
+2295,1390,nissan,skyline,1993,181972,1990,at,2wd,rhd,gasoline
+2296,1390,toyota,vitz,2005,44944,1300,at,2wd,rhd,gasoline
+2297,1390,toyota,vitz,2002,87016,1300,at,2wd,rhd,gasoline
+2298,1390,nissan,moco,2004,97410,660,at,2wd,rhd,gasoline
+2299,1390,mitsubishi,minica,2007,69070,660,at,2wd,rhd,gasoline
+2300,1390,suzuki,wagon r,2006,150000,660,at,4wd,rhd,gasoline
+2301,1390,honda,life,2003,155460,660,at,4wd,rhd,gasoline
+2302,1390,bmw,3 series,2006,118500,2000,at,2wd,rhd,gasoline
+2303,1390,toyota,alphard,2004,79800,2400,at,2wd,rhd,gasoline
+2304,1390,suzuki,wagon r,2004,90530,660,at,2wd,rhd,gasoline
+2305,1391,toyota,ist,2002,159692,1500,at,2wd,rhd,gasoline
+2306,1395,volvo,c30,2010,73300,2000,at,2wd,rhd,gasoline
+2307,1395,toyota,auris,2007,35000,1500,at,2wd,rhd,gasoline
+2308,1398,suzuki,carry truck,2007,129928,650,mt,2wd,rhd,gasoline
+2309,1399,honda,fit hybrid,2013,114000,1300,at,2wd,rhd,gasoline
+2310,1399,mitsubishi,outlander,2006,165100,2350,at,4wd,rhd,gasoline
+2311,1400,toyota,premio,2005,85674,1800,at,2wd,rhd,gasoline
+2312,1400,toyota,isis,2005,138082,1800,at,2wd,rhd,gasoline
+2313,1400,toyota,noah,2005,104593,2000,at,2wd,rhd,gasoline
+2314,1400,toyota,vitz,2005,45939,1300,at,2wd,rhd,gasoline
+2315,1400,nissan,vanette van,2006,147875,1800,at,2wd,rhd,gasoline
+2316,1400,toyota,isis,2006,115670,2000,at,4wd,rhd,gasoline
+2317,1400,toyota,wish,2003,74978,1800,at,2wd,rhd,gasoline
+2318,1400,toyota,wish,2007,96755,1800,at,2wd,rhd,gasoline
+2319,1400,mazda,rx-8,2006,98299,1300,at,2wd,rhd,gasoline
+2320,1400,toyota,mark x,2007,83221,2500,at,2wd,rhd,gasoline
+2321,1400,toyota,mark x,2008,110909,2500,at,2wd,rhd,gasoline
+2322,1400,toyota,mark x,2007,87456,2500,at,2wd,rhd,gasoline
+2323,1400,mitsubishi,pajero io,2001,104151,1999,at,4wd,rhd,gasoline
+2324,1400,nissan,elgrand,2003,49286,3500,at,2wd,rhd,gasoline
+2325,1400,subaru,legacy,2002,157500,2000,mt,awd,rhd,gasoline
+2326,1400,subaru,legacy b4,2002,157500,2000,mt,awd,rhd,gasoline
+2327,1400,mazda,demio,2009,111670,1300,at,2wd,rhd,gasoline
+2328,1400,toyota,comfort,2003,497408,1990,at,2wd,rhd,lpg
+2329,1400,toyota,wish,2005,101874,2000,at,2wd,rhd,gasoline
+2330,1400,mazda,demio,2007,112000,1300,at,2wd,rhd,gasoline
+2331,1400,toyota,vitz,2009,121000,996,at,2wd,rhd,gasoline
+2332,1400,toyota,estima,2003,101000,3000,at,2wd,rhd,gasoline
+2333,1400,subaru,r2,2005,101000,660,cvt,2wd,rhd,gasoline
+2334,1400,honda,z,2000,170000,660,at,4wd,rhd,gasoline
+2335,1400,toyota,estima t,2005,72320,3000,at,2wd,rhd,gasoline

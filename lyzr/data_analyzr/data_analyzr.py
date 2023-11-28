@@ -34,10 +34,8 @@ class CapturePrints:
 
 
 class DataAnalyzr:
-    def __init__(self, df=None, user_input=None, gpt_model="gpt-3.5-turbo"):
-        if user_input is None or df is None:
-            raise ValueError("Please provide `user_input` and `dataframe`")
-        self.df = self.cleanDf(df)
+    def __init__(self, dataframe=None, user_input=None, gpt_model="gpt-3.5-turbo"):
+        self.df = self.cleanDf(dataframe)
         self.user_input = user_input
         self.gpt_model = gpt_model
         self.df_columns = self.df.columns.tolist()
@@ -45,31 +43,21 @@ class DataAnalyzr:
         self.client = OpenAI()
 
     def cleanDf(self, df):
-        # Removing columns having more than 50% of missing values
         df = df[df.columns[df.isnull().mean() < .5]]
-
-        # Getting the columns which are categorical
         cat_columns = df.select_dtypes(include=['object']).columns
-
-        # Getting the columns which are numerical
         num_columns = df.select_dtypes(include=[np.number]).columns
-
-        # Replacing missing categorical values with the most frequent value(mode)
         df[cat_columns] = df[cat_columns].apply(lambda x: x.fillna(x.mode()[0]))
-
-        # Replacing missing numerical values with the mean
         df[num_columns] = df[num_columns].apply(lambda x: x.fillna(x.mean()))
-        
-        # Removing "Unnamed:" columns if any
         df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
-
-        # Removing duplicates
         df = df.drop_duplicates(keep='first')
         
         return df
 
 
     def getRecommendations(self, number_of_recommendations=4):
+
+        if self.df is None:
+            raise ValueError("Please provide a `dataframe`")
 
         system_prompt = f"""You are a Senior Data Scientist and intelligent strategic advisor with 10+ Years of Experience. This is a Critical Scenario. The CEO has given you a dataframe, your job is to list {number_of_recommendations} high level recommendations to Analyze data and get deep insights from the data"""
 
@@ -116,6 +104,9 @@ class DataAnalyzr:
 
 
     def getAnalysisSteps(self):
+
+        if self.user_input is None or self.df is None:
+            raise ValueError("Please provide `user_input` and `dataframe`")
 
         system_prompt = """You are a Senior Data Scientist with 10+ Years of Experience. This is a Critical Scenario. The CEO has asked you a question on a dataframe, your job is to list down steps to Analyze the Data and answer the CEO's question. """
 
@@ -168,7 +159,10 @@ Write list of steps:
         return steps
 
     
-    def getAnalysisCode(self, instructions):
+    def getAnalysisCode(self, instructions=None):
+
+        if self.user_input is None or self.df is None or instructions is None:
+            raise ValueError("Please provide `user_input`, `dataframe` and `instructions`")
 
         system_prompt = """You Write Python Function. You are a Senior Data Analyst with 10+ Years of Experience. This is a Critical Scenario. The CEO has asked you to write Python Function to answer a question on a given data, based on the instructions given by Senior Data Scientist"""
 
@@ -230,6 +224,9 @@ Just Write the Python code in markdown format, that's it.
 
     def getVisualizationSteps(self):
 
+        if self.user_input is None or self.df is None:
+            raise ValueError("Please provide `user_input` and `dataframe`")        
+
         system_prompt = """You are a Senior Data Scientist with 10+ Years of Experience. This is a Critical Scenario. The CEO has asked you a question on a dataframe, your job is to list down steps to Visualize the Data and create visualization to answer the CEO's question. """
 
         user_prompt = f"""CEO: "{self.user_input}"
@@ -280,7 +277,10 @@ Write list of steps:
         return steps
 
     
-    def getVisualiztionCode(self, instructions):
+    def getVisualiztionCode(self, instructions=None):
+
+        if self.user_input is None or self.df is None or instructions is None:
+            raise ValueError("Please provide `user_input`, `dataframe` and `instructions`")
 
         system_prompt = """You are a Senior Data Analyst with 10+ Years of Experience. You write reliable python code to create a save visualizations for Data Analysis"""
 
@@ -337,37 +337,40 @@ Now, Write down python code to create Visualizations answer the CEO's question: 
         return python_code
 
 
-    def correctCode(self, python_code, error_message):
-        
+    def correctCode(self, python_code=None, error_message=None):
+
+        if self.user_input is None or self.df is None or python_code is None or error_message is None:
+            raise ValueError("Please provide `user_input`, `dataframe`. `python_code` and `error_message`")
+
         corrected_python_code = ""
 
         system_prompt = """You are an Expert Python Programmer with more than 10 years of experience. You have to fix the erroneous Python Code written by the Data Scientist. And output the working Python Code."""
 
         user_prompt = f"""CEO asked the follwoing question: {self.user_input}
 
-        Dataframe Head:
-        ```python
-        {self.df_head}
-        ```
-        
-        Data Scientist wrote the following python code:
-        ```python
-        {python_code}
-        ```
+Dataframe Head:
+```python
+{self.df_head}
+```
 
-        Upon runninng the python code, resulted in the following error:
-        ```error
-        {error_message}
-        ```
-        
-        Dataframe Coloumns:
-        ```python
-        {self.df_columns}
-        ```
-        
-        Do NOT generate anything other than the corrected Python Code and keep the structure of the corrected code same as the input code.
+Data Scientist wrote the following python code:
+```python
+{python_code}
+```
 
-        Take a deep breath and think step by step and only Write the complete corrected Python code in markdown format.
+Upon runninng the python code, resulted in the following error:
+```error
+{error_message}
+```
+
+Dataframe Coloumns:
+```python
+{self.df_columns}
+```
+
+Do NOT generate anything other than the corrected Python Code and keep the structure of the corrected code same as the input code.
+
+Take a deep breath and think step by step and only Write the complete corrected Python code in markdown format.
         """
 
         messages=[
@@ -395,10 +398,7 @@ Now, Write down python code to create Visualizations answer the CEO's question: 
 
 
     def getAnalysisOutput(self):
-        # print("getting steps")
         steps = self.getAnalysisSteps()
-        
-        # print("getting code")
         analysis_python_code = self.getAnalysisCode(steps)
 
         suppress_warning = """
@@ -410,7 +410,6 @@ pd.set_option('display.max_rows', 5)
 
         analysis_python_code = suppress_warning + analysis_python_code
 
-        # print("Running code")
         with CapturePrints() as c:
             exec_scope = {'df': self.df, 'sns': sns}
             try:
@@ -422,7 +421,6 @@ pd.set_option('display.max_rows', 5)
 
         output = c.getvalue()        
 
-        # print("sending output")
         return output
 
 
@@ -433,8 +431,6 @@ pd.set_option('display.max_rows', 5)
 
         if len(analysis_output) > 6000:
             analysis_output = analysis_output[0:3000] + "..." + analysis_output[-3000:]        
-
-        # print("analysis output: ", analysis_output, "\n\n")
 
         system_prompt = """You are an intelligent data analyst capable of understanding an analytics output result and share them in simple understandable language catered to business users and data analysts.\n\nYou will be provided with the user_query and the analysis_output. You will have to understand the analysis results and generate clear simplified explanations along with corresponding data points.\n\nGenerate 3 analysis explanations, limiting the overall response to 100 words. \n\nPresent the output as bullet points.\n\nRank all your insights and only share the top 3 ones.  Focus on clarity and conciseness.\n\nDo not describe the dataset or the prompt.\nDo not speak about charts.\nDo not share any title. \n\n"""
 
@@ -504,4 +500,3 @@ pd.set_option('display.max_rows', 5)
         analysis = self.getAnalysis()
         images = self.getVisualizations()
         return analysis, images    
-        

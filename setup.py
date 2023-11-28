@@ -27,5 +27,7 @@ setup(
         "lancedb==0.3.3",
         "beautifulsoup4==4.12.2",
         "pandas==2.0.2",
+        "redshift-connector==2.0.917",
+        "psycopg2==2.9.9",
     ],
 )
