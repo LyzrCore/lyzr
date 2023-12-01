@@ -7,7 +7,7 @@ from lyzr.base.vector_store import LyzrVectorStoreIndex
 from lyzr.formula_generator import FormulaGen
 from lyzr.csv_analyzr import CsvAnalyzr 
 from lyzr.data_analyzr import DataAnalyzr
-from lyzr.connector import Connector
+from lyzr.data_connector import DataConnector
 
 __all__ = [
     "LyzrLLMFactory",
@@ -19,5 +19,5 @@ __all__ = [
     "Generator",
     "CsvAnalyzr", 
     "DataAnalyzr",
-    "Connector"
+    "DataConnector",
 ]
