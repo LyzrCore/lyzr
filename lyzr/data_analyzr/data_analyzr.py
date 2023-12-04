@@ -1,6 +1,7 @@
 from openai import OpenAI
 from PIL import Image
 import pandas as pd
+import datetime
 import shutil
 import glob
 import ast
@@ -42,12 +43,15 @@ class DataAnalyzr:
         self.df_head = self.df.head(5)
         self.client = OpenAI()
 
+
     def cleanDf(self, df):
         df = df[df.columns[df.isnull().mean() < .5]]
         cat_columns = df.select_dtypes(include=['object']).columns
-        num_columns = df.select_dtypes(include=[np.number]).columns
+        int_columns = df.select_dtypes(include=['integer']).columns
+        float_columns = df.select_dtypes(include=[np.number]).columns.difference(int_columns)
         df[cat_columns] = df[cat_columns].apply(lambda x: x.fillna(x.mode()[0]))
-        df[num_columns] = df[num_columns].apply(lambda x: x.fillna(x.mean()))
+        df[float_columns] = df[float_columns].apply(lambda x: x.fillna(x.mean()))
+        df[int_columns] = df[int_columns].fillna(0)
         df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
         df = df.drop_duplicates(keep='first')
         
@@ -122,6 +126,7 @@ Dataframe Head:
 3. The steps should be only related to analysis and do NOT include any visualization steps.
 4. All the analysis results be printed with `print()` function.
 5. The analysis results should be short, simple and human readable, so that the CEO and other CXO's can understand it easily.
+6. Current Date and time is: {datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")} include this in the steps, if the Date or Time is required to answer the CEO's Question.
 
 This is an extremely critical Scenario, so only include important steps related to CEO's Question and do NOT include any unnecessary steps like imports and data cleaning.
 
@@ -240,6 +245,7 @@ Dataframe Head:
 2. You have to describe on a advanced level what type of visualization needs to be done and on which coloumn and what is the expected visualization.
 3. Save the visualizations with proper labels and names.
 4. Create at least one or more visualizations
+5. Current Date and time is: {datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")} include this in the steps, if the Date or Time is required to answer the CEO's Question.
 
 This is an extremely critical Scenario, so only include important steps related to CEO's Question and do NOT include any unnecessary steps like imports and data cleaning.
 
@@ -455,7 +461,20 @@ pd.set_option('display.max_rows', 5)
         return analysis
 
 
-    def getVisualizations(self):
+    def moveFiles(self, source, destination):
+        if not os.path.exists(destination):
+            os.makedirs(destination)
+        for file_name in os.listdir(source):
+            if file_name.endswith(".png"):
+                base = os.path.splitext(file_name)[0]
+                now = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                new_file_name = f"{base}-{now}.png"
+                old_file_path = os.path.join(source, file_name)
+                new_file_path = os.path.join(destination, new_file_name)
+                shutil.move(old_file_path, new_file_path)      
+
+
+    def getVisualizations(self, directoryPath='./generatedImages'):
         visualization_steps = self.getVisualizationSteps()
         visualization_python_code = self.getVisualiztionCode(visualization_steps)
 
@@ -483,15 +502,7 @@ pd.set_option('display.max_rows', 5)
 
         image_list = load_images_in_current_directory()
         
-        if not os.path.exists('generated_images'):
-            os.makedirs('generated_images')
-
-        destination_directory = os.path.join(os.getcwd(), "generated_images")
-
-        png_files = [f for f in os.listdir(os.getcwd()) if f.endswith('.png')]
-
-        for file_name in png_files:
-            shutil.move(file_name, destination_directory)           
+        self.moveFiles('./', directoryPath)           
             
         return image_list           
 
