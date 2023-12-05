@@ -6,6 +6,8 @@ import pandas_gbq
 from google.cloud import bigquery
 from google.oauth2 import service_account
 import snowflake.connector
+import mysql.connector
+import sqlite3
 
 
 class DataConnector:
@@ -28,21 +30,21 @@ class DataConnector:
 
     def fetch_dataframe_from_redshift(self, host: str, database: str, user: str, password: str, schema: str, table: str, port: int = 5439) -> pd.DataFrame:
         try:
-            conn = redshift_connector.connect(
+            with redshift_connector.connect(
                 host=host,
                 database=database,
                 port=port,
                 user=user,
                 password=password
-            )
+            ) as conn:
 
-            cursor = conn.cursor()
+                cursor = conn.cursor()
 
-            full_table_name = f'"{database}"."{schema}"."{table}"'
-            cursor.execute(f'SELECT * FROM {full_table_name};')
+                full_table_name = f'"{database}"."{schema}"."{table}"'
+                cursor.execute(f'SELECT * FROM {full_table_name};')
 
-            dataframe: pd.DataFrame = cursor.fetch_dataframe()
-            return dataframe
+                dataframe: pd.DataFrame = cursor.fetch_dataframe()
+                return dataframe
 
         except redshift_connector.InterfaceError as e:
             raise RuntimeError(
@@ -53,15 +55,17 @@ class DataConnector:
 
     def fetch_dataframe_from_postgres(self, host: str, database: str, user: str, password: str, schema: str, table: str, port: int = 5432) -> pd.DataFrame:
         try:
-            connection = psycopg2.connect(
-                host=host, database=database, port=port, user=user, password=password)
-            cursor = connection.cursor()
-            cursor.execute(f"SELECT * FROM {schema}.{table};")
-            table_contents = cursor.fetchall()
+             with psycopg2.connect(
+                host=host, database=database, port=port, user=user, password=password) as connection:
+            
+                cursor = connection.cursor()
+                cursor.execute(f"SELECT * FROM {schema}.{table};")
+                table_contents = cursor.fetchall()
 
-            column_names = [desc[0] for desc in cursor.description]
-            table_df = pd.DataFrame(table_contents, columns=column_names)
-            return table_df
+                column_names = [desc[0] for desc in cursor.description]
+                table_df = pd.DataFrame(table_contents, columns=column_names)
+                return table_df
+             
         except psycopg2.Error:
             raise RuntimeError(
                 f"Unable to connect to PostgreSQL database. Please ensure the database details are correct.")
@@ -91,7 +95,7 @@ class DataConnector:
 
     def fetch_dataframe_from_snowflake(self, user: str, password: str, account: str,  warehouse: str, database: str, schema: str, table: str) -> pd.DataFrame:
         try:
-            conn = snowflake.connector.connect(
+            with snowflake.connector.connect(
                 user=user,
                 password=password,
                 account=account,
@@ -99,15 +103,51 @@ class DataConnector:
                 database=database,
                 schema=schema,
                 table=table,
-            )
+            ) as conn:
 
-            cursor = conn.cursor()
-            cursor.execute(f"SELECT * FROM {table};")
-            table_contents = cursor.fetchall()
+                cursor = conn.cursor()
+                cursor.execute(f"SELECT * FROM {table};")
+                table_contents = cursor.fetchall()
 
-            column_names = [desc[0] for desc in cursor.description]
-            table_df = pd.DataFrame(table_contents, columns=column_names)
-            return table_df
+                column_names = [desc[0] for desc in cursor.description]
+                table_df = pd.DataFrame(table_contents, columns=column_names)
+                return table_df
+            
         except Exception as e:
             raise RuntimeError(
                 f"Error occurred while fetching data from Snowflake table: {str(e)}")
+
+    def fetch_dataframe_from_mysql(self, user: str, password: str, host: str, db_name: str, table: str) -> pd.DataFrame:
+        try:
+            with mysql.connector.connect(
+                user=user, password=password, host=host) as conn:
+
+                cursor = conn.cursor()
+                cursor.execute(f"USE {db_name}")
+                cursor.execute(f"SELECT * FROM {table}")
+
+                columns = [desc[0] for desc in cursor.description]
+                df = pd.DataFrame(cursor.fetchall(), columns=columns)
+
+                return df
+
+        except mysql.connector.Error as e:
+            raise RuntimeError(
+                f"Error occurred while connecting to MySQL database: {str(e)}")
+        except Exception as e:
+            raise RuntimeError(
+                f"Error occurred while fetching data from MySQL table: {str(e)}")
+
+    def fetch_dataframe_from_sqlite(self, db_path: str, table: str) -> pd.DataFrame:
+        try:
+            with sqlite3.connect(db_path) as conn:
+                df = pd.read_sql_query(f"SELECT * FROM {table}", conn)
+            return df
+        except sqlite3.Error as e:
+            raise RuntimeError(
+                f"Error occurred while connecting to SQLite database: {str(e)}")
+        except Exception as e:
+            raise RuntimeError(
+                f"Error occurred while fetching data from SQLite table: {str(e)}")
+        
+    

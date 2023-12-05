@@ -134,7 +134,7 @@ Dataframe Coloumns:
 ```python
 {self.df_columns}
 ```
-Important: Output the steps in python list format eg. ["Step 1", "Step 2", "Step 3"]
+
 Now, Write down clear and precise steps to Analyze the Data and answer the CEO's question: "{self.user_input}"
 The CEO's question should be answered in the first line itself.
 
@@ -154,20 +154,16 @@ Write list of steps:
 
         steps = completion.choices[0].message.content
 
-        try:
-            result_list = ast.literal_eval(steps)
-            if isinstance(result_list, list) and all(isinstance(item, str) for item in result_list):
-                steps = result_list
-        except:
-            pass
-
         return steps
 
     
     def getAnalysisCode(self, instructions=None):
 
-        if self.user_input is None or self.df is None or instructions is None:
-            raise ValueError("Please provide `user_input`, `dataframe` and `instructions`")
+        if instructions is None:
+            instructions = self.getAnalysisSteps()
+
+        if self.user_input is None or self.df is None:
+            raise ValueError("Please provide `user_input` and `dataframe`")
 
         system_prompt = """You Write Python Function. You are a Senior Data Analyst with 10+ Years of Experience. This is a Critical Scenario. The CEO has asked you to write Python Function to answer a question on a given data, based on the instructions given by Senior Data Scientist"""
 
@@ -253,7 +249,7 @@ Dataframe Coloumns:
 ```python
 {self.df_columns}
 ```
-Important: Output the steps in python list format eg. ["Step 1", "Step 2", "Step 3"]
+
 If the CEO's question does not need a visualization to answer, then create visualization that is related to CEO's question and provides deep insights from the data.
 
 Now, Write down clear and precise steps to create visualization answer the CEO's question: "{self.user_input}"
@@ -273,20 +269,16 @@ Write list of steps:
 
         steps = completion.choices[0].message.content
 
-        try:
-            result_list = ast.literal_eval(steps)
-            if isinstance(result_list, list) and all(isinstance(item, str) for item in result_list):
-                steps = result_list
-        except:
-            pass
-
         return steps
 
     
     def getVisualiztionCode(self, instructions=None):
 
-        if self.user_input is None or self.df is None or instructions is None:
-            raise ValueError("Please provide `user_input`, `dataframe` and `instructions`")
+        if instructions is None:
+            instructions = self.getVisualizationSteps()
+
+        if self.user_input is None or self.df is None:
+            raise ValueError("Please provide `user_input` and `dataframe`")
 
         system_prompt = """You are a Senior Data Analyst with 10+ Years of Experience. You write reliable python code to create a save visualizations for Data Analysis"""
 
@@ -467,11 +459,11 @@ pd.set_option('display.max_rows', 5)
         for file_name in os.listdir(source):
             if file_name.endswith(".png"):
                 base = os.path.splitext(file_name)[0]
-                now = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                now = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
                 new_file_name = f"{base}-{now}.png"
                 old_file_path = os.path.join(source, file_name)
                 new_file_path = os.path.join(destination, new_file_name)
-                shutil.move(old_file_path, new_file_path)      
+                shutil.move(old_file_path, new_file_path)     
 
 
     def getVisualizations(self, directoryPath='./generatedImages'):
