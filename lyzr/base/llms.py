@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 from typing import Optional, Union
-from lyzr.base.prompt import Prompt, get_prompt
+from lyzr.base.prompt import Prompt, get_prompt_text
 from lyzr.base.errors import MissingValueError, InvalidValueError
 
 
@@ -53,8 +53,11 @@ class LLM:
 
         messages = []
         for prompt in model_prompts:
-            messages.append({"role": prompt["role"], "content": get_prompt(prompt)})
+            messages.append(
+                {"role": prompt["role"], "content": get_prompt_text(prompt)}
+            )
         self.messages = messages
+        return self
 
     def run(self, **kwargs):
         if self.api_key is None:
@@ -66,17 +69,17 @@ class LLM:
             if "model_prompts" not in kwargs:
                 raise MissingValueError(["model_prompts"])
             self.set_messages(kwargs["model_prompts"])
+            del kwargs["model_prompts"]
 
         params = self.__dict__.copy()
-        for param in ["api_key", "model_prompts"]:
-            del params[param]
+        for param in ["api_key", "model_prompts", "model_type", "model_name"]:
+            if param in params:
+                del params[param]
         params.update(kwargs)
 
         if self.model_type == "openai":
-            client = OpenAI(api_key=self.api_key)
-            completion = client.completions.create(
+            completion = OpenAI(api_key=self.api_key).chat.completions.create(
                 model=self.model_name,
-                messages=self.messages,
                 **params,
             )
             return completion

@@ -1,6 +1,6 @@
+from lyzr.base import prompts
 from typing import Optional, Union
 from importlib import resources as impresources
-from lyzr.base import prompts
 from lyzr.base.errors import MissingValueError, InvalidValueError
 
 
@@ -27,7 +27,7 @@ class Prompt:
 
     def save_prompt(self):
         inp_file = impresources.files(prompts) / f"{self.name}.txt"
-        with inp_file.open("w+") as f:
+        with inp_file.open("wb") as f:
             f.write(self.text.encode("utf-8"))
 
     def load_prompt(self):
@@ -46,6 +46,7 @@ class Prompt:
         self.text = prompt_text
         self.variables = self.get_variables()
         self.save_prompt()
+        return self
 
     def format(self, **kwargs):
         if self.text is None:
@@ -56,7 +57,8 @@ class Prompt:
         except KeyError:
             print(f"Please provide values for all variables: {self.variables}")
             raise
-        return prompt_text
+        self.text = prompt_text
+        return self
 
 
 def get_prompts_list() -> list:
@@ -69,14 +71,16 @@ def get_prompts_list() -> list:
     return all_prompts
 
 
-def get_prompt(prompt: Union[dict, Prompt]):
+def get_prompt_text(prompt: Union[dict, Prompt]):
     if isinstance(prompt, Prompt):
-        return prompt
+        return prompt.text
     if not isinstance(prompt, dict):
         raise InvalidValueError(["dict", "Prompt"])
-    if ("prompt" not in prompt) and (("name" not in prompt) and ("text" not in prompt)):
-        raise MissingValueError(["prompt", "name and text"])
+    if ("prompt" not in prompt) and ("text" not in prompt):
+        raise MissingValueError(["prompt", "text"])
     if "prompt" in prompt:
-        return get_prompt(prompt["prompt"])
+        return get_prompt_text(prompt["prompt"])
+    elif "name" in prompt:
+        return Prompt(prompt["name"], prompt["text"]).text
     else:
-        return Prompt(prompt["name"], prompt["text"])
+        return prompt["text"]

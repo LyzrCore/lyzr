@@ -1,7 +1,7 @@
-CEO: {self.user_input}
+CEO: {user_input}
 
 Dataframe Head: 
-{self.df_head}
+{df_head}
 
 Data Scientist's Instructions:
 {instructions}
@@ -19,7 +19,7 @@ def function_name(dataframe):
 function_name(df) # Call the function that you wrote with the dataframe as the argument
 ```
 
-Now, Write down python function to print the answer the CEO's question: {self.user_input}
+Now, Write down python function to print the answer the CEO's question: {user_input}
 
 Important: You are writing code only for analysis and not for visualization. So, do NOT include any visualization code in the function. 
 

@@ -18,10 +18,12 @@ import plotly
 
 import warnings
 
+from typing import Optional, Union
 from lyzr.base.prompt import Prompt
 from lyzr.base.llms import LLM, get_model
 from lyzr.base.errors import MissingValueError
 from lyzr.base.file_utils import read_file
+from datetime import datetime
 
 warnings.filterwarnings("ignore")
 
@@ -42,25 +44,27 @@ class CapturePrints:
 class DataAnalyzr:
     def __init__(
         self,
-        df=None,
-        model=None,
-        model_type=None,
-        model_name=None,
-        user_input=None,
+        df: Union[str, pd.DataFrame] = None,
+        api_key: Optional[str] = None,
+        model: Optional[LLM] = None,
+        model_type: Optional[str] = None,
+        model_name: Optional[str] = None,
+        user_input: Optional[str] = None,
     ):
         self.model = (
             model
             or os.environ.get("LLM_MODEL")
             or get_model(
+                api_key=api_key or os.environ.get("OPENAI_API_KEY"),
                 model_type=model_type or os.environ.get("MODEL_TYPE", "openai"),
                 model_name=model_name or os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
             )
         )
-        self.df = df or os.environ.get("DATAFRAME")
+        df = df or os.environ.get("DATAFRAME")
         if df is None:
             raise MissingValueError(["dataframe"])
-        if isinstance(self.df, str):
-            self.df = self.cleandf(read_file(self.df))
+        if isinstance(df, str):
+            self.df = self.cleandf(read_file(df))
 
         self.user_input = user_input
 
@@ -100,8 +104,8 @@ class DataAnalyzr:
                 {
                     "prompt": Prompt("analysis_recommendations_pt").format(
                         number_of_recommendations=number_of_recommendations,
-                        df_head=self.df_head,
-                        df_columns=self.df_columns,
+                        df_head=self.df.head(5),
+                        df_columns=self.df.columns.tolist(),
                     ),
                     "role": "system",
                 },
@@ -119,14 +123,14 @@ class DataAnalyzr:
         self.model.set_messages(
             [
                 {
-                    "prompt": Prompt("system_analysis_pt"),
+                    "prompt": Prompt("system_analysis_steps_pt"),
                     "role": "system",
                 },
                 {
                     "prompt": Prompt("analysis_steps_pt").format(
                         user_input=self.user_input,
-                        df_head=self.df_head,
-                        df_columns=self.df_columns,
+                        df_head=self.df.head(5),
+                        df_columns=self.df.columns.tolist(),
                     ),
                     "role": "user",
                 },
@@ -161,6 +165,8 @@ class DataAnalyzr:
                     "prompt": Prompt("analysis_code_pt").format(
                         user_input=self.user_input,
                         instructions=instructions,
+                        df_head=self.df.head(5),
+                        df_columns=self.df.columns.tolist(),
                     ),
                     "role": "user",
                 },
@@ -192,8 +198,8 @@ class DataAnalyzr:
                 {
                     "prompt": Prompt("visualization_steps_pt").format(
                         user_input=self.user_input,
-                        df_head=self.df_head,
-                        df_columns=self.df_columns,
+                        df_head=self.df.head(5),
+                        df_columns=self.df.columns.tolist(),
                     ),
                     "role": "user",
                 },
@@ -257,7 +263,11 @@ class DataAnalyzr:
                 },
                 {
                     "prompt": Prompt("correct_code_pt").format(
-                        python_code, error_message, self.df_columns, self.df_head
+                        python_code=python_code,
+                        error_message=error_message,
+                        df_columns=self.df.columns.tolist(),
+                        df_head=self.df.head(5),
+                        user_input=self.user_input,
                     ),
                     "role": "user",
                 },
@@ -275,40 +285,39 @@ class DataAnalyzr:
 
         return corrected_python_code
 
-    def getanalysisoutput(self):
+    def getanalysisoutput(self, user_input=None):
+        self.user_input = user_input or self.user_input
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
         # print("getting steps")
         steps = self.getanalysissteps()
 
         # print("getting code")
         analysis_python_code = self.getanalysiscode(steps)
+        # print(f"code received:\n{analysis_python_code}\n\n")
 
-        suppress_warning = """
-            import warnings
-            warnings.filterwarnings("ignore")
-            import pandas as pd
-            pd.set_option('display.max_rows', 5)
-            """
-
-        analysis_python_code = suppress_warning + analysis_python_code
-
-        # print("Running code")
+        # print(f"Running code:\n{analysis_python_code}\n\n")
         with CapturePrints() as c:
             exec_scope = {"df": self.df, "sns": sns}
             try:
                 exec(analysis_python_code, exec_scope)
             except Exception as e:
                 error_message = str(e)
+                print(f"Error. {type(e).__name__}: {error_message}")
                 analysis_python_code = self.correctcode(
                     analysis_python_code, error_message
                 )
                 exec(analysis_python_code, exec_scope)
 
         output = c.getvalue()
-
+        # print(f"Output:\n{output}\n\n")
         # print("sending output")
         return output
 
-    def getanalysis(self):
+    def getanalysis(self, user_input=None):
+        self.user_input = user_input or self.user_input
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
         analysis = ""
 
         analysis_output = self.getanalysisoutput()
@@ -326,7 +335,8 @@ class DataAnalyzr:
                 },
                 {
                     "prompt": Prompt("analysis_output_pt").format(
-                        self.user_input, analysis_output
+                        user_input=self.user_input,
+                        analysis_output=analysis_output,
                     ),
                     "role": "user",
                 },
@@ -343,7 +353,10 @@ class DataAnalyzr:
 
         return analysis
 
-    def getvisualizations(self):
+    def getvisualizations(self, image_dir=None, user_input=None):
+        self.user_input = user_input or self.user_input
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
         visualization_steps = self.getvisualizationsteps()
         visualization_python_code = self.getvisualiztioncode(visualization_steps)
 
@@ -357,35 +370,38 @@ class DataAnalyzr:
             )
             exec(visualization_python_code, exec_scope)
 
-        def load_images_in_current_directory():
-            current_directory = os.getcwd()
-            image_data = {}
-
-            for file in os.listdir(current_directory):
-                if file.lower().endswith(".png"):
-                    image_path = os.path.join(current_directory, file)
-                    with Image.open(image_path) as img:
-                        byte_arr = io.BytesIO()
-                        img.save(byte_arr, format="PNG")
-                        image_data[file] = byte_arr.getvalue()
-
-            return image_data
+        image_dir = image_dir or os.path.join(os.getcwd(), "generated_images")
+        try:
+            os.makedirs(image_dir, exist_ok=True)
+        except Exception:
+            # print("Error creating directory")
+            pass
 
         image_list = load_images_in_current_directory()
-
-        if not os.path.exists("generated_images"):
-            os.makedirs("generated_images")
-
-        destination_directory = os.path.join(os.getcwd(), "generated_images")
-
         png_files = [f for f in os.listdir(os.getcwd()) if f.endswith(".png")]
-
-        for file_name in png_files:
-            shutil.move(file_name, destination_directory)
-
+        for filename in png_files:
+            shutil.move(filename, image_dir)
         return image_list
 
-    def run(self):
+    def run(self, user_input=None):
+        self.user_input = user_input or self.user_input
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
         analysis = self.getanalysis()
         images = self.getvisualizations()
         return analysis, images
+
+
+def load_images_in_current_directory():
+    current_directory = os.getcwd()
+    image_data = {}
+
+    for filename in os.listdir(current_directory):
+        if filename.lower().endswith(".png"):
+            image_path = os.path.join(current_directory, filename)
+            with Image.open(image_path) as img:
+                byte_arr = io.BytesIO()
+                img.save(byte_arr, format="PNG")
+                image_data[filename] = byte_arr.getvalue()
+
+    return image_data

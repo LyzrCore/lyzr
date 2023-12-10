@@ -1,8 +1,8 @@
-CEO asked the following question: {self.user_input}
+CEO asked the following question: {user_input}
 
 Dataframe Head:
 ```python
-{self.df_head}
+{df_head}
 ```
 
 Data Scientist wrote the following python code:
@@ -17,7 +17,7 @@ Upon runninng the python code, resulted in the following error:
 
 Dataframe Coloumns:
 ```python
-{self.df_columns}
+{df_columns}
 ```
 
 Do NOT generate anything other than the corrected Python Code and keep the structure of the corrected code same as the input code.
