@@ -21,6 +21,7 @@ import warnings
 from lyzr.base.prompt import Prompt
 from lyzr.base.llms import LLM, get_model
 from lyzr.base.errors import MissingValueError
+from lyzr.base.file_utils import read_file
 
 warnings.filterwarnings("ignore")
 
@@ -39,15 +40,29 @@ class CapturePrints:
 
 
 class DataAnalyzr:
-    def __init__(self, df=None, user_input=None, gpt_model=None):
+    def __init__(
+        self,
+        df=None,
+        model=None,
+        model_type=None,
+        model_name=None,
+        user_input=None,
+    ):
+        self.model = (
+            model
+            or os.environ.get("LLM_MODEL")
+            or get_model(
+                model_type=model_type or os.environ.get("MODEL_TYPE", "openai"),
+                model_name=model_name or os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
+            )
+        )
+        self.df = df or os.environ.get("DATAFRAME")
         if df is None:
             raise MissingValueError(["dataframe"])
-        self.df = self.cleandf(df)
+        if isinstance(self.df, str):
+            self.df = self.cleandf(read_file(self.df))
+
         self.user_input = user_input
-        self.gpt_model = gpt_model or os.environ.get("GPT_MODEL", "gpt-3.5-turbo")
-        self.df_columns = self.df.columns.tolist()
-        self.df_head = self.df.head(5)
-        self.client = OpenAI()
 
     def cleandf(self, df):
         # Removing columns having more than 50% of missing values
@@ -74,25 +89,26 @@ class DataAnalyzr:
         return df
 
     def getrecommendations(self, number_of_recommendations=4):
-        system_prompt = Prompt("system_recommendations_pt").format(
-            number_of_recommendations=number_of_recommendations,
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_recommendations_pt").format(
+                        number_of_recommendations=number_of_recommendations,
+                    ),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("analysis_recommendations_pt").format(
+                        number_of_recommendations=number_of_recommendations,
+                        df_head=self.df_head,
+                        df_columns=self.df_columns,
+                    ),
+                    "role": "system",
+                },
+            ]
         )
-        user_prompt = Prompt("analysis_recommendations_pt").format(
-            number_of_recommendations=number_of_recommendations,
-            df_head=self.df_head,
-            df_columns=self.df_columns,
-        )
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
 
-        completion = self.client.chat.completions.create(
-            model=self.gpt_model, messages=messages, temperature=0.2
-        )
-
-        steps = completion.choices[0].message.content
-
+        steps = self.model.run(temperature=0.2).choices[0].message.content
         return steps
 
     def getanalysissteps(self, user_input=None):
@@ -100,23 +116,24 @@ class DataAnalyzr:
         if self.user_input is None:
             raise MissingValueError(["user_input"])
 
-        system_prompt = Prompt("system_analysis_pt")
-        user_prompt = Prompt("analysis_steps_pt").format(
-            user_input=self.user_input,
-            df_head=self.df_head,
-            df_columns=self.df_columns,
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_analysis_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("analysis_steps_pt").format(
+                        user_input=self.user_input,
+                        df_head=self.df_head,
+                        df_columns=self.df_columns,
+                    ),
+                    "role": "user",
+                },
+            ]
         )
 
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-
-        completion = self.client.chat.completions.create(
-            model=self.gpt_model, messages=messages, temperature=0.1
-        )
-
-        steps = completion.choices[0].message.content
+        steps = self.model.run(temperature=0.1).choices[0].message.content
 
         try:
             result_list = ast.literal_eval(steps)
@@ -134,19 +151,22 @@ class DataAnalyzr:
         if self.user_input is None:
             raise MissingValueError(["user_input"])
 
-        system_prompt = Prompt("system_code_pt")
-        user_prompt = Prompt("analysis_code_pt").format(self.user_input, instructions)
-
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-
-        completion = self.client.chat.completions.create(
-            model=self.gpt_model, messages=messages, temperature=0.1
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_code_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("analysis_code_pt").format(
+                        user_input=self.user_input,
+                        instructions=instructions,
+                    ),
+                    "role": "user",
+                },
+            ]
         )
-
-        model_response = completion.choices[0].message.content
+        model_response = self.model.run(temperature=0.1).choices[0].message.content
 
         pattern = r"```python\n(.*?)\n```"
         python_code_blocks = re.findall(pattern, model_response, re.DOTALL)
@@ -162,21 +182,25 @@ class DataAnalyzr:
         self.user_input = user_input or self.user_input
         if self.user_input is None:
             raise MissingValueError(["user_input"])
-        system_prompt = Prompt("system_visualization_pt")
 
-        user_prompt = Prompt("visualization_steps_pt").format(
-            self.user_input, self.df_head, self.df_columns
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_visualization_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("visualization_steps_pt").format(
+                        user_input=self.user_input,
+                        df_head=self.df_head,
+                        df_columns=self.df_columns,
+                    ),
+                    "role": "user",
+                },
+            ]
         )
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
 
-        completion = self.client.chat.completions.create(
-            model=self.gpt_model, messages=messages, temperature=0.1
-        )
-
-        steps = completion.choices[0].message.content
+        steps = self.model.run(temperature=0.1).choices[0].message.content
 
         try:
             result_list = ast.literal_eval(steps)
@@ -194,24 +218,23 @@ class DataAnalyzr:
         if self.user_input is None:
             raise MissingValueError(["user_input"])
 
-        system_prompt = Prompt("system_vis_code_pt")
-        user_prompt = Prompt("visualization_code_pt").format(
-            self.user_input,
-            instructions,
-            self.df_head,
-            self.df_columns,
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_vis_code_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("visualization_code_pt").format(
+                        user_input=self.user_input,
+                        instructions=instructions,
+                    ),
+                    "role": "user",
+                },
+            ]
         )
 
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-
-        completion = self.client.chat.completions.create(
-            model=self.gpt_model, messages=messages, temperature=0.1
-        )
-
-        model_response = completion.choices[0].message.content
+        model_response = self.model.run(temperature=0.1).choices[0].message.content
 
         pattern = r"```python\n(.*?)\n```"
         python_code_blocks = re.findall(pattern, model_response, re.DOTALL)
@@ -226,21 +249,21 @@ class DataAnalyzr:
     def correctcode(self, python_code, error_message):
         corrected_python_code = ""
 
-        system_prompt = Prompt("system_correct_code_pt")
-        user_prompt = Prompt("correct_code_pt").format(
-            python_code, error_message, self.df_columns, self.df_head
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_correct_code_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("correct_code_pt").format(
+                        python_code, error_message, self.df_columns, self.df_head
+                    ),
+                    "role": "user",
+                },
+            ]
         )
-
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-
-        completion = self.client.chat.completions.create(
-            model=self.gpt_model, messages=messages, temperature=0.1
-        )
-
-        model_response = completion.choices[0].message.content
+        model_response = self.model.run(temperature=0.1).choices[0].message.content
 
         pattern = r"```python\n(.*?)\n```"
         python_code_blocks = re.findall(pattern, model_response, re.DOTALL)
@@ -295,26 +318,28 @@ class DataAnalyzr:
 
         # print("analysis output: ", analysis_output, "\n\n")
 
-        system_prompt = Prompt("system_analysis_pt")
-        user_prompt = Prompt("analysis_output_pt").format(
-            self.user_input, analysis_output
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_analysis_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("analysis_output_pt").format(
+                        self.user_input, analysis_output
+                    ),
+                    "role": "user",
+                },
+            ]
         )
 
-        analysis_messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-
-        completion = self.client.chat.completions.create(
-            model="gpt-4",
-            messages=analysis_messages,
-            temperature=0.3,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
+        analysis = (
+            self.model.run(
+                temperature=0.3, top_p=1, frequency_penalty=0, presence_penalty=0
+            )
+            .choices[0]
+            .message.content
         )
-
-        analysis = completion.choices[0].message.content
 
         return analysis
 

@@ -59,7 +59,7 @@ def describe_dataset(
 
     model.prompt = Prompt("dataset_description_pt")
     if model.prompt.get_variables() != []:
-        model.set_prompt(
+        model.set_messages(
             headers=df.columns.tolist(),
             df_sample=df.head(),
         )

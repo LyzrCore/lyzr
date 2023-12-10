@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, Union
 from importlib import resources as impresources
 from lyzr.base import prompts
+from lyzr.base.errors import MissingValueError, InvalidValueError
 
 
 class Prompt:
@@ -66,3 +67,16 @@ def get_prompts_list() -> list:
         if (pfile.suffix == ".txt") and (pfile.stem.endswith("_pt"))
     ]
     return all_prompts
+
+
+def get_prompt(prompt: Union[dict, Prompt]):
+    if isinstance(prompt, Prompt):
+        return prompt
+    if not isinstance(prompt, dict):
+        raise InvalidValueError(["dict", "Prompt"])
+    if ("prompt" not in prompt) and (("name" not in prompt) and ("text" not in prompt)):
+        raise MissingValueError(["prompt", "name and text"])
+    if "prompt" in prompt:
+        return get_prompt(prompt["prompt"])
+    else:
+        return Prompt(prompt["name"], prompt["text"])
