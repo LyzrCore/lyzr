@@ -1,4 +1,5 @@
-"""With DataAnalyzr, you can analyze any dataframe 
+"""
+With DataAnalyzr, you can analyze any dataframe 
 derive actionable insights and create 
 visually compelling and Intuitive visualizations.
 """
