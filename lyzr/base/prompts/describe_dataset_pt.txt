@@ -1,0 +1,6 @@
+Dataset Sample (with top five row including the column names):
+{df_head} 
+
+The description should be at most one paragraph long and should be understandable by business users and other data scientists. The description should be deeply insightful yet simple for the readers.
+         
+Now Write a detailed description of the data:
