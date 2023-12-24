@@ -8,3 +8,5 @@ venv
 .lancedb
 
 .venv
+.csv
+generated_plots/

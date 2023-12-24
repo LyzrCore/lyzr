@@ -16,8 +16,9 @@ from contextlib import AbstractContextManager
 from typing import Optional, Union, List, Dict, Type
 
 import numpy as np
-import pandas as pd
 from PIL import Image
+import pandas as pd
+from pandas.errors import EmptyDataError
 
 from lyzr.base.prompt import Prompt
 from lyzr.base.llms import LLM, get_model
@@ -81,9 +82,24 @@ class DataAnalyzr:
                 model_name=model_name or os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
             )
         )
-        df = df or os.environ.get("DATAFRAME")
+        # Process the dataframe parameter
         if df is None:
+            df = os.environ.get(
+                "DATAFRAME"
+            )  # Try getting from environment if not provided
+        if df is None:
+            # If df is still None, neither a DataFrame nor a valid path were provided
             raise MissingValueError(["dataframe"])
+        elif isinstance(df, str):
+            self.df = self._clean_df(read_file(df))
+        elif isinstance(df, pd.DataFrame):
+            # You might want to check whether df is empty
+            if df.empty:
+                raise EmptyDataError("The provided DataFrame is empty.")
+            self.df = self._clean_df(df)
+        else:
+            raise ValueError("df must be a path to a file or a pd.DataFrame object.")
+        
         if isinstance(df, str):
             self.df = self._clean_df(read_file(df))
 
@@ -129,7 +145,8 @@ class DataAnalyzr:
         Get the steps to perform the analysis.
 
         Parameters:
-        - user_input (str): The user input based on which analysis steps are generated. (default: None)
+        - user_input (str):
+            The user input based on which analysis steps are generated. (default: None)
 
         Raises:
         - MissingValueError: If user input is missing.
@@ -168,7 +185,8 @@ class DataAnalyzr:
 
         Parameters:
         - instructions (str): The instructions to perform the analysis.
-        - user_input (str): The user input based on which analysis code is generated. (default: None)
+        - user_input (str):
+            The user input based on which analysis code is generated. (default: None)
 
         Raises:
         - MissingValueError: If user input is missing.
@@ -215,7 +233,8 @@ class DataAnalyzr:
         Get the steps to perform the visualization.
 
         Parameters:
-        - user_input (str): The user input based on which visualization steps are generated. (default: None)
+        - user_input (str):
+            The user input based on which visualization steps are generated. (default: None)
 
         Raises:
         - MissingValueError: If user input is missing.
@@ -275,6 +294,8 @@ class DataAnalyzr:
                 {
                     "prompt": Prompt("visualization_code_pt").format(
                         user_input=self.user_input,
+                        df_head=self.df.head(5),
+                        df_columns=self.df.columns.tolist(),
                         instructions=instructions,
                     ),
                     "role": "user",
@@ -290,7 +311,7 @@ class DataAnalyzr:
 
         try:
             python_code = python_code_blocks[0]
-        except Exception:
+        except IndexError:
             python_code = model_response
 
         return python_code
@@ -334,7 +355,7 @@ class DataAnalyzr:
 
         try:
             corrected_python_code = python_code_blocks[0]
-        except Exception:
+        except IndexError:
             corrected_python_code = model_response
 
         return corrected_python_code
@@ -344,7 +365,8 @@ class DataAnalyzr:
         Get the output of the analysis.
 
         Parameters:
-        - user_input (str): The user input based on which analysis output is generated. (default: None)
+        - user_input (str):
+            The user input based on which analysis output is generated. (default: None)
 
         Raises:
         - MissingValueError: If user input is missing.
@@ -379,7 +401,8 @@ class DataAnalyzr:
         Load all PNG images in the current directory and convert them to a dictionary
 
         Returns:
-        - Dict[str, bytes]: A dictionary where the key is the filename and the value is byte data of the image.
+        - Dict[str, bytes]:
+            A dictionary where the key is the filename and the value is byte data of the image.
         """
         current_directory = os.getcwd()
         image_data = {}
@@ -398,7 +421,8 @@ class DataAnalyzr:
         self, source: Path, destination: Path, file_type: str
     ) -> None:
         """
-        Move generated visualization files of a given type from a source directory to a destination directory.
+        Move generated visualization files of a given type,
+        from a source directory to a destination directory.
 
         Parameters:
         - source (Path): The source directory.
@@ -467,15 +491,18 @@ class DataAnalyzr:
 
     def visualizations(
         self,
-        dir_path: Path = Path("./generated_plots"),
         user_input: str = None,
+        dir_path: Path = Path("./generated_plots"),
     ) -> List[Image.Image]:
         """
-        Get visualizations of the analysis and save the generated plot images to the specified directory.
+        Get visualizations of the analysis and
+        save the generated plot images to the specified directory.
 
         Parameters:
-        - dir_path (Path): The directory path to save the visualizations (default: "./generated_plots")
-        - user_input (str): The user input data based on which visualizations are created. (default: None)
+        - user_input (str):
+            The user input data based on which visualizations are created. (default: None)
+        - dir_path (Path):
+            The directory path to save the visualizations (default: "./generated_plots")
 
         Raises:
         - MissingValueError: If user input is not provided.
@@ -540,7 +567,8 @@ class DataAnalyzr:
         Returns AI-generated queries for data analysis related to the dataset.
 
         Parameters:
-        - dataset_description (str, optional): A description of the dataset. If not provided, it will be generated.
+        - dataset_description (str, optional):
+            A description of the dataset. If not provided, it will be generated.
 
         Returns:
         - str: Queries for data analysis related to the dataset.
@@ -582,7 +610,8 @@ class DataAnalyzr:
 
         Parameters:
         - user_input (str, optional): The user input data. Defaults to None.
-        - number_of_recommendations (int, optional): The number of recommendations to return. Defaults to 4.
+        - number_of_recommendations (int, optional):
+            The number of recommendations to return. Defaults to 4.
 
         Returns:
         - str: Recommendations for analysis.
@@ -624,7 +653,8 @@ class DataAnalyzr:
         Parameters:
         - insights (str, optional): The analysis insights. Defaults to None.
         - user_input (str, optional): The user input. Defaults to None.
-        - schema (list, optional): The schema for the recommendations. Defaults to a predefined schema.
+        - schema (list, optional):
+            The schema for the recommendations. Defaults to a predefined schema.
 
         Raises:
         - MissingValueError: If user_input is not provided.
@@ -693,9 +723,12 @@ class DataAnalyzr:
         Generate tasks based on the given user input, analysis insights, and recommendations.
 
         Parameters:
-        - user_input (Optional[str]): The user input data. If None, the class's user_input attribute is used.
-        - insights (Optional[str]): The analysis insights. If None, generated by analysis_insights method.
-        - recommendations (Optional[str]): The analysis recommendations. If None, generated by recommendations method.
+        - user_input (Optional[str]):
+            The user input data. If None, the class's user_input attribute is used.
+        - insights (Optional[str]):
+            The analysis insights. If None, generated by analysis_insights method.
+        - recommendations (Optional[str]):
+            The analysis recommendations. If None, generated by recommendations method.
 
         Raises:
         - MissingValueError: If user_input is not provided.
