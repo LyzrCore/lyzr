@@ -13,12 +13,13 @@ This is an extremely critical scenario, so only include important and high quali
 
 Create Recommendations that provide value and are understandable to the CEO and other CXO's. 
 
-Important: Output the recommendations in Bullet Points
+Important: Output the recommendations in markdown Bullet Points
 
 Dataframe Coloumns:
 ```python
 {df_columns}
 ```
+{formatted_user_input}
 
 Now, Write down clear, precise and concise {number_of_recommendations} recommendations to Analyze the Data
 Keep the recommendation advanced yet concise. Only the Recommendations in one short line each.

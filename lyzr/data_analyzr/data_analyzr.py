@@ -13,7 +13,7 @@ import datetime
 from pathlib import Path
 from types import TracebackType
 from contextlib import AbstractContextManager
-from typing import Optional, Union, List, Dict, Type
+from typing import Optional, Union, Type
 
 import numpy as np
 from PIL import Image
@@ -25,7 +25,6 @@ from lyzr.base.llms import LLM, get_model
 from lyzr.base.errors import MissingValueError
 from lyzr.base.file_utils import read_file
 
-global PATTERN_PYTHON_CODE_BLOCK
 PATTERN_PYTHON_CODE_BLOCK = r"```python\n(.*?)\n```"
 
 warnings.filterwarnings("ignore")
@@ -396,7 +395,7 @@ class DataAnalyzr:
         output = c.get_value()
         return output
 
-    def _load_images_in_current_directory(self) -> Dict[str, bytes]:
+    def _load_images_in_current_directory(self) -> dict[str, bytes]:
         """
         Load all PNG images in the current directory and convert them to a dictionary
 
@@ -616,6 +615,11 @@ class DataAnalyzr:
         Returns:
         - str: Recommendations for analysis.
         """
+        formatted_user_input: str = (
+            Prompt("formatted_user_input_pt").format(user_input=user_input)
+            if user_input is not None else ""
+        )
+
         self.model.set_messages(
             [
                 {
@@ -629,7 +633,7 @@ class DataAnalyzr:
                         number_of_recommendations=number_of_recommendations,
                         df_head=self.df.head(5),
                         df_columns=self.df.columns.tolist(),
-                        user_input=user_input,
+                        formatted_user_input=formatted_user_input,
                     ),
                     "role": "system",
                 },
