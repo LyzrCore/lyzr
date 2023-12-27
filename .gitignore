@@ -10,3 +10,4 @@ venv
 .venv
 *.csv
 generated_plots/
+tests/
