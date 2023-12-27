@@ -492,7 +492,7 @@ class DataAnalyzr:
         self,
         user_input: str = None,
         dir_path: Path = Path("./generated_plots"),
-    ) -> List[Image.Image]:
+    ) -> list[Image.Image]:
         """
         Get visualizations of the analysis and
         save the generated plot images to the specified directory.
