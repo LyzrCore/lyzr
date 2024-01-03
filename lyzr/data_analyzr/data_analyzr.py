@@ -98,7 +98,7 @@ class DataAnalyzr:
             self.df = self._clean_df(df)
         else:
             raise ValueError("df must be a path to a file or a pd.DataFrame object.")
-        
+
         if isinstance(df, str):
             self.df = self._clean_df(read_file(df))
 
@@ -617,7 +617,8 @@ class DataAnalyzr:
         """
         formatted_user_input: str = (
             Prompt("formatted_user_input_pt").format(user_input=user_input)
-            if user_input is not None else ""
+            if user_input is not None
+            else ""
         )
 
         self.model.set_messages(

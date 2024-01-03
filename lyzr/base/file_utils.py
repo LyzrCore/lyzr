@@ -5,7 +5,8 @@ from typing import Optional
 import pandas as pd
 
 from lyzr.base.errors import InvalidValueError
-from lyzr.base.llms import LLM, Prompt, get_model
+from lyzr.base.llms import LLM, get_model
+from lyzr.base.prompt import Prompt
 
 
 def read_file(

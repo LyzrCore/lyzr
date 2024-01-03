@@ -15,6 +15,7 @@ class InvalidValueError(ValueError):
     def __init__(self, params: list):
         super().__init__(f"Invalid value provided. Provide value of type: {params}")
 
+
 class MissingModuleError(ImportError):
     def __init__(self, required_modules: dict):
         super().__init__(
