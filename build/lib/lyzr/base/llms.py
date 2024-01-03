@@ -1,8 +1,9 @@
 import os
 from openai import OpenAI
 from typing import Optional, Literal
-from dataanalyzr.enterprise_data_analyzr.base.prompt import get_prompt_text
-from dataanalyzr.enterprise_data_analyzr.base.errors import MissingValueError
+from lyzr.base.prompt import get_prompt_text
+from lyzr.base.errors import MissingValueError, InvalidValueError
+
 
 class LLM:
     def __init__(
@@ -11,7 +12,9 @@ class LLM:
         model_type: Optional[str] = None,
         model_name: Optional[str] = None,
         model_prompts: Optional[list[dict]] = None,
-        voice: Optional[str] = None,  # Add support for specifying the voice model
+        voice: Optional[
+            Literal["echo", "alloy", "fable", "onyx", "nova", "shimmer"]
+        ] = None,  # Add support for specifying the voice model
         **kwargs,
     ):
         self.api_key = api_key
@@ -24,35 +27,17 @@ class LLM:
         for param in kwargs:
             setattr(self, param, kwargs[param])
 
-
-        # llm_params = {
-        #     "temperature": 0,
-        #     "top_p": 1,
-        #     "presence_penalty": 0,
-        #     "frequency_penalty": 0,
-        #     "stop": None,
-        #     "n": 1,
-        #     "stream": False,
-        #     "functions": None,
-        #     "function_call": None,
-        #     "logit_bias": None,
-        #     "best_of": 1,
-        #     "echo": False,
-        #     "logprobs": None,
-        #     "suffix": None,
-        # }
-        # for param in llm_params:
-        #     setattr(self, param, kwargs.get(param, llm_params[param]))
-
     def set_messages(
         self,
         model_prompts: Optional[list[dict]] = None,
+        messages: Optional[list[dict]] = None,
     ):
-        if model_prompts is None and self.prompt is None:
+        if model_prompts is None and messages is None and self.messages is None:
             raise ValueError("Please set a value for the prompt")
 
-        if model_prompts is None:
-            return None
+        if messages is not None:
+            self.messages = messages
+            return self
 
         messages = []
         for prompt in model_prompts:
@@ -64,17 +49,36 @@ class LLM:
 
     def run(self, **kwargs):
         if self.api_key is None:
-            raise ValueError("Please provide an API key or set the API_KEY environment variable.")
+            raise ValueError(
+                "Please provide an API key or set the API_KEY environment variable."
+            )
 
-        if self.messages is None and "model_prompts" in kwargs:
-            self.set_messages(kwargs["model_prompts"])
-            del kwargs["model_prompts"]
+        if self.messages is None:
+            if "model_prompts" in kwargs:
+                self.set_messages(model_prompts=kwargs["model_prompts"])
+            elif "messages" in kwargs:
+                self.set_messages(messages=[kwargs["messages"]])
+            elif "input" in kwargs:
+                self.input = kwargs["input"]
+            elif "audiofile" in kwargs:
+                self.audiofile = kwargs["audiofile"]
+            else:
+                raise MissingValueError(["model_prompts", "messages"])
 
         params = self.__dict__.copy()
-        for param in ["api_key", "model_prompts", "model_type", "model_name"]:
+        params.update(kwargs)
+        for param in [
+            "api_key",
+            "model_prompts",
+            "model_type",
+            "model_name",
+            "messages",
+            "voice",
+            "input",
+            "audiofile",
+        ]:
             if param in params:
                 del params[param]
-        params.update(kwargs)
 
         # Instantiate the OpenAI client
         client = OpenAI(api_key=self.api_key)
@@ -82,22 +86,26 @@ class LLM:
         if self.model_type == "openai":
             # Check for Text-to-Speech models
             if self.model_name in ["tts-1", "tts-1-hd"]:
+                if self.input is None:
+                    raise MissingValueError("input")
                 # Use 'voice' and any other options required by OpenAI's TTS endpoint
                 response = client.audio.speech.create(
                     model=self.model_name,
                     voice=self.voice,
-                    text=params.get("text"),
+                    input=self.input,
+                    **params,
                 )
                 return response
 
             # Check for transcription models like "whisper"
             elif self.model_name.startswith("whisper"):
+                if self.audiofile is None:
+                    raise MissingValueError("audiofile")
                 # The transcription API may require a file-like object or binary data
-                if "file" not in params:
-                    raise MissingValueError("file")
                 response = client.audio.transcriptions.create(
                     model=self.model_name,
-                    file=params["file"],
+                    file=self.audiofile,
+                    **params,
                 )
                 return response
 
@@ -110,18 +118,16 @@ class LLM:
                 )
                 return completion
 
+
 def get_model(
     api_key: Optional[str] = None,
-    model_type: Literal["openai"] = None,
-    model_name: Literal["gpt-3.5-turbo", "gpt-4", "tts-1", "tts-1-hd","whisper"] = None,
-    voice: Optional[Literal["echo", "alloy", "fable", "onyx", "nova", "shimmer"]] = None,
-    
-    
-    
+    model_type: Optional[str] = None,
+    model_name: Optional[str] = None,
+    **kwargs,
 ) -> LLM:
     return LLM(
         api_key=api_key or os.getenv("API_KEY"),
         model_type=model_type or os.getenv("MODEL_TYPE") or "openai",
         model_name=model_name or os.getenv("MODEL_NAME") or "gpt-3.5-turbo",
-        voice = voice or os.getenv("Voice") or "nova"    
+        **kwargs,
     )
