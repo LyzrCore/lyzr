@@ -113,10 +113,15 @@ class LLM:
 def get_model(
     api_key: Optional[str] = None,
     model_type: Literal["openai"] = None,
-    model_name: Literal["gpt-3.5-turbo", "gpt-4"] = None,
+    model_name: Literal["gpt-3.5-turbo", "gpt-4", "tts-1", "tts-1-hd","whisper"] = None,
+    voice: Optional[Literal["echo", "alloy", "fable", "onyx", "nova", "shimmer"]] = None,
+    
+    
+    
 ) -> LLM:
     return LLM(
         api_key=api_key or os.getenv("API_KEY"),
         model_type=model_type or os.getenv("MODEL_TYPE") or "openai",
         model_name=model_name or os.getenv("MODEL_NAME") or "gpt-3.5-turbo",
+        voice = voice or os.getenv("Voice") or "nova"    
     )
