@@ -1,55 +1,126 @@
-from openai import OpenAI
+"""
+With DataAnalyzr, you can analyze any dataframe 
+derive actionable insights and create 
+visually compelling and Intuitive visualizations.
+"""
+import os
+import io
+import re
+import sys
+import shutil
+import warnings
+import datetime
+from pathlib import Path
+from types import TracebackType
+from contextlib import AbstractContextManager
+from typing import Optional, Union, Type
+
+import numpy as np
 from PIL import Image
 import pandas as pd
-import shutil
-import glob
-import ast
-import sys
-import re
-import io
-import os
+from pandas.errors import EmptyDataError
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import sklearn
-import plotly
+from lyzr.base.prompt import Prompt
+from lyzr.base.llms import LLM, get_model
+from lyzr.base.errors import MissingValueError
+from lyzr.base.file_utils import read_file
 
-import warnings
+PATTERN_PYTHON_CODE_BLOCK = r"```python\n(.*?)\n```"
+
 warnings.filterwarnings("ignore")
 
 
-class CapturePrints:
-    def __enter__(self):
-        self.old_stdout = sys.stdout
-        sys.stdout = self.mystdout = io.StringIO()
+class CapturePrints(AbstractContextManager):
+    """
+    A context manager for capturing output to stdout.
+
+    This class can be used to capture prints and other output
+    that normally go to stdout. It can be useful whenever
+    output to stdout needs to be captured or suppressed.
+    """
+
+    def __enter__(self) -> "CapturePrints":
+        self._old_stdout = sys.stdout
+        sys.stdout = self._mystdout = io.StringIO()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        sys.stdout = self.old_stdout
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[Exception],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        sys.stdout = self._old_stdout
+        # Can decide to handle exceptions here or let them propagate
+        return None  # Returning None means any exceptions will propagate
 
-    def getvalue(self):
-        return self.mystdout.getvalue()
+    def get_value(self) -> str:
+        """Retrieve the captured stdout content."""
+        return self._mystdout.getvalue()
 
 
 class DataAnalyzr:
-    def __init__(self, df=None, user_input=None, gpt_model="gpt-3.5-turbo"):
-        if user_input is None or df is None:
-            raise ValueError("Please provide `user_input` and `dataframe`")
-        self.df = self.cleanDf(df)
-        self.user_input = user_input
-        self.gpt_model = gpt_model
-        self.df_columns = self.df.columns.tolist()
-        self.df_head = self.df.head(5)
-        self.client = OpenAI()
+    """The DataAnalyzr Class for analyzing dataframes."""
 
-    def cleanDf(self, df):
+    def __init__(
+        self,
+        df: Union[str, pd.DataFrame] = None,
+        api_key: Optional[str] = None,
+        model: Optional[LLM] = None,
+        model_type: Optional[str] = None,
+        model_name: Optional[str] = None,
+        user_input: Optional[str] = None,
+        seed: int = None,
+    ):
+        self.model = (
+            model
+            or os.environ.get("LLM_MODEL")
+            or get_model(
+                api_key=api_key or os.environ.get("OPENAI_API_KEY"),
+                model_type=model_type or os.environ.get("MODEL_TYPE", "openai"),
+                model_name=model_name or os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
+            )
+        )
+        # Process the dataframe parameter
+        if df is None:
+            df = os.environ.get(
+                "DATAFRAME"
+            )  # Try getting from environment if not provided
+        if df is None:
+            # If df is still None, neither a DataFrame nor a valid path were provided
+            raise MissingValueError(["dataframe"])
+        elif isinstance(df, str):
+            self.df = self._clean_df(read_file(df))
+        elif isinstance(df, pd.DataFrame):
+            # You might want to check whether df is empty
+            if df.empty:
+                raise EmptyDataError("The provided DataFrame is empty.")
+            self.df = self._clean_df(df)
+        else:
+            raise ValueError("df must be a path to a file or a pd.DataFrame object.")
+
+        if isinstance(df, str):
+            self.df = self._clean_df(read_file(df))
+
+        self.user_input = user_input
+        self.seed = seed
+
+    def _clean_df(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Clean the dataframe.
+
+        Parameters:
+        - df (pd.DataFrame) : Input Dataframe to be cleaned.
+
+        Returns:
+        - pd.DataFrame: cleaned dataframe with no columns having >50% missing values,
+        no unnamed columns, no duplicates, and NaNs replaced in numerical/categorical columns.
+        """
         # Removing columns having more than 50% of missing values
-        df = df[df.columns[df.isnull().mean() < .5]]
+        df = df[df.columns[df.isnull().mean() < 0.5]]
 
         # Getting the columns which are categorical
-        cat_columns = df.select_dtypes(include=['object']).columns
+        cat_columns = df.select_dtypes(include=["object"]).columns
 
         # Getting the columns which are numerical
         num_columns = df.select_dtypes(include=[np.number]).columns
@@ -59,463 +130,652 @@ class DataAnalyzr:
 
         # Replacing missing numerical values with the mean
         df[num_columns] = df[num_columns].apply(lambda x: x.fillna(x.mean()))
-        
+
         # Removing "Unnamed:" columns if any
-        df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+        df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
 
         # Removing duplicates
-        df = df.drop_duplicates(keep='first')
-        
+        df = df.drop_duplicates(keep="first")
+
         return df
 
-
-    def getRecommendations(self, number_of_recommendations=4):
-
-        system_prompt = f"""You are a Senior Data Scientist and intelligent strategic advisor with 10+ Years of Experience. This is a Critical Scenario. The CEO has given you a dataframe, your job is to list {number_of_recommendations} high level recommendations to Analyze data and get deep insights from the data"""
-
-        user_prompt = f"""On the given dataframe give {number_of_recommendations} advanced and high quality recommendations for analysis to get deep insights from the data.
-
-        Dataframe Head:
-        ```python
-        {self.df_head}
-        ```
-
-        1. Do Not provide shallow and obvious recommendations like "Do Data Cleaning", "Do Data Preprocessing", "Do Data Visualization" etc.
-        2. You have to keep the recommendations concise and precise.
-        3. Only include recommendations that can be answered by running python code on the dataframe.
-
-        This is an extremely critical Scenario, so only include important and high quality recommendations related to the dataframe. 
-
-        Create Recommendations that provide value and are understandable to the CEO and other CXO's. 
-        
-        Important: Output the recommendations in Python List format example: 
-        ```
-        [
-        "Recommendation 1", 
-        "Recommendation 2",
-        ...
-        ]
-        ```
-
-        Dataframe Coloumns:
-        ```python
-        {self.df_columns}
-        ```
-
-        Now, Write down clear, precise and concise {number_of_recommendations} recommendations to Analyze the Data
-        Keep the recommendation advanced yet concise. Only the Recommendations in one short line each.
+    def _get_analysis_steps(self, user_input: str = None) -> str:
         """
+        Get the steps to perform the analysis.
 
-        messages=[
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
-        ]
+        Parameters:
+        - user_input (str):
+            The user input based on which analysis steps are generated. (default: None)
 
-        completion = self.client.chat.completions.create(
-        model=self.gpt_model,
-        messages=messages,
-        temperature=0.2
+        Raises:
+        - MissingValueError: If user input is missing.
+
+        Returns:
+        - str: The analysis steps based on user input and dataframe.
+        """
+        self.user_input = user_input or self.user_input
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
+
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_analysis_steps_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("analysis_steps_pt").format(
+                        user_input=self.user_input,
+                        df_head=self.df.head(5),
+                        df_columns=self.df.columns.tolist(),
+                    ),
+                    "role": "user",
+                },
+            ]
         )
 
-        steps = completion.choices[0].message.content
-
-        try:
-            result_list = ast.literal_eval(steps)
-            if isinstance(result_list, list) and all(isinstance(item, str) for item in result_list):
-                steps = result_list
-        except:
-            pass
-
-        return steps    
-
-
-    def getAnalysisSteps(self):
-
-        system_prompt = """You are a Senior Data Scientist with 10+ Years of Experience. This is a Critical Scenario. The CEO has asked you a question on a dataframe, your job is to list down steps to Analyze the Data and answer the CEO's question. """
-
-        user_prompt = f"""CEO: "{self.user_input}"
-
-Dataframe Head:
-```python
-{self.df_head}
-```
-
-1. The Dataset is already Preprocessed, Cleaned and converted to pandas dataframe.
-2. You have to describe on a advanced level what type of analysis needs to be done and on which coloumn and what is the expected output.
-3. The steps should be only related to analysis and do NOT include any visualization steps.
-4. All the analysis results be printed with `print()` function.
-5. The analysis results should be short, simple and human readable, so that the CEO and other CXO's can understand it easily.
-
-This is an extremely critical Scenario, so only include important steps related to CEO's Question and do NOT include any unnecessary steps like imports and data cleaning.
-
-Dataframe Coloumns:
-```python
-{self.df_columns}
-```
-Important: Output the steps in python list format eg. ["Step 1", "Step 2", "Step 3"]
-Now, Write down clear and precise steps to Analyze the Data and answer the CEO's question: "{self.user_input}"
-The CEO's question should be answered in the first line itself.
-
-Write list of steps:
-"""
-
-        messages=[
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
-        ]
-
-        completion = self.client.chat.completions.create(
-        model=self.gpt_model,
-        messages=messages,
-        temperature=0.1
-        )
-
-        steps = completion.choices[0].message.content
-
-        try:
-            result_list = ast.literal_eval(steps)
-            if isinstance(result_list, list) and all(isinstance(item, str) for item in result_list):
-                steps = result_list
-        except:
-            pass
+        steps = self.model.run(temperature=0.1).choices[0].message.content
 
         return steps
 
-    
-    def getAnalysisCode(self, instructions):
-
-        system_prompt = """You Write Python Function. You are a Senior Data Analyst with 10+ Years of Experience. This is a Critical Scenario. The CEO has asked you to write Python Function to answer a question on a given data, based on the instructions given by Senior Data Scientist"""
-
-        user_prompt = f"""CEO: {self.user_input}
-
-Dataframe Head: 
-{self.df_head}
-
-Data Scientist's Instructions:
-{instructions}
-
-Here is a sample output for the Python Function and Code:
-```python
-import pandas as pd
-import <necessory_libraries> # import ALL the necessory libraries
-
-def function_name(dataframe):
-    # Write your Python Function here that does the required analysis and answer's CEO's Question
-    # Print all the analysis results with `print()` function
-                
-# Assume `df` is already defined
-function_name(df) # Call the function that you wrote with the dataframe as the argument
-```
-
-Now, Write down python function to print the answer the CEO's question: {self.user_input}
-
-Important: You are writing code only for analysis and not for visualization. So, do NOT include any visualization code in the function. 
-
-The code should always print the analysis results with `print()` function.
-
-The CEO's question should be answered in the first line that is printed. The analysis results should be clear and concise. You can go into detail once you answer CEO's question.
-
-Just Write the Python code in markdown format, that's it.
+    def _get_analysis_code(self, instructions: str, user_input: str = None) -> str:
         """
+        Get the Python code to perform the analysis.
 
-        messages=[
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
-        ]
+        Parameters:
+        - instructions (str): The instructions to perform the analysis.
+        - user_input (str):
+            The user input based on which analysis code is generated. (default: None)
 
-        completion = self.client.chat.completions.create(
-        model=self.gpt_model,
-        messages=messages,
-        temperature=0.1
+        Raises:
+        - MissingValueError: If user input is missing.
+
+        Returns:
+        - str: The analysis Python code based on user input and dataframe.
+        """
+        self.user_input = user_input or self.user_input
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
+
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_code_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("analysis_code_pt").format(
+                        user_input=self.user_input,
+                        instructions=instructions,
+                        df_head=self.df.head(5),
+                        df_columns=self.df.columns.tolist(),
+                    ),
+                    "role": "user",
+                },
+            ]
         )
+        model_response = self.model.run(temperature=0.1).choices[0].message.content
 
-        model_response = completion.choices[0].message.content
-
-        pattern = r'```python\n(.*?)\n```'
-        python_code_blocks = re.findall(pattern, model_response, re.DOTALL)
+        python_code_blocks = re.findall(
+            PATTERN_PYTHON_CODE_BLOCK, model_response, re.DOTALL
+        )
 
         try:
             python_code = python_code_blocks[0]
-        except:
-            python_code = model_response    
+        except IndexError:
+            python_code = model_response
 
         return python_code
 
+    def _get_visualization_steps(self, user_input: str = None) -> str:
+        """
+        Get the steps to perform the visualization.
 
-    def getVisualizationSteps(self):
+        Parameters:
+        - user_input (str):
+            The user input based on which visualization steps are generated. (default: None)
 
-        system_prompt = """You are a Senior Data Scientist with 10+ Years of Experience. This is a Critical Scenario. The CEO has asked you a question on a dataframe, your job is to list down steps to Visualize the Data and create visualization to answer the CEO's question. """
+        Raises:
+        - MissingValueError: If user input is missing.
 
-        user_prompt = f"""CEO: "{self.user_input}"
+        Returns:
+        - str: The visualization steps based on user input and dataframe.
+        """
+        self.user_input = user_input or self.user_input
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
 
-Dataframe Head:
-```python
-{self.df_head}
-```
-
-1. The Dataset is already Preprocessed, Cleaned and converted to pandas dataframe.
-2. You have to describe on a advanced level what type of visualization needs to be done and on which coloumn and what is the expected visualization.
-3. Save the visualizations with proper labels and names.
-4. Create at least one or more visualizations
-
-This is an extremely critical Scenario, so only include important steps related to CEO's Question and do NOT include any unnecessary steps like imports and data cleaning.
-
-Dataframe Coloumns:
-```python
-{self.df_columns}
-```
-Important: Output the steps in python list format eg. ["Step 1", "Step 2", "Step 3"]
-If the CEO's question does not need a visualization to answer, then create visualization that is related to CEO's question and provides deep insights from the data.
-
-Now, Write down clear and precise steps to create visualization answer the CEO's question: "{self.user_input}"
-Write list of steps:
-"""
-
-        messages=[
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
-        ]
-
-        completion = self.client.chat.completions.create(
-        model=self.gpt_model,
-        messages=messages,
-        temperature=0.1
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_visualization_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("visualization_steps_pt").format(
+                        user_input=self.user_input,
+                        df_head=self.df.head(5),
+                        df_columns=self.df.columns.tolist(),
+                    ),
+                    "role": "user",
+                },
+            ]
         )
 
-        steps = completion.choices[0].message.content
-
-        try:
-            result_list = ast.literal_eval(steps)
-            if isinstance(result_list, list) and all(isinstance(item, str) for item in result_list):
-                steps = result_list
-        except:
-            pass
+        steps = self.model.run(temperature=0.1).choices[0].message.content
 
         return steps
 
-    
-    def getVisualiztionCode(self, instructions):
-
-        system_prompt = """You are a Senior Data Analyst with 10+ Years of Experience. You write reliable python code to create a save visualizations for Data Analysis"""
-
-        user_prompt = f"""This is a Critical Scenario. The CEO has asked you to write Python code to create visualization that answers his question on a given dataframe, based on the instructions given by Senior Data Scientist
-        
-CEO: "{self.user_input}"
-
-Dataframe Head: 
-{self.df_head}
-
-Data Scientist's Instructions:
-{instructions}
-
-Dataframe coloumns:
-{self.df_columns}
-
-Here is a sample output for the Python Code:
-```python
-import pandas as pd
-import <necessory_libraries> # import ALL the necessory libraries
-
-def function_name(dataframe):
-    # Write your Python Function here that creates visualizations that answer's CEO's Question
-    # Save the visualizations with proper labels, names and extensions(in .png format)
-    # Do not display the visualization just save it.
-
-# Assume `df` is already defined
-function_name(df) # Call the function that you wrote with the dataframe as the argument
-```
-Now, Write down python code to create Visualizations answer the CEO's question: {self.user_input}
+    def _get_visualiztion_code(self, instructions: str, user_input: str = None) -> str:
         """
+        Get the Python code to generate the visualization.
 
-        messages=[
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
-        ]
+        Parameters:
+        - instructions (str): The instructions to generate the visualization.
+        - user_input (str): The user input based on which visualization code is generated. (default: None)
 
-        completion = self.client.chat.completions.create(
-        model=self.gpt_model,
-        messages=messages,
-        temperature=0.1
+        Raises:
+        - MissingValueError: If user input is missing.
+
+        Returns:
+        - str: The visualization Python code based on user input and dataframe.
+        """
+        self.user_input = user_input or self.user_input
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
+
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_vis_code_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("visualization_code_pt").format(
+                        user_input=self.user_input,
+                        df_head=self.df.head(5),
+                        df_columns=self.df.columns.tolist(),
+                        instructions=instructions,
+                    ),
+                    "role": "user",
+                },
+            ]
         )
 
-        model_response = completion.choices[0].message.content
+        model_response = self.model.run(temperature=0.1).choices[0].message.content
 
-        pattern = r'```python\n(.*?)\n```'
-        python_code_blocks = re.findall(pattern, model_response, re.DOTALL)
+        python_code_blocks = re.findall(
+            PATTERN_PYTHON_CODE_BLOCK, model_response, re.DOTALL
+        )
 
         try:
             python_code = python_code_blocks[0]
-        except:
-            python_code = model_response    
+        except IndexError:
+            python_code = model_response
 
         return python_code
 
+    def _correct_code(self, python_code: str, error_message: str) -> str:
+        """
+        Correct the Python code based on the error message.
 
-    def correctCode(self, python_code, error_message):
-        
+        Parameters:
+        - python_code (str): The Python code to be corrected.
+        - error_message (str): The error message based on which the code is corrected.
+
+        Returns:
+        - str: The corrected Python code.
+        """
         corrected_python_code = ""
 
-        system_prompt = """You are an Expert Python Programmer with more than 10 years of experience. You have to fix the erroneous Python Code written by the Data Scientist. And output the working Python Code."""
-
-        user_prompt = f"""CEO asked the follwoing question: {self.user_input}
-
-        Dataframe Head:
-        ```python
-        {self.df_head}
-        ```
-        
-        Data Scientist wrote the following python code:
-        ```python
-        {python_code}
-        ```
-
-        Upon runninng the python code, resulted in the following error:
-        ```error
-        {error_message}
-        ```
-        
-        Dataframe Coloumns:
-        ```python
-        {self.df_columns}
-        ```
-        
-        Do NOT generate anything other than the corrected Python Code and keep the structure of the corrected code same as the input code.
-
-        Take a deep breath and think step by step and only Write the complete corrected Python code in markdown format.
-        """
-
-        messages=[
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
-        ]
-
-        completion = self.client.chat.completions.create(
-        model=self.gpt_model,
-        messages=messages,
-        temperature=0.1
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_correct_code_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("correct_code_pt").format(
+                        python_code=python_code,
+                        error_message=error_message,
+                        df_columns=self.df.columns.tolist(),
+                        df_head=self.df.head(5),
+                        user_input=self.user_input,
+                    ),
+                    "role": "user",
+                },
+            ]
         )
+        model_response = self.model.run(temperature=0.1).choices[0].message.content
 
-        model_response = completion.choices[0].message.content
-
-        pattern = r'```python\n(.*?)\n```'
-        python_code_blocks = re.findall(pattern, model_response, re.DOTALL)
+        python_code_blocks = re.findall(
+            PATTERN_PYTHON_CODE_BLOCK, model_response, re.DOTALL
+        )
 
         try:
             corrected_python_code = python_code_blocks[0]
-        except:
+        except IndexError:
             corrected_python_code = model_response
 
         return corrected_python_code
 
+    def _get_analysis_output(self, user_input: str = None) -> str:
+        """
+        Get the output of the analysis.
 
-    def getAnalysisOutput(self):
-        # print("getting steps")
-        steps = self.getAnalysisSteps()
-        
-        # print("getting code")
-        analysis_python_code = self.getAnalysisCode(steps)
+        Parameters:
+        - user_input (str):
+            The user input based on which analysis output is generated. (default: None)
 
-        suppress_warning = """
-import warnings
-warnings.filterwarnings("ignore")
-import pandas as pd
-pd.set_option('display.max_rows', 5)
-"""
+        Raises:
+        - MissingValueError: If user input is missing.
 
-        analysis_python_code = suppress_warning + analysis_python_code
+        Returns:
+        - str: The analysis output after running the analysis python code.
+        """
+        self.user_input = user_input or self.user_input
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
+        steps = self._get_analysis_steps()
 
-        # print("Running code")
+        analysis_python_code = self._get_analysis_code(steps)
+
         with CapturePrints() as c:
-            exec_scope = {'df': self.df, 'sns': sns}
+            exec_scope = {"df": self.df}
             try:
                 exec(analysis_python_code, exec_scope)
             except Exception as e:
                 error_message = str(e)
-                analysis_python_code = self.correctCode(analysis_python_code, error_message)
+                print(f"Error. {type(e).__name__}: {error_message}")
+                analysis_python_code = self._correct_code(
+                    analysis_python_code, error_message
+                )
                 exec(analysis_python_code, exec_scope)
 
-        output = c.getvalue()        
-
-        # print("sending output")
+        output = c.get_value()
         return output
 
+    def _load_images_in_current_directory(self) -> dict[str, bytes]:
+        """
+        Load all PNG images in the current directory and convert them to a dictionary
 
-    def getAnalysis(self):
-        analysis = ""
+        Returns:
+        - Dict[str, bytes]:
+            A dictionary where the key is the filename and the value is byte data of the image.
+        """
+        current_directory = os.getcwd()
+        image_data = {}
 
-        analysis_output = self.getAnalysisOutput() 
+        for filename in os.listdir(current_directory):
+            if filename.lower().endswith(".png"):
+                image_path = os.path.join(current_directory, filename)
+                with Image.open(image_path) as img:
+                    byte_arr = io.BytesIO()
+                    img.save(byte_arr, format="PNG")
+                    image_data[filename] = byte_arr.getvalue()
+
+        return image_data
+
+    def _move_visualization_files(
+        self, source: Path, destination: Path, file_type: str
+    ) -> None:
+        """
+        Move generated visualization files of a given type,
+        from a source directory to a destination directory.
+
+        Parameters:
+        - source (Path): The source directory.
+        - destination (Path): The destination directory.
+        - file_type (str): The type of files to be moved.
+
+        Post-condition:
+        - The files of the specified type are moved from source to destination.
+        - The files are renamed to include the current datetime in their names for uniqueness.
+        """
+        if not destination.exists():
+            destination.mkdir(parents=True)
+        for file_name in source.glob(f"*.{file_type}"):
+            base = file_name.stem
+            now = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+            new_file_name = f"{base}-{now}.{file_type}"
+            new_file_path = destination / new_file_name
+            shutil.move(str(file_name), str(new_file_path))
+
+    def analysis_insights(self, user_input: str = None) -> str:
+        """
+        Get insights from the analysis in three bullet points.
+
+        Parameters:
+        - user_input (str): The user input based on which insights are generated. (default: None)
+
+        Raises:
+        - MissingValueError: If user input is missing.
+
+        Returns:
+        - str: The analysis insights derived from the dataframe based on user input.
+        """
+        self.user_input = user_input or self.user_input
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
+
+        analysis_output = self._get_analysis_output()
 
         if len(analysis_output) > 6000:
-            analysis_output = analysis_output[0:3000] + "..." + analysis_output[-3000:]        
+            analysis_output = analysis_output[:3000] + "..." + analysis_output[-3000:]
 
-        # print("analysis output: ", analysis_output, "\n\n")
-
-        system_prompt = """You are an intelligent data analyst capable of understanding an analytics output result and share them in simple understandable language catered to business users and data analysts.\n\nYou will be provided with the user_query and the analysis_output. You will have to understand the analysis results and generate clear simplified explanations along with corresponding data points.\n\nGenerate 3 analysis explanations, limiting the overall response to 100 words. \n\nPresent the output as bullet points.\n\nRank all your insights and only share the top 3 ones.  Focus on clarity and conciseness.\n\nDo not describe the dataset or the prompt.\nDo not speak about charts.\nDo not share any title. \n\n"""
-
-        user_prompt = f'''User Query: {self.user_input}\n For the above user query, after analysing with python we get the following output \n Analysis Output: \n {analysis_output}'''
-
-        analysis_messages=[
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
+        prompt_messages = [
+            {
+                "prompt": Prompt("system_analysis_pt"),
+                "role": "system",
+            },
+            {
+                "prompt": Prompt("analysis_output_pt").format(
+                    user_input=self.user_input, analysis_output=analysis_output
+                ),
+                "role": "user",
+            },
         ]
 
-        completion = self.client.chat.completions.create(
-        model="gpt-4",
-        messages=analysis_messages,
-        temperature=0.3,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0,
-        )
+        self.model.set_messages(prompt_messages)
 
-        analysis = completion.choices[0].message.content
+        analysis = (
+            self.model.run(
+                temperature=0.3, top_p=1, frequency_penalty=0, presence_penalty=0
+            )
+            .choices[0]
+            .message.content
+        )
 
         return analysis
 
+    def visualizations(
+        self,
+        user_input: str = None,
+        dir_path: Path = Path("./generated_plots"),
+    ) -> list[Image.Image]:
+        """
+        Get visualizations of the analysis and
+        save the generated plot images to the specified directory.
 
-    def getVisualizations(self):
-        visualization_steps = self.getVisualizationSteps()
-        visualization_python_code = self.getVisualiztionCode(visualization_steps)
+        Parameters:
+        - user_input (str):
+            The user input data based on which visualizations are created. (default: None)
+        - dir_path (Path):
+            The directory path to save the visualizations (default: "./generated_plots")
 
-        exec_scope = {'df': self.df}
+        Raises:
+        - MissingValueError: If user input is not provided.
+
+        Returns:
+        - List[Image.Image]: A list of PIL Image objects representing the saved visualizations.
+        """
+        self.user_input = user_input or self.user_input
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
+        visualization_steps = self._get_visualization_steps()
+        visualization_python_code = self._get_visualiztion_code(visualization_steps)
+
+        exec_scope = {"df": self.df}
         try:
             exec(visualization_python_code, exec_scope)
         except Exception as e:
             error_message = str(e)
-            visualization_python_code = self.correctCode(visualization_python_code, error_message)
+            visualization_python_code = self._correct_code(
+                visualization_python_code, error_message
+            )
             exec(visualization_python_code, exec_scope)
 
-        def load_images_in_current_directory():
-            current_directory = os.getcwd()
-            image_data = {}
+        image_list = self._load_images_in_current_directory()
+        self._move_visualization_files(Path("./"), dir_path, "png")
+        return image_list
 
-            for file in os.listdir(current_directory):
-                if file.lower().endswith('.png'):
-                    image_path = os.path.join(current_directory, file)
-                    with Image.open(image_path) as img:
-                        byte_arr = io.BytesIO()
-                        img.save(byte_arr, format='PNG')
-                        image_data[file] = byte_arr.getvalue()
+    def dataset_description(self) -> str:
+        """
+        Generate a brief description of the dataset currently in use.
 
-            return image_data
+        Returns:
+        - str: A string providing a description of the dataset.
+        """
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_describe_dataset_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("describe_dataset_pt").format(
+                        df_head=self.df.head(5),
+                    ),
+                    "role": "user",
+                },
+            ]
+        )
 
-        image_list = load_images_in_current_directory()
-        
-        if not os.path.exists('generated_images'):
-            os.makedirs('generated_images')
+        description = (
+            self.model.run(
+                temperature=1, top_p=0.3, frequency_penalty=0.7, presence_penalty=0.3
+            )
+            .choices[0]
+            .message.content
+        )
 
-        destination_directory = os.path.join(os.getcwd(), "generated_images")
+        return description
 
-        png_files = [f for f in os.listdir(os.getcwd()) if f.endswith('.png')]
+    def ai_queries_df(self, dataset_description: Optional[str] = None) -> str:
+        """
+        Returns AI-generated queries for data analysis related to the dataset.
 
-        for file_name in png_files:
-            shutil.move(file_name, destination_directory)           
-            
-        return image_list           
+        Parameters:
+        - dataset_description (str, optional):
+            A description of the dataset. If not provided, it will be generated.
 
+        Returns:
+        - str: Queries for data analysis related to the dataset.
+        """
+        if dataset_description is None:
+            dataset_description = self.dataset_description()
 
-    def run(self):        
-        analysis = self.getAnalysis()
-        images = self.getVisualizations()
-        return analysis, images    
-        
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_ai_queries_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("ai_queries_pt").format(
+                        dataset_description=dataset_description,
+                        df_head=self.df.head(5),
+                    ),
+                    "role": "user",
+                },
+            ]
+        )
+
+        ai_queries_df = (
+            self.model.run(
+                temperature=1, top_p=0.3, frequency_penalty=0.7, presence_penalty=0.3
+            )
+            .choices[0]
+            .message.content
+        )
+
+        return ai_queries_df
+
+    def analysis_recommendation(
+        self, user_input: Optional[str] = None, number_of_recommendations: int = 4
+    ) -> str:
+        """
+        Get recommendation on what analysis to perform on the dataset.
+
+        Parameters:
+        - user_input (str, optional): The user input data. Defaults to None.
+        - number_of_recommendations (int, optional):
+            The number of recommendations to return. Defaults to 4.
+
+        Returns:
+        - str: Recommendations for analysis.
+        """
+        formatted_user_input: str = (
+            Prompt("formatted_user_input_pt").format(user_input=user_input)
+            if user_input is not None
+            else ""
+        )
+
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_recommendations_pt").format(
+                        number_of_recommendations=number_of_recommendations,
+                    ),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("analysis_recommendations_pt").format(
+                        number_of_recommendations=number_of_recommendations,
+                        df_head=self.df.head(5),
+                        df_columns=self.df.columns.tolist(),
+                        formatted_user_input=formatted_user_input,
+                    ),
+                    "role": "system",
+                },
+            ]
+        )
+
+        recommendations = (
+            self.model.run(temperature=0.2, seed=self.seed).choices[0].message.content
+        )
+        return recommendations
+
+    def recommendations(
+        self,
+        insights: Optional[str] = None,
+        user_input: Optional[str] = None,
+        schema: Optional[list] = None,
+    ) -> str:
+        """
+        Get recommendations based on the analysis insights.
+
+        Parameters:
+        - insights (str, optional): The analysis insights. Defaults to None.
+        - user_input (str, optional): The user input. Defaults to None.
+        - schema (list, optional):
+            The schema for the recommendations. Defaults to a predefined schema.
+
+        Raises:
+        - MissingValueError: If user_input is not provided.
+
+        Returns:
+        - str: Recommendations as a string.
+        """
+        self.user_input = user_input or self.user_input
+
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
+
+        if insights is None:
+            insights = self.analysis_insights(user_input=user_input)
+
+        schema = schema or [
+            {
+                "Recommendation": "string",
+                "Basis of the Recommendation": "string",
+                "Impact if implemented": "string",
+            },
+            {
+                "Recommendation": "string",
+                "Basis of the Recommendation": "string",
+                "Impact if implemented": "string",
+            },
+            {
+                "Recommendation": "string",
+                "Basis of the Recommendation": "string",
+                "Impact if implemented": "string",
+            },
+        ]
+
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_recommendation_pt").format(schema=schema),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("recommendation_pt").format(
+                        user_input=user_input, insights=insights
+                    ),
+                    "role": "user",
+                },
+            ]
+        )
+
+        recommendations = (
+            self.model.run(
+                temperature=1, top_p=0.3, frequency_penalty=0.7, presence_penalty=0.3
+            )
+            .choices[0]
+            .message.content
+        )
+
+        return recommendations
+
+    def tasks(
+        self,
+        user_input: Optional[str] = None,
+        insights: Optional[str] = None,
+        recommendations: Optional[str] = None,
+    ) -> str:
+        """
+        Generate tasks based on the given user input, analysis insights, and recommendations.
+
+        Parameters:
+        - user_input (Optional[str]):
+            The user input data. If None, the class's user_input attribute is used.
+        - insights (Optional[str]):
+            The analysis insights. If None, generated by analysis_insights method.
+        - recommendations (Optional[str]):
+            The analysis recommendations. If None, generated by recommendations method.
+
+        Raises:
+        - MissingValueError: If user_input is not provided.
+
+        Returns:
+        - str: The generated tasks.
+        """
+        self.user_input = user_input or self.user_input
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
+
+        if insights is None:
+            insights = self.analysis_insights(user_input=user_input)
+
+        if recommendations is None:
+            recommendations = self.recommendations(
+                insights=insights, user_input=user_input
+            )
+
+        self.model.set_messages(
+            [
+                {
+                    "prompt": Prompt("system_tasks_pt"),
+                    "role": "system",
+                },
+                {
+                    "prompt": Prompt("task_pt").format(
+                        user_input=user_input,
+                        insights=insights,
+                        recommendations=recommendations,
+                    ),
+                    "role": "user",
+                },
+            ]
+        )
+
+        tasks = (
+            self.model.run(
+                temperature=1, top_p=0.3, frequency_penalty=0.7, presence_penalty=0.3
+            )
+            .choices[0]
+            .message.content
+        )
+
+        return tasks

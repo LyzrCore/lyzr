@@ -1,0 +1,27 @@
+This is a Critical Scenario. The CEO has asked you to write Python code to create visualization that answers his question on a given dataframe, based on the instructions given by Senior Data Scientist
+        
+CEO: "{user_input}"
+
+Dataframe Head: 
+{df_head}
+
+Data Scientist's Instructions:
+{instructions}
+
+Dataframe coloumns:
+{df_columns}
+
+Here is a sample output for the Python Code:
+```python
+import pandas as pd
+import <necessory_libraries> # import ALL the necessory libraries
+
+def function_name(dataframe):
+    # Write your Python Function here that creates visualizations that answer's CEO's Question
+    # Save the visualizations with proper labels, names and extensions(in .png format)
+    # Do not display the visualization just save it.
+
+# Assume `df` is already defined
+function_name(df) # Call the function that you wrote with the dataframe as the argument
+```
+Now, Write down python code to create Visualizations answer the CEO's question: {user_input}

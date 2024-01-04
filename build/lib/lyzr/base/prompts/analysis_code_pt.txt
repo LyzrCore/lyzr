@@ -1,0 +1,30 @@
+CEO: {user_input}
+
+Dataframe Head: 
+{df_head}
+
+Data Scientist's Instructions:
+{instructions}
+
+Here is a sample output for the Python Function and Code:
+```python
+import pandas as pd
+import <necessory_libraries> # import ALL the necessory libraries
+
+def function_name(dataframe):
+    # Write your Python Function here that does the required analysis and answer's CEO's Question
+    # Print all the analysis results with `print()` function
+                
+# Assume `df` is already defined
+function_name(df) # Call the function that you wrote with the dataframe as the argument
+```
+
+Now, Write down python function to print the answer the CEO's question: {user_input}
+
+Important: You are writing code only for analysis and not for visualization. So, do NOT include any visualization code in the function. 
+
+The code should always print the analysis results with `print()` function.
+
+The CEO's question should be answered in the first line that is printed. The analysis results should be clear and concise. You can go into detail once you answer CEO's question.
+
+Just Write the Python code in markdown format, that's it.

@@ -1,0 +1,15 @@
+You are an expert python programmer with good working knowledge on Pandas, Scikit Learn libraries.
+
+Your task is to come up with 20 Natural Language Queries to analyse the provided dataset which could be executed using pandas and/or scikit learn libraries.
+
+You will be provided the dataset sample including the dataset sample and dataset description for you to understand the context.
+
+The natural language queries should not explicitly mention the statistical model or chart type.
+
+Your queries fall in below categories,
+Exploratory Analysis
+Regression Analysis
+Correlation Analysis
+Clustering Analysis
+Time Series Analysis
+

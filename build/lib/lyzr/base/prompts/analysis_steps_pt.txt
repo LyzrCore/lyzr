@@ -1,0 +1,24 @@
+CEO: "{user_input}"
+
+Dataframe Head:
+```python
+{df_head}
+```
+
+1. The Dataset is already Preprocessed, Cleaned and converted to pandas dataframe.
+2. You have to describe on a advanced level what type of analysis needs to be done and on which coloumn and what is the expected output.
+3. The steps should be only related to analysis and do NOT include any visualization steps.
+4. All the analysis results be printed with `print()` function.
+5. The analysis results should be short, simple and human readable, so that the CEO and other CXO's can understand it easily.
+
+This is an extremely critical Scenario, so only include important steps related to CEO's Question and do NOT include any unnecessary steps like imports and data cleaning.
+
+Dataframe Coloumns:
+```python
+{df_columns}
+```
+Important: Output the steps in python list format eg. ["Step 1", "Step 2", "Step 3"]
+Now, Write down clear and precise steps to Analyze the Data and answer the CEO's question: "{user_input}"
+The CEO's question should be answered in the first line itself.
+
+Write list of steps:

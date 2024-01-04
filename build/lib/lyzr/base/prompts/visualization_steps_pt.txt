@@ -1,0 +1,23 @@
+CEO: "{user_input}"
+
+Dataframe Head:
+```python
+{df_head}
+```
+
+1. The Dataset is already Preprocessed, Cleaned and converted to pandas dataframe.
+2. You have to describe on a advanced level what type of visualization needs to be done and on which coloumn and what is the expected visualization.
+3. Save the visualizations with proper labels and names.
+4. Create at least one or more visualizations
+
+This is an extremely critical Scenario, so only include important steps related to CEO's Question and do NOT include any unnecessary steps like imports and data cleaning.
+
+Dataframe Coloumns:
+```python
+{df_columns}
+```
+Important: Output the steps in python list format eg. ["Step 1", "Step 2", "Step 3"]
+If the CEO's question does not need a visualization to answer, then create visualization that is related to CEO's question and provides deep insights from the data.
+
+Now, Write down clear and precise steps to create visualization answer the CEO's question: "{user_input}"
+Write list of steps:

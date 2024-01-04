@@ -5,7 +5,8 @@ from typing import Optional
 import pandas as pd
 
 from lyzr.base.errors import InvalidValueError
-from lyzr.base.llms import LLM, Prompt, get_model
+from lyzr.base.llms import LLM, get_model
+from lyzr.base.prompt import Prompt
 
 
 def read_file(
@@ -59,7 +60,7 @@ def describe_dataset(
 
     model.prompt = Prompt("dataset_description_pt")
     if model.prompt.get_variables() != []:
-        model.set_prompt(
+        model.set_messages(
             headers=df.columns.tolist(),
             df_sample=df.head(),
         )

@@ -1,0 +1,25 @@
+On the given dataframe give {number_of_recommendations} advanced and high quality recommendations for analysis to get deep insights from the data.
+
+Dataframe Head:
+```python
+{df_head}
+```
+
+1. Do Not provide shallow and obvious recommendations like "Do Data Cleaning", "Do Data Preprocessing", "Do Data Visualization" etc.
+2. You have to keep the recommendations concise and precise.
+3. Only include recommendations that can be answered by running python code on the dataframe.
+
+This is an extremely critical scenario, so only include important and high quality recommendations related to the dataframe. 
+
+Create Recommendations that provide value and are understandable to the CEO and other CXO's. 
+
+Important: Output the recommendations in markdown Bullet Points
+
+Dataframe Coloumns:
+```python
+{df_columns}
+```
+{formatted_user_input}
+
+Now, Write down clear, precise and concise {number_of_recommendations} recommendations to Analyze the Data
+Keep the recommendation advanced yet concise. Only the Recommendations in one short line each.

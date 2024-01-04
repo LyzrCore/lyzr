@@ -1,0 +1,3 @@
+User Query: {user_input}
+For the above user query, after analysing with python we get the following output:
+{analysis_output}

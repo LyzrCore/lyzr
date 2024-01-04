@@ -1,7 +1,5 @@
 from typing import Union
 
-from lyzr.base.llms import LLM
-
 
 class MissingValueError(ValueError):
     def __init__(self, params: Union[str, list]):
@@ -18,17 +16,8 @@ class InvalidValueError(ValueError):
         super().__init__(f"Invalid value provided. Provide value of type: {params}")
 
 
-def check_values(
-    query: Union[str, None],
-    model: Union[LLM, None],
-    params: dict,
-) -> None:
-    if query is None:
-        raise MissingValueError(["query"])
-
-    if model is not None:
-        return None
-
-    for value in params.values():
-        if value is None:
-            raise MissingValueError(["model or ", ", ".join(params.keys())])
+class MissingModuleError(ImportError):
+    def __init__(self, required_modules: dict):
+        super().__init__(
+            f"The following modules are needed to run this function: {', '.join(required_modules.keys())}. Please install them using: `pip install {' '.join(required_modules.values())}`"
+        )
