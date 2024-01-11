@@ -47,7 +47,7 @@ def pdf_chat_(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -119,7 +119,7 @@ def txt_chat_(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -191,7 +191,7 @@ def docx_chat_(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -253,7 +253,7 @@ def webpage_chat_(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -315,7 +315,7 @@ def website_chat_(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -377,7 +377,7 @@ def youtube_chat_(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )

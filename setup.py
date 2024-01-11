@@ -24,9 +24,9 @@ setup(
         "llama-index==0.9.4",
         "langchain==0.0.339",
         "python-dotenv>=1.0.0",
-        "lancedb==0.3.3",
         "beautifulsoup4==4.12.2",
         "pandas==2.0.2",
         "matplotlib==3.8.2",
+        "weaviate-client==3.25.3",
     ],
 )
