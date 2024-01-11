@@ -42,6 +42,7 @@ class ChatBot:
         vector_store_params: dict = None,
         service_context_params: dict = None,
         chat_engine_params: dict = None,
+        retriever_params: dict = None,
     ) -> BaseChatEngine:
         return pdf_chat_(
             input_dir=input_dir,
@@ -57,6 +58,7 @@ class ChatBot:
             vector_store_params=vector_store_params,
             service_context_params=service_context_params,
             chat_engine_params=chat_engine_params,
+            retriever_params=retriever_params,
         )
 
     @staticmethod
@@ -74,6 +76,7 @@ class ChatBot:
         vector_store_params: dict = None,
         service_context_params: dict = None,
         chat_engine_params: dict = None,
+        retriever_params: dict = None,
     ) -> BaseChatEngine:
         return docx_chat_(
             input_dir=input_dir,
@@ -89,6 +92,7 @@ class ChatBot:
             vector_store_params=vector_store_params,
             service_context_params=service_context_params,
             chat_engine_params=chat_engine_params,
+            retriever_params=retriever_params,
         )
 
     @staticmethod
@@ -106,6 +110,7 @@ class ChatBot:
         vector_store_params: dict = None,
         service_context_params: dict = None,
         chat_engine_params: dict = None,
+        retriever_params: dict = None,
     ) -> BaseChatEngine:
         return txt_chat_(
             input_dir=input_dir,
@@ -121,6 +126,7 @@ class ChatBot:
             vector_store_params=vector_store_params,
             service_context_params=service_context_params,
             chat_engine_params=chat_engine_params,
+            retriever_params=retriever_params,
         )
 
     @staticmethod
@@ -133,6 +139,7 @@ class ChatBot:
         vector_store_params: dict = None,
         service_context_params: dict = None,
         chat_engine_params: dict = None,
+        retriever_params: dict = None,
     ) -> BaseChatEngine:
         return webpage_chat_(
             url=url,
@@ -143,6 +150,7 @@ class ChatBot:
             vector_store_params=vector_store_params,
             service_context_params=service_context_params,
             chat_engine_params=chat_engine_params,
+            retriever_params=retriever_params,
         )
 
     @staticmethod
@@ -155,6 +163,7 @@ class ChatBot:
         vector_store_params: dict = None,
         service_context_params: dict = None,
         chat_engine_params: dict = None,
+        retriever_params: dict = None,
     ) -> BaseChatEngine:
         return website_chat_(
             url=url,
@@ -165,6 +174,7 @@ class ChatBot:
             vector_store_params=vector_store_params,
             service_context_params=service_context_params,
             chat_engine_params=chat_engine_params,
+            retriever_params=retriever_params,
         )
 
     @staticmethod
@@ -177,6 +187,7 @@ class ChatBot:
         vector_store_params: dict = None,
         service_context_params: dict = None,
         chat_engine_params: dict = None,
+        retriever_params: dict = None,
     ) -> BaseChatEngine:
         return youtube_chat_(
             urls=urls,
@@ -187,4 +198,5 @@ class ChatBot:
             vector_store_params=vector_store_params,
             service_context_params=service_context_params,
             chat_engine_params=chat_engine_params,
+            retriever_params=retriever_params,
         )

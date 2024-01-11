@@ -106,6 +106,7 @@ def txt_chat_(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     chat_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseChatEngine:
     documents = read_txt_as_documents(
         input_dir=input_dir,
@@ -177,6 +178,7 @@ def docx_chat_(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     chat_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseChatEngine:
     documents = read_docx_as_documents(
         input_dir=input_dir,
@@ -243,6 +245,7 @@ def webpage_chat_(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     chat_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseChatEngine:
     documents = read_webpage_as_documents(
         url=url,
@@ -304,6 +307,7 @@ def website_chat_(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     chat_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseChatEngine:
     documents = read_website_as_documents(
         url=url,
@@ -365,6 +369,7 @@ def youtube_chat_(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     chat_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseChatEngine:
     documents = read_youtube_as_documents(
         urls=urls,
