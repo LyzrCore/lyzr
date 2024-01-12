@@ -2,8 +2,10 @@ from typing import Union, Optional, List
 
 from llama_index.embeddings.utils import EmbedType
 from llama_index.indices.query.base import BaseQueryEngine
+from llama_index.query_engine import RetrieverQueryEngine
 
 from lyzr.base.llm import LyzrLLMFactory
+from lyzr.base.retrievers import LyzrRetriever
 from lyzr.base.service import LyzrService
 from lyzr.base.vector_store import LyzrVectorStoreIndex
 from lyzr.utils.document_reading import (
@@ -30,6 +32,7 @@ def pdf_rag(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     query_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseQueryEngine:
     documents = read_pdf_as_documents(
         input_dir=input_dir,
@@ -49,7 +52,13 @@ def pdf_rag(
     service_context_params = (
         {} if service_context_params is None else service_context_params
     )
-    query_engine_params = {} if query_engine_params is None else query_engine_params
+    chat_engine_params = {} if chat_engine_params is None else chat_engine_params
+
+    retriever_params = (
+        {"retriever_type": "QueryFusionRetriever"}
+        if retriever_params is None
+        else retriever_params
+    )
 
     llm = LyzrLLMFactory.from_defaults(**llm_params)
     service_context = LyzrService.from_defaults(
@@ -61,12 +70,16 @@ def pdf_rag(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params,
-        documents=documents,
-        service_context=service_context,
+        **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_query_engine(**query_engine_params, similarity_top_k=5)
+    retriever = LyzrRetriever.from_defaults(
+        **retriever_params, base_index=vector_store_index
+    )
+
+    query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+
+    return query_engine
 
 
 def txt_rag(
