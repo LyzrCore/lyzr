@@ -41,6 +41,7 @@ class QABot:
         vector_store_params: dict = None,
         service_context_params: dict = None,
         query_engine_params: dict = None,
+        retriever_params: dict = None,
     ) -> BaseQueryEngine:
         return pdf_rag(
             input_dir=input_dir,
@@ -56,6 +57,7 @@ class QABot:
             vector_store_params=vector_store_params,
             service_context_params=service_context_params,
             query_engine_params=query_engine_params,
+            retriever_params=retriever_params,
         )
 
     @staticmethod
@@ -73,6 +75,7 @@ class QABot:
         vector_store_params: dict = None,
         service_context_params: dict = None,
         query_engine_params: dict = None,
+        retriever_params: dict = None,
     ) -> BaseQueryEngine:
         return docx_rag(
             input_dir=input_dir,
@@ -88,6 +91,7 @@ class QABot:
             vector_store_params=vector_store_params,
             service_context_params=service_context_params,
             query_engine_params=query_engine_params,
+            retriever_params=retriever_params,
         )
 
     @staticmethod
@@ -105,6 +109,7 @@ class QABot:
         vector_store_params: dict = None,
         service_context_params: dict = None,
         query_engine_params: dict = None,
+        retriever_params: dict = None,
     ) -> BaseQueryEngine:
         return txt_rag(
             input_dir=input_dir,
@@ -120,6 +125,7 @@ class QABot:
             vector_store_params=vector_store_params,
             service_context_params=service_context_params,
             query_engine_params=query_engine_params,
+            retriever_params=retriever_params,
         )
 
     @staticmethod
@@ -132,6 +138,7 @@ class QABot:
         vector_store_params: dict = None,
         service_context_params: dict = None,
         query_engine_params: dict = None,
+        retriever_params: dict = None,
     ) -> BaseQueryEngine:
         return webpage_rag(
             url=url,
@@ -142,6 +149,7 @@ class QABot:
             vector_store_params=vector_store_params,
             service_context_params=service_context_params,
             query_engine_params=query_engine_params,
+            retriever_params=retriever_params,
         )
 
     @staticmethod
@@ -154,6 +162,7 @@ class QABot:
         vector_store_params: dict = None,
         service_context_params: dict = None,
         query_engine_params: dict = None,
+        retriever_params: dict = None,
     ) -> BaseQueryEngine:
         return website_rag(
             url=url,
@@ -164,6 +173,7 @@ class QABot:
             vector_store_params=vector_store_params,
             service_context_params=service_context_params,
             query_engine_params=query_engine_params,
+            retriever_params=retriever_params,
         )
 
     @staticmethod
@@ -176,6 +186,7 @@ class QABot:
         vector_store_params: dict = None,
         service_context_params: dict = None,
         query_engine_params: dict = None,
+        retriever_params: dict = None,
     ) -> BaseQueryEngine:
         return youtube_rag(
             urls=urls,
@@ -186,4 +197,5 @@ class QABot:
             vector_store_params=vector_store_params,
             service_context_params=service_context_params,
             query_engine_params=query_engine_params,
+            retriever_params=retriever_params,
         )
