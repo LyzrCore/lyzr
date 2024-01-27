@@ -38,7 +38,7 @@ class LyzrVectorStoreIndex:
                 else kwargs["weaviate_client"]
             )
             kwargs["index_name"] = (
-                uuid if "index_name" not in kwargs else kwargs["index_name"]
+                f"DB_{uuid.uuid4().hex}" if "index_name" not in kwargs else kwargs["index_name"]
             )
 
             vector_store = VectorStoreClass(**kwargs)

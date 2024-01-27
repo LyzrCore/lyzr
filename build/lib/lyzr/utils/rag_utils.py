@@ -45,14 +45,14 @@ def pdf_rag(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
     service_context_params = (
         {} if service_context_params is None else service_context_params
     )
-    chat_engine_params = {} if chat_engine_params is None else chat_engine_params
+    query_engine_params = {} if query_engine_params is None else query_engine_params
 
     retriever_params = (
         {"retriever_type": "QueryFusionRetriever"}
@@ -61,6 +61,7 @@ def pdf_rag(
     )
 
     llm = LyzrLLMFactory.from_defaults(**llm_params)
+
     service_context = LyzrService.from_defaults(
         llm=llm,
         embed_model=embed_model,
@@ -96,6 +97,7 @@ def txt_rag(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     query_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseQueryEngine:
     documents = read_txt_as_documents(
         input_dir=input_dir,
@@ -108,7 +110,7 @@ def txt_rag(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -117,7 +119,14 @@ def txt_rag(
     )
     query_engine_params = {} if query_engine_params is None else query_engine_params
 
+    retriever_params = (
+        {"retriever_type": "QueryFusionRetriever"}
+        if retriever_params is None
+        else retriever_params
+    )
+
     llm = LyzrLLMFactory.from_defaults(**llm_params)
+
     service_context = LyzrService.from_defaults(
         llm=llm,
         embed_model=embed_model,
@@ -130,7 +139,13 @@ def txt_rag(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_query_engine(**query_engine_params, similarity_top_k=5)
+    retriever = LyzrRetriever.from_defaults(
+        **retriever_params, base_index=vector_store_index
+    )
+
+    query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+
+    return query_engine
 
 
 def docx_rag(
@@ -147,6 +162,7 @@ def docx_rag(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     query_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseQueryEngine:
     documents = read_docx_as_documents(
         input_dir=input_dir,
@@ -159,7 +175,7 @@ def docx_rag(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -168,7 +184,14 @@ def docx_rag(
     )
     query_engine_params = {} if query_engine_params is None else query_engine_params
 
+    retriever_params = (
+        {"retriever_type": "QueryFusionRetriever"}
+        if retriever_params is None
+        else retriever_params
+    )
+
     llm = LyzrLLMFactory.from_defaults(**llm_params)
+
     service_context = LyzrService.from_defaults(
         llm=llm,
         embed_model=embed_model,
@@ -181,7 +204,13 @@ def docx_rag(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_query_engine(**query_engine_params, similarity_top_k=5)
+    retriever = LyzrRetriever.from_defaults(
+        **retriever_params, base_index=vector_store_index
+    )
+
+    query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+
+    return query_engine
 
 
 def webpage_rag(
@@ -193,6 +222,7 @@ def webpage_rag(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     query_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseQueryEngine:
     documents = read_webpage_as_documents(
         url=url,
@@ -200,7 +230,7 @@ def webpage_rag(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -209,7 +239,14 @@ def webpage_rag(
     )
     query_engine_params = {} if query_engine_params is None else query_engine_params
 
+    retriever_params = (
+        {"retriever_type": "QueryFusionRetriever"}
+        if retriever_params is None
+        else retriever_params
+    )
+
     llm = LyzrLLMFactory.from_defaults(**llm_params)
+
     service_context = LyzrService.from_defaults(
         llm=llm,
         embed_model=embed_model,
@@ -222,7 +259,13 @@ def webpage_rag(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_query_engine(**query_engine_params, similarity_top_k=5)
+    retriever = LyzrRetriever.from_defaults(
+        **retriever_params, base_index=vector_store_index
+    )
+
+    query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+
+    return query_engine
 
 
 def website_rag(
@@ -234,6 +277,7 @@ def website_rag(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     query_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseQueryEngine:
     documents = read_website_as_documents(
         url=url,
@@ -241,7 +285,7 @@ def website_rag(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -250,7 +294,14 @@ def website_rag(
     )
     query_engine_params = {} if query_engine_params is None else query_engine_params
 
+    retriever_params = (
+        {"retriever_type": "QueryFusionRetriever"}
+        if retriever_params is None
+        else retriever_params
+    )
+
     llm = LyzrLLMFactory.from_defaults(**llm_params)
+
     service_context = LyzrService.from_defaults(
         llm=llm,
         embed_model=embed_model,
@@ -263,7 +314,13 @@ def website_rag(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_query_engine(**query_engine_params, similarity_top_k=5)
+    retriever = LyzrRetriever.from_defaults(
+        **retriever_params, base_index=vector_store_index
+    )
+
+    query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+
+    return query_engine
 
 
 def youtube_rag(
@@ -275,6 +332,7 @@ def youtube_rag(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     query_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseQueryEngine:
     documents = read_youtube_as_documents(
         urls=urls,
@@ -282,7 +340,7 @@ def youtube_rag(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -291,7 +349,14 @@ def youtube_rag(
     )
     query_engine_params = {} if query_engine_params is None else query_engine_params
 
+    retriever_params = (
+        {"retriever_type": "QueryFusionRetriever"}
+        if retriever_params is None
+        else retriever_params
+    )
+
     llm = LyzrLLMFactory.from_defaults(**llm_params)
+
     service_context = LyzrService.from_defaults(
         llm=llm,
         embed_model=embed_model,
@@ -304,4 +369,10 @@ def youtube_rag(
         **vector_store_params, documents=documents, service_context=service_context
     )
 
-    return vector_store_index.as_query_engine(**query_engine_params, similarity_top_k=5)
+    retriever = LyzrRetriever.from_defaults(
+        **retriever_params, base_index=vector_store_index
+    )
+
+    query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+
+    return query_engine

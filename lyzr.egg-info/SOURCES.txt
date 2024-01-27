@@ -14,6 +14,7 @@ lyzr/base/file_utils.py
 lyzr/base/llm.py
 lyzr/base/llms.py
 lyzr/base/prompt.py
+lyzr/base/retrievers.py
 lyzr/base/service.py
 lyzr/base/vector_store.py
 lyzr/base/prompts/ai_queries_pt.txt

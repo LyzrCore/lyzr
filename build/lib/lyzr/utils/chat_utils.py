@@ -47,7 +47,7 @@ def pdf_chat_(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -106,6 +106,7 @@ def txt_chat_(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     chat_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseChatEngine:
     documents = read_txt_as_documents(
         input_dir=input_dir,
@@ -118,7 +119,7 @@ def txt_chat_(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -177,6 +178,7 @@ def docx_chat_(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     chat_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseChatEngine:
     documents = read_docx_as_documents(
         input_dir=input_dir,
@@ -189,7 +191,7 @@ def docx_chat_(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -243,6 +245,7 @@ def webpage_chat_(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     chat_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseChatEngine:
     documents = read_webpage_as_documents(
         url=url,
@@ -250,7 +253,7 @@ def webpage_chat_(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -304,6 +307,7 @@ def website_chat_(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     chat_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseChatEngine:
     documents = read_website_as_documents(
         url=url,
@@ -311,7 +315,7 @@ def website_chat_(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
@@ -365,6 +369,7 @@ def youtube_chat_(
     vector_store_params: dict = None,
     service_context_params: dict = None,
     chat_engine_params: dict = None,
+    retriever_params: dict = None,
 ) -> BaseChatEngine:
     documents = read_youtube_as_documents(
         urls=urls,
@@ -372,7 +377,7 @@ def youtube_chat_(
 
     llm_params = {} if llm_params is None else llm_params
     vector_store_params = (
-        {"vector_store_type": "LanceDBVectorStore"}
+        {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
         else vector_store_params
     )
