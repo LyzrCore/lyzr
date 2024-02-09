@@ -1,9 +1,9 @@
 import os
 from openai import OpenAI
+from litellm import completion
 from typing import Optional, Literal
 from lyzr.base.prompt import get_prompt_text
 from lyzr.base.errors import MissingValueError, InvalidValueError
-
 
 class LLM:
     def __init__(
@@ -111,12 +111,23 @@ class LLM:
 
             # Else, handle chat completions
             else:
-                completion = client.chat.completions.create(
+                response = completion(
                     model=self.model_name,
                     messages=self.messages,
                     **params,
                 )
-                return completion
+                
+                return response
+            
+        else:
+            response = completion(
+                model=self.model_name,
+                messages=self.messages,
+                **params,
+            )
+            
+            return response            
+
 
 
 def get_model(
