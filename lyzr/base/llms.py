@@ -48,10 +48,6 @@ class LLM:
         return self
 
     def run(self, **kwargs):
-        if self.api_key is None:
-            raise ValueError(
-                "Please provide an API key or set the API_KEY environment variable."
-            )
 
         if self.messages is None:
             if "model_prompts" in kwargs:
