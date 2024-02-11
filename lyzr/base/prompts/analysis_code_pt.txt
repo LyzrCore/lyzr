@@ -15,9 +15,10 @@ def function_name(dataframe):
     # Write your Python Function here that does the required analysis and answer's CEO's Question
     # Print all the analysis results with `print()` function
                 
-# Assume `df` is already defined
-function_name(df) # Call the function that you wrote with the dataframe as the argument
+function_name(df)
 ```
+Lastly in the code, Call the function that you wrote 
+Assume `df` is already defined
 
 Now, Write down python function to print the answer the CEO's question: {user_input}
 

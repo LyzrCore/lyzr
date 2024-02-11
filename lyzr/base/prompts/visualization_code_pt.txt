@@ -21,7 +21,9 @@ def function_name(dataframe):
     # Save the visualizations with proper labels, names and extensions(in .png format)
     # Do not display the visualization just save it.
 
-# Assume `df` is already defined
-function_name(df) # Call the function that you wrote with the dataframe as the argument
+function_name(df)
 ```
+Lastly in the code, Call the function that you wrote 
+Assume `df` is already defined
+
 Now, Write down python code to create Visualizations answer the CEO's question: {user_input}

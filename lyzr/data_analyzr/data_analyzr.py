@@ -8,12 +8,13 @@ import io
 import re
 import sys
 import shutil
+import logging
 import warnings
 import datetime
 from pathlib import Path
 from types import TracebackType
 from contextlib import AbstractContextManager
-from typing import Optional, Union, Type
+from typing import Optional, Union, Type, Literal
 
 import numpy as np
 from PIL import Image
@@ -71,6 +72,9 @@ class DataAnalyzr:
         model_name: Optional[str] = None,
         user_input: Optional[str] = None,
         seed: int = None,
+        log_level: Literal[
+            "NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
+        ] = "WARNING",
     ):
         self.model = (
             model
@@ -104,6 +108,54 @@ class DataAnalyzr:
 
         self.user_input = user_input
         self.seed = seed
+        self._set_logger(log_level)
+
+    def _set_logger(self, log_level):
+        """
+        Configure a logger for the current instance with the specified log level.
+
+        This method initializes a logger with the given log level, setting it up
+        to output to `sys.stdout`.
+
+        Parameters:
+            log_level (str): A string representing the log level to set for the logger.
+                            This should be one of 'DEBUG', 'INFO', 'WARNING', 'ERROR',
+                            or 'CRITICAL'.
+
+        Raises:
+            ValueError: If `log_level` does not correspond to a valid logging level.
+
+        Returns:
+            None
+        """
+        self.logger = logging.getLogger(__name__)
+        numeric_level = getattr(logging, log_level.upper(), None)
+        if not isinstance(numeric_level, int):
+            raise ValueError("Invalid log level: %s" % log_level)
+        self.logger.setLevel(numeric_level)
+
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setLevel(numeric_level)
+
+        if self.logger.hasHandlers():
+            self.logger.handlers.clear()
+
+        self.logger.addHandler(handler)
+
+        log_filename = "lyzr_dataanalyzr.log"
+        file_handler = logging.FileHandler(
+            log_filename, mode="a"
+        )  # Open the log file in append mode
+        file_handler.setLevel(numeric_level)
+
+        # Optionally, you can set a formatter for the file handler if you want a different format for file logs
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
+        file_handler.setFormatter(formatter)
+
+        # Add the file handler to the logger
+        self.logger.addHandler(file_handler)
 
     def _clean_df(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -377,8 +429,10 @@ class DataAnalyzr:
         if self.user_input is None:
             raise MissingValueError(["user_input"])
         steps = self._get_analysis_steps()
+        self.logger.info("Analysis Steps:\n%s", steps)
 
         analysis_python_code = self._get_analysis_code(steps)
+        self.logger.info("Analysis Code:\n%s", analysis_python_code)
 
         with CapturePrints() as c:
             exec_scope = {"df": self.df}
@@ -458,7 +512,9 @@ class DataAnalyzr:
         if self.user_input is None:
             raise MissingValueError(["user_input"])
 
+        self.logger.info("Analysis User Input:\n%s", self.user_input)
         analysis_output = self._get_analysis_output()
+        self.logger.info("Analysis Output:\n%s", analysis_output)
 
         if len(analysis_output) > 6000:
             analysis_output = analysis_output[:3000] + "..." + analysis_output[-3000:]
@@ -485,7 +541,7 @@ class DataAnalyzr:
             .choices[0]
             .message.content
         )
-
+        self.logger.info("Analysis Insights:\n%s", analysis)
         return analysis
 
     def visualizations(
@@ -510,10 +566,16 @@ class DataAnalyzr:
         - List[Image.Image]: A list of PIL Image objects representing the saved visualizations.
         """
         self.user_input = user_input or self.user_input
+        self.logger.info("User Input:\n%s", user_input)
+
         if self.user_input is None:
             raise MissingValueError(["user_input"])
+ 
         visualization_steps = self._get_visualization_steps()
+        self.logger.info("Visualization Steps:\n%s", visualization_steps)
+
         visualization_python_code = self._get_visualiztion_code(visualization_steps)
+        self.logger.info("Visualization Python Code:\n%s", visualization_python_code)
 
         exec_scope = {"df": self.df}
         try:
