@@ -76,10 +76,11 @@ class LLM:
             if param in params:
                 del params[param]
 
-        # Instantiate the OpenAI client
-        client = OpenAI(api_key=self.api_key)
 
         if self.model_type == "openai":
+            # Instantiate the OpenAI client
+            client = OpenAI(api_key=self.api_key)
+            
             # Check for Text-to-Speech models
             if self.model_name in ["tts-1", "tts-1-hd"]:
                 if self.input is None:
