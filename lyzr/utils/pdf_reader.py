@@ -1,6 +1,6 @@
 from typing import List
 
-from langchain.document_loaders import PDFMinerLoader
+from llmsherpa.readers import LayoutPDFReader
 from llama_index.readers.base import BaseReader
 from llama_index.schema import Document
 
@@ -8,24 +8,22 @@ from llama_index.schema import Document
 class LyzrPDFReader(BaseReader):
     def __init__(self) -> None:
         try:
-            from pdfminer.high_level import extract_text 
+            from llmsherpa.readers import LayoutPDFReader
         except ImportError:
             raise ImportError(
-                "`pdfminer` package not found, please install it with "
-                "`pip install pdfminer.six`"
+                "`llmsherpa` package not found, please install it with "
+                "`pip install llmsherpa`"
             )
 
     def load_data(self, file_path: str, extra_info: dict = None) -> List[Document]:
-        loader = PDFMinerLoader(str(file_path))
-        langchain_documents = loader.load()  
+        llmsherpa_api_url = "https://readers.llmsherpa.com/api/document/developer/parseDocument?renderFormat=all"
+        loader = LayoutPDFReader(llmsherpa_api_url)
 
+        doc = loader.read_pdf(str(file_path))
+        metadata = {"source": str(file_path)} 
         documents = []
-        for langchain_document in langchain_documents:
-            doc = Document.from_langchain_format(langchain_document)
-
-            if extra_info is not None:
-                doc.metadata.update(extra_info)
-
-            documents.append(doc)
+        for chunk in doc.chunks():
+            document = Document(text=chunk.to_context_text(), metadata=metadata)
+            documents.append(document)
 
         return documents
