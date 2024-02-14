@@ -71,14 +71,18 @@ def pdf_rag(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params, documents=documents, service_context=service_context
+        **vector_store_params,
+        documents=documents,
+        service_context=service_context,
+        similarity_top_k=10,
     )
 
-    retriever = LyzrRetriever.from_defaults(
-        **retriever_params, base_index=vector_store_index
-    )
+    # retriever = LyzrRetriever.from_defaults(
+    #     **retriever_params, base_index=vector_store_index
+    # )
 
-    query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+    query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
@@ -136,14 +140,18 @@ def txt_rag(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params, documents=documents, service_context=service_context
+        **vector_store_params,
+        documents=documents,
+        service_context=service_context,
+        similarity_top_k=10,
     )
 
-    retriever = LyzrRetriever.from_defaults(
-        **retriever_params, base_index=vector_store_index
-    )
+    # retriever = LyzrRetriever.from_defaults(
+    #     **retriever_params, base_index=vector_store_index
+    # )
 
-    query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+    query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
@@ -201,14 +209,18 @@ def docx_rag(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params, documents=documents, service_context=service_context
+        **vector_store_params,
+        documents=documents,
+        service_context=service_context,
+        similarity_top_k=10,
     )
 
-    retriever = LyzrRetriever.from_defaults(
-        **retriever_params, base_index=vector_store_index
-    )
+    # retriever = LyzrRetriever.from_defaults(
+    #     **retriever_params, base_index=vector_store_index
+    # )
 
-    query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+    query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
@@ -256,14 +268,18 @@ def webpage_rag(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params, documents=documents, service_context=service_context
+        **vector_store_params,
+        documents=documents,
+        service_context=service_context,
+        similarity_top_k=10,
     )
 
-    retriever = LyzrRetriever.from_defaults(
-        **retriever_params, base_index=vector_store_index
-    )
+    # retriever = LyzrRetriever.from_defaults(
+    #     **retriever_params, base_index=vector_store_index
+    # )
 
-    query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+    query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
@@ -311,14 +327,18 @@ def website_rag(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params, documents=documents, service_context=service_context
+        **vector_store_params,
+        documents=documents,
+        service_context=service_context,
+        similarity_top_k=10,
     )
 
-    retriever = LyzrRetriever.from_defaults(
-        **retriever_params, base_index=vector_store_index
-    )
+    # retriever = LyzrRetriever.from_defaults(
+    #     **retriever_params, base_index=vector_store_index
+    # )
 
-    query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+    query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
@@ -366,13 +386,17 @@ def youtube_rag(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params, documents=documents, service_context=service_context
+        **vector_store_params,
+        documents=documents,
+        service_context=service_context,
+        similarity_top_k=10,
     )
 
-    retriever = LyzrRetriever.from_defaults(
-        **retriever_params, base_index=vector_store_index
-    )
+    # retriever = LyzrRetriever.from_defaults(
+    #     **retriever_params, base_index=vector_store_index
+    # )
 
-    query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+    query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine

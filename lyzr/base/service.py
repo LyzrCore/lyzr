@@ -22,18 +22,12 @@ class LyzrService:
         system_prompt: str = None,
         query_wrapper_prompt: Union[str, BasePromptTemplate] = None,
         **kwargs,
-    ) -> ServiceContext: 
+    ) -> ServiceContext:
         if isinstance(query_wrapper_prompt, str):
             query_wrapper_prompt = PromptTemplate(template=query_wrapper_prompt)
 
         callback_manager: CallbackManager = kwargs.get(
             "callback_manager", CallbackManager()
-        )
-
-        node_parser = SimpleNodeParser.from_defaults(
-            chunk_size=750,
-            chunk_overlap=100,
-            callback_manager=callback_manager,
         )
 
         service_context = ServiceContext.from_defaults(
@@ -42,7 +36,6 @@ class LyzrService:
             system_prompt=system_prompt,
             query_wrapper_prompt=query_wrapper_prompt,
             callback_manager=callback_manager,
-            node_parser=node_parser,
             **kwargs,
         )
 
