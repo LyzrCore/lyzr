@@ -7,5 +7,5 @@ class LyzrLLMFactory:
     def __init__(self) -> None:
         None
     @staticmethod
-    def from_defaults(model: str = "gpt-3.5-turbo", **kwargs) -> LLM:
+    def from_defaults(model: str = "gpt-4-0125-preview", **kwargs) -> LLM:
         return LiteLLM(model=model, **kwargs)
