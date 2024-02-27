@@ -45,7 +45,14 @@ def pdf_chat_(
         required_exts=required_exts,
     )
 
-    llm_params = {} if llm_params is None else llm_params
+    llm_params = (
+        {
+            "model": "gpt-4-0125-preview",
+            "temperature": 0,
+        }
+        if llm_params is None
+        else llm_params
+    )
     vector_store_params = (
         {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
@@ -117,7 +124,14 @@ def txt_chat_(
         required_exts=required_exts,
     )
 
-    llm_params = {} if llm_params is None else llm_params
+    llm_params = (
+        {
+            "model": "gpt-4-0125-preview",
+            "temperature": 0,
+        }
+        if llm_params is None
+        else llm_params
+    )
     vector_store_params = (
         {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
@@ -189,7 +203,14 @@ def docx_chat_(
         required_exts=required_exts,
     )
 
-    llm_params = {} if llm_params is None else llm_params
+    llm_params = (
+        {
+            "model": "gpt-4-0125-preview",
+            "temperature": 0,
+        }
+        if llm_params is None
+        else llm_params
+    )
     vector_store_params = (
         {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
@@ -251,7 +272,14 @@ def webpage_chat_(
         url=url,
     )
 
-    llm_params = {} if llm_params is None else llm_params
+    llm_params = (
+        {
+            "model": "gpt-4-0125-preview",
+            "temperature": 0,
+        }
+        if llm_params is None
+        else llm_params
+    )
     vector_store_params = (
         {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
@@ -313,7 +341,14 @@ def website_chat_(
         url=url,
     )
 
-    llm_params = {} if llm_params is None else llm_params
+    llm_params = (
+        {
+            "model": "gpt-4-0125-preview",
+            "temperature": 0,
+        }
+        if llm_params is None
+        else llm_params
+    )
     vector_store_params = (
         {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None
@@ -375,7 +410,14 @@ def youtube_chat_(
         urls=urls,
     )
 
-    llm_params = {} if llm_params is None else llm_params
+    llm_params = (
+        {
+            "model": "gpt-4-0125-preview",
+            "temperature": 0,
+        }
+        if llm_params is None
+        else llm_params
+    )
     vector_store_params = (
         {"vector_store_type": "WeaviateVectorStore"}
         if vector_store_params is None

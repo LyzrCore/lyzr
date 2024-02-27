@@ -1,17 +1,26 @@
 Metadata-Version: 2.1
 Name: lyzr
-Version: 0.1.24
-Summary: UNKNOWN
-Home-page: UNKNOWN
+Version: 0.1.25
+Home-page: 
 Author: lyzr
-License: UNKNOWN
-Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.8.1, <3.12
 Description-Content-Type: text/markdown
 License-File: LICENSE.txt
+Requires-Dist: asyncio
+Requires-Dist: nest_asyncio
+Requires-Dist: openai==1.3.4
+Requires-Dist: litellm==1.2.0
+Requires-Dist: llama-index==0.9.4
+Requires-Dist: langchain==0.0.339
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: beautifulsoup4==4.12.2
+Requires-Dist: pandas==2.0.2
+Requires-Dist: matplotlib==3.8.2
+Requires-Dist: weaviate-client==3.25.3
+Requires-Dist: llmsherpa
 
 # lyzr
 
@@ -72,5 +81,3 @@ Replace `[version]` with the actual version of the package you have built.
 ## License
 
 `lyzr` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
-
-
