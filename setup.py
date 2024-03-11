@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="lyzr",
-    version="0.1.25",
+    version="0.1.26",
     author="lyzr",
     description="",
     long_description=open("README.md").read(),
@@ -28,6 +28,6 @@ setup(
         "pandas==2.0.2",
         "matplotlib==3.8.2",
         "weaviate-client==3.25.3",
-        "llmsherpa"
+        "llmsherpa",
     ],
 )
