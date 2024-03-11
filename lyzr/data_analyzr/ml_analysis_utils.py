@@ -25,14 +25,16 @@ def get_columns_names(
     if isinstance(df_columns, pd.MultiIndex):
         df_columns = df_columns.levels[0]
     if columns is None:
-        if "columns" not in arguments or not isinstance(arguments["columns"], list):
+        if "columns" not in arguments or not isinstance(arguments.get("columns"), list):
             return df_columns.to_list()
-        columns = arguments["columns"]
-    columns_dict = {re.sub(r"\s+", "", col): col for col in df_columns}
+        columns = arguments.get("columns", [])
+    if len(columns) == 0:
+        return df_columns.to_list()
+    columns_dict = {col: col for col in df_columns}
     column_names = []
     for col in columns:
         if col not in columns_dict:
-            logger.warn(
+            logger.warning(
                 "Invalid column name provided: {}. Skipping this column.".format(col)
             )
         else:
@@ -46,7 +48,7 @@ def run_analysis_step(
     logger: logging.Logger,
 ):
     logger.info(f"\nRunning step: {step_details}")
-    if step_details["task"] == "cleandata":
+    if step_details["task"] == "clean_data":
         step_details["args"]["columns"] = get_columns_names(
             data.columns,
             arguments=step_details["args"],
@@ -58,18 +60,18 @@ def run_analysis_step(
             step_details["args"]["columns"],
         )
         data = cleaner.func()
-    elif step_details["task"] == "preprocess":
+    elif step_details["task"] == "transform":
         step_details["args"]["columns"] = get_columns_names(
             data.columns,
             arguments=step_details["args"],
             logger=logger,
         )
-        preprocessor = Preprocessor(
+        transformer = Transformer(
             data,
             step_details["type"],
         )
-        data = preprocessor.func(**step_details["args"])
-    elif step_details["task"] == "mathoperation":
+        data = transformer.func(**step_details["args"])
+    elif step_details["task"] == "math_operation":
         if "result" not in step_details["args"]:
             if len(step_details["args"].keys()) > 1:
                 step_details["args"]["result"] = [
@@ -129,12 +131,12 @@ class MLAnalysisFactory:
         self.context = context
         self.logger = logger
 
-    def _get_analysis_context(self, user_input: str) -> str:
+    def _get_analysis_guide(self, user_input: str) -> str:
         self.model.set_messages(
             messages=[
                 {
                     "role": "system",
-                    "content": Prompt("analysis_context_pt")
+                    "content": Prompt("analysis_guide_pt")
                     .format(
                         df_details=print_df_details(self.df_dict, self.df_info_dict),
                         question=user_input,
@@ -154,15 +156,15 @@ class MLAnalysisFactory:
             "steps": [
                 {
                     "step": 1,
-                    "task": "clean data",
-                    "type": "convert to datetime",
+                    "task": "clean_data",
+                    "type": "convert_to_datetime",
                     "args": {
                         "columns": ["col1"],
                     },
                 },
                 {
                     "step": 2,
-                    "task": "math operation",
+                    "task": "math_operation",
                     "type": "subtract",
                     "args": {
                         "columns": ["col1", "col2"],
@@ -191,7 +193,7 @@ class MLAnalysisFactory:
                         schema=schema,
                         df_details=print_df_details(self.df_dict, self.df_info_dict),
                         question=user_input,
-                        context=self.analysis_steps,
+                        context=self.analysis_guide,
                     )
                     .text,
                 },
@@ -205,20 +207,12 @@ class MLAnalysisFactory:
         output = self.model.run(**self.model_kwargs)
         return output.choices[0].message.content
 
-    def _run_analysis(self, user_input) -> tuple:
+    def _get_and_run_analysis(self, user_input) -> tuple:
         self.llm_output = self._get_analysis_steps(user_input)
         self.logger.info("\nSecond analysis LLM output:\n{}".format(self.llm_output))
         try:
             self.analysis_dict = check_output_format(self.llm_output, self.logger)
-            df_name = self.analysis_dict["analysis_df"]
-            data = self.df_dict[df_name].copy(deep=True)
-            outputs = []
-            for step_details in self.analysis_dict["steps"]:
-                step_details = validate_output_step_details(step_details, self.logger)
-                data = run_analysis_step(data, step_details, self.logger)
-                if not isinstance(data, pd.DataFrame):
-                    outputs.append(data)
-                    data = self.df_dict[df_name].copy(deep=True)
+            outputs, data = self.run_analysis(self.analysis_dict)
         except RecursionError:
             raise RecursionError(
                 "The request could not be completed. Please wait a while and try again."
@@ -229,7 +223,19 @@ class MLAnalysisFactory:
                     "The request could not be completed. Please wait a while and try again."
                 )
             self.logger.info(f"{e.__class__.__name__}: {e}")
-            return self._run_analysis(user_input)
+            return self._get_and_run_analysis(user_input)
+        return outputs, data
+
+    def run_analysis(self, analysis_dict):
+        df_name = analysis_dict["analysis_df"]
+        data = self.df_dict[df_name].copy(deep=True)
+        outputs = []
+        for step_details in analysis_dict["steps"]:
+            step_details = validate_output_step_details(step_details, self.logger)
+            data = run_analysis_step(data, step_details, self.logger)
+            if not isinstance(data, pd.DataFrame):
+                outputs.append(data)
+                data = self.df_dict[df_name].copy(deep=True)
         return outputs, data
 
     def _handle_single_output(self, data):
@@ -242,7 +248,7 @@ class MLAnalysisFactory:
 
         output_columns = get_columns_names(
             data.columns,
-            columns=self.analysis_dict["outputcolumns"],
+            columns=self.analysis_dict["output_columns"],
             logger=self.logger,
         )
         # Return output columns
@@ -259,17 +265,17 @@ class MLAnalysisFactory:
 
     def get_analysis_output(self, user_input: str) -> dict:
         # Get analysis steps from LLM using user_input
-        self.analysis_steps = self._get_analysis_context(user_input)
+        self.analysis_guide = self._get_analysis_guide(user_input)
         if (
-            self.analysis_steps
+            self.analysis_guide
             == "The provided dataset is not sufficient to answer the question."
         ):
-            return self.analysis_steps
-        self.logger.info("First analysis LLM output:\n{}\n".format(self.analysis_steps))
+            return self.analysis_guide
+        self.logger.info("First analysis LLM output:\n{}\n".format(self.analysis_guide))
 
         # Perform analysis using classes from lyzr/data_analyzr/run_analysis.py
         self.start_time = time.time()
-        outputs, data = self._run_analysis(user_input)
+        outputs, data = self._get_and_run_analysis(user_input)
         if len(outputs) > 0:
             outputs.append(data)
             self._handle_list_output(outputs)
@@ -280,14 +286,15 @@ class MLAnalysisFactory:
 
 
 class DataCleanerUtil:
+
     def __init__(
         self,
         df: pd.DataFrame,
         cleaning_type: Literal[
-            "removenulls",
-            "converttodatetime",
-            "converttonumeric",
-            "converttocategorical",
+            "remove_nulls",
+            "convert_to_datetime",
+            "convert_to_numeric",
+            "convert_to_categorical",
         ],
         columns: list,
     ):
@@ -295,24 +302,24 @@ class DataCleanerUtil:
         self.columns = columns
         self.func = getattr(self, cleaning_type.lower())
 
-    def removenulls(self) -> pd.DataFrame:
+    def remove_nulls(self) -> pd.DataFrame:
         return self.df.dropna(subset=self.columns)
 
-    def converttodatetime(self) -> pd.DataFrame:
-        self.df = self.removenulls()
+    def convert_to_datetime(self) -> pd.DataFrame:
+        self.df = self.remove_nulls()
         self.df.loc[:, self.columns] = self.df.loc[:, self.columns].apply(
             pd.to_datetime, errors="coerce"
         )
         return self.df
 
-    def converttonumeric(self) -> pd.DataFrame:
-        self.df = self.removenulls()
-        self.df.loc[:, self.columns] = self._remove_punctuation()
+    def convert_to_numeric(self) -> pd.DataFrame:
+        self.df = self.remove_nulls()
+        self.df = self._remove_punctuation()
         self.df.loc[:, self.columns] = self.df.loc[:, self.columns].apply(pd.to_numeric)
         return self.df
 
-    def converttocategorical(self) -> pd.DataFrame:
-        self.df = self.removenulls()
+    def convert_to_categorical(self) -> pd.DataFrame:
+        self.df = self.remove_nulls()
         self.df.loc[:, self.columns] = self.df.loc[:, self.columns].astype("category")
         return self.df
 
@@ -329,27 +336,31 @@ class DataCleanerUtil:
         return re.sub(r"[^\d.]", "", str(value))
 
 
-class Preprocessor:
+class Transformer:
     def __init__(
         self,
         df: pd.DataFrame,
-        preprocessing_type: Literal[
-            "onehotencode", "ordinalencode", "scale", "extracttimeperiod"
+        transform_type: Literal[
+            "one_hot_encode",
+            "ordinal_encode",
+            "scale",
+            "extract_time_period",
+            "select_indices",
         ],
     ):
         self.df = df
         self.func = getattr(
-            self, preprocessing_type.replace("-", "").replace(" ", "_").lower()
+            self, transform_type.replace("-", "").replace(" ", "_").lower()
         )
 
-    def onehotencode(self, columns) -> pd.DataFrame:
+    def one_hot_encode(self, columns) -> pd.DataFrame:
         encoded_df = pd.get_dummies(self.df, columns=columns, dtype=float)
         categories = {}
         for col in columns:
             categories[col] = self.df[col].astype("category").cat.categories.to_list()
         return encoded_df
 
-    def ordinalencode(self, columns) -> pd.DataFrame:
+    def ordinal_encode(self, columns) -> pd.DataFrame:
         from sklearn.preprocessing import OrdinalEncoder
 
         encoder = OrdinalEncoder()
@@ -370,7 +381,7 @@ class Preprocessor:
         scaled_df.loc[:, columns] = scaler.fit_transform(self.df.loc[:, columns].values)
         return scaled_df
 
-    def extracttimeperiod(
+    def extract_time_period(
         self,
         columns,
         period_to_extract: Literal[
@@ -414,6 +425,9 @@ class Preprocessor:
                 self.df.loc[:, columns], errors="coerce"
             ).dt.weekday
         return self.df
+
+    def select_indices(self, columns, indices) -> pd.DataFrame:
+        return self.df.loc[indices, columns]
 
 
 class DataOperatorUtil:
@@ -488,12 +502,12 @@ class DataAnalyserUtil:
             elif ascending.lower() == "false":
                 ascending = False
             else:
-                self.logger.warn(
+                self.logger.warning(
                     f"Invalid value provided for ascending: {ascending}. Defaulting to True."
                 )
                 ascending = True
         if not isinstance(ascending, bool):
-            self.logger.warn(
+            self.logger.warning(
                 f"Invalid value type provided for ascending: {type(ascending)}. Defaulting to True."
             )
             ascending = True
@@ -529,7 +543,7 @@ class DataAnalyserUtil:
         if len(columns) != len(relations) and len(relations) == 1:
             relations = relations * len(columns)
         if len(columns) != len(values) or len(columns) != len(relations):
-            self.logger.warn(
+            self.logger.warning(
                 "Invalid number of columns, values or relations provided. Returning original dataframe."
             )
             return self.df
@@ -555,7 +569,7 @@ class DataAnalyserUtil:
             elif rel == "notequalto":
                 self.df = self.df[self.df[col] != val]
             else:
-                self.logger.warn(f"Invalid relation provided: {rel}. Skipping.")
+                self.logger.warning(f"Invalid relation provided: {rel}. Skipping.")
         return self.df
 
     def mean(self, columns: list, result: Optional[str] = None) -> pd.DataFrame:
@@ -596,7 +610,9 @@ class DataAnalyserUtil:
             self.df.columns, columns=columns, logger=self.logger
         )
         if len(columns) == 0:
-            self.logger.warn("No valid columns provided. Returning original dataframe.")
+            self.logger.warning(
+                "No valid columns provided. Returning original dataframe."
+            )
             return self.df
         if agg_col is None:
             agg_col = self.df.columns.to_list()

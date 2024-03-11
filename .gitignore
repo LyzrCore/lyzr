@@ -13,3 +13,4 @@ generated_plots/
 tests/
 testing/
 logs/
+*.log

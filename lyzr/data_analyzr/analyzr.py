@@ -21,6 +21,7 @@ from lyzr.base.llms import (
     get_model,
     set_model_params,
 )
+from lyzr.data_analyzr.plot_utils import PlotFactory
 
 # imports for logging
 import sys
@@ -35,6 +36,7 @@ class DataAnalyzr:
         api_key: Optional[str] = None,
         gen_model: Optional[Union[dict, LLM]] = None,
         analysis_model: Optional[Union[dict, LLM]] = None,
+        plot_model: Optional[Union[dict, LLM]] = None,
         user_input: Optional[str] = None,
         context: Optional[str] = None,
         log_level: Optional[
@@ -69,6 +71,7 @@ class DataAnalyzr:
 
         self.analysis_type = analysis_type.lower().strip()
         self._analysis_model = analysis_model
+        self._plot_model = plot_model
 
         self.context = context or ""
         self.user_input = user_input
@@ -265,15 +268,16 @@ class DataAnalyzr:
         self,
         user_input: str,
         analysis_context: str,
+        analysis_steps: dict = None,
     ):
-        if self.analysis_type == "skip":
+        if self.analysis_type == "skip" and analysis_steps is None:
             if self.df_dict is None:
                 self.logger.info(
                     "No analysis performed. Fetching dataframes from database."
                 )
                 self.df_dict = self.database_connector.fetch_dataframes_dict()
             self.analysis_output = self.df_dict
-            self.analysis_steps = (
+            self.analysis_guide = (
                 "No analysis performed. Analysis output is the given dataframe."
             )
             return self.analysis_output
@@ -283,31 +287,38 @@ class DataAnalyzr:
             "kwargs": {},
         }
         if isinstance(self._analysis_model, LLM):
-            self.analysis_model_kwargs = {}
+            self._analysis_model_kwargs = {}
         elif isinstance(self._analysis_model, dict):
-            self.analysis_model_kwargs = self._analysis_model.get("kwargs", {})
+            self._analysis_model_kwargs = self._analysis_model.get("kwargs", {})
             self._analysis_model = get_model(
                 self.api_key,
                 self._analysis_model.get("type"),
                 self._analysis_model.get("name"),
-                **self.analysis_model_kwargs,
+                **self._analysis_model_kwargs,
             )
         if self.analysis_type == "sql":
             return self._txt_to_sql_analysis(user_input, analysis_context)
-        if self.analysis_type == "ml":
-            return self._ml_analysis(user_input, analysis_context)
+        if self.analysis_type == "ml" or analysis_steps is not None:
+            return self._ml_analysis(
+                user_input, analysis_context, analysis_steps=analysis_steps
+            )
 
-    def _ml_analysis(self, user_input: str, analysis_context: str = None):
+    def _ml_analysis(
+        self, user_input: str, analysis_context: str = None, analysis_steps: dict = None
+    ):
         self.analyzer = MLAnalysisFactory(
             model=self._analysis_model,
             data_dict=self.df_dict,
             data_info_dict=self.df_info_dict,
             logger=self.logger,
             context=analysis_context,
-            model_kwargs=self.analysis_model_kwargs,
+            model_kwargs=self._analysis_model_kwargs,
         )
+        if analysis_steps is not None:
+            _, data = self.analyzer.run_analysis(analysis_steps)
+            return data
         self.analysis_output = self.analyzer.get_analysis_output(user_input)
-        self.analysis_steps = self.analyzer.analysis_steps
+        self.analysis_guide = self.analyzer.analysis_guide
         return self.analysis_output
 
     def _txt_to_sql_analysis(self, user_input: str, analysis_context: str = None):
@@ -316,12 +327,85 @@ class DataAnalyzr:
             db_connector=self.database_connector,
             logger=self.logger,
             context=analysis_context,
-            model_kwargs=self.analysis_model_kwargs,
+            model_kwargs=self._analysis_model_kwargs,
             vector_store=self.vector_store,
         )
         self.analysis_output = self.analyzer.get_analysis_output(user_input)
-        self.analysis_steps = self.analyzer.analysis_steps
+        self.analysis_guide = self.analyzer.analysis_guide
         return self.analysis_output
+
+    def visualisation(
+        self,
+        user_input: str,
+        plot_context: str = None,
+        plot_path: str = None,
+    ):
+        if self.user_input == user_input and self.visualisation_output is not None:
+            return self.visualisation_output
+
+        if self.df_dict is None:
+            self.logger.info("Fetching dataframes from database to make visualization.")
+            self.df_dict = self.database_connector.fetch_dataframes_dict()
+
+        plot_context = plot_context or self.context
+        self.user_input = user_input or self.user_input
+        if self.user_input is None:
+            raise MissingValueError(["user_input"])
+
+        self._plot_model = self._plot_model or {
+            "type": "openai",
+            "name": "gpt-3.5-turbo-1106",
+            "kwargs": {},
+        }
+        if isinstance(self._plot_model, LLM):
+            self._plot_model_kwargs = {}
+        elif isinstance(self._plot_model, dict):
+            self._plot_model_kwargs = self._plot_model.get("kwargs", {})
+            self._plot_model = get_model(
+                self.api_key,
+                self._plot_model.get("type"),
+                self._plot_model.get("name"),
+                **self._plot_model_kwargs,
+            )
+
+        self.visualisation_output = None
+        self.start_time = time.time()
+        while True:
+            try:
+                self.logger.info("Generating visualisation\n")
+                plotter = PlotFactory(
+                    plotting_model=self._plot_model,
+                    plotting_model_kwargs=self._plot_model_kwargs,
+                    df_dict=self.df_dict,
+                    logger=self.logger,
+                    plot_context=plot_context,
+                    plot_path=plot_path,
+                )
+                analysis_steps = plotter.get_analysis_steps(self.user_input)
+                if analysis_steps is not None and "steps" in analysis_steps:
+                    if len(analysis_steps["steps"]) == 0:
+                        plot_df = self.df_dict[analysis_steps["df_name"]]
+                    else:
+                        plot_df = self.analysis(user_input, "", analysis_steps)
+                else:
+                    self.logger.info(
+                        "No analysis steps found. Using first dataframe for plotting.\n"
+                    )
+                    plot_df = self.df_dict[list(self.df_dict.keys())[0]]
+                print("Plotting dataframe:", plot_df)
+                self.visualisation_output = plotter.get_visualisation(plot_df)
+                return self.visualisation_output
+            except RecursionError:
+                raise RecursionError(
+                    "The request could not be completed. Please wait a while and try again."
+                )
+            except Exception as e:
+                if time.time() - self.start_time > 30:
+                    raise TimeoutError(
+                        "The request could not be completed. Please wait a while and try again."
+                    )
+                self.logger.info(f"{e.__class__.__name__}: {e}")
+                continue
 
     def insights(
         self,
@@ -342,7 +426,7 @@ class DataAnalyzr:
                     "content": Prompt("insights_pt")
                     .format(
                         user_input=user_input,
-                        analysis_context=self.analysis_steps,
+                        analysis_context=self.analysis_guide,
                         analysis_output=_format_analysis_output(self.analysis_output),
                         date=time.strftime("%d %b %Y"),
                     )
@@ -489,7 +573,10 @@ class DataAnalyzr:
     def ask(
         self,
         user_input: str = None,
-        outputs: list[Literal["insights", "recommendations", "tasks"]] = None,
+        outputs: list[
+            Literal["visualisation", "insights", "recommendations", "tasks"]
+        ] = None,
+        plot_path: str = None,
         rerun_analysis: bool = True,
         use_insights: bool = True,
         recs_format: dict = None,
@@ -502,7 +589,7 @@ class DataAnalyzr:
         if rerun_analysis is None:
             rerun_analysis = True
         if outputs is None:
-            outputs = ["insights", "recommendations", "tasks"]
+            outputs = ["visualisation", "insights", "recommendations", "tasks"]
         if user_input is None and self.user_input is None:
             raise MissingValueError(["user_input"])
         if user_input is None:
@@ -514,6 +601,13 @@ class DataAnalyzr:
             self.analysis_output = self.analysis(
                 user_input=user_input,
                 analysis_context=context.get("analysis", self.context),
+            )
+
+        if "visualisation" in outputs:
+            self.visualisation_output = self.visualisation(
+                user_input=user_input,
+                plot_context=context.get("visualisation", self.context),
+                plot_path=plot_path,
             )
 
         if (
@@ -551,6 +645,7 @@ class DataAnalyzr:
             self.tasks_output = ""
 
         return {
+            "visualisation": self.visualisation_output,
             "insights": self.insights_output,
             "recommendations": self.recommendations_output,
             "tasks": self.tasks_output,

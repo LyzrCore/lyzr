@@ -33,7 +33,7 @@ class TxttoSQLFactory:
         if self.vector_store is None:
             raise MissingValueError("vector_store")
 
-        self.analysis_output, self.analysis_steps = None, None
+        self.analysis_output, self.analysis_guide = None, None
 
     def get_analysis_output(
         self,
@@ -42,8 +42,8 @@ class TxttoSQLFactory:
     ):
         # SQL Generation
         self.logger.info("Generating SQL Query\n")
-        self.analysis_steps = self._generate_sql(user_input=user_input)
-        sql_query = extract_sql(self.analysis_steps, self.logger)
+        self.analysis_guide = self._generate_sql(user_input=user_input)
+        sql_query = extract_sql(self.analysis_guide, self.logger)
         self.logger.info(f"SQL Query generated:\n{sql_query}\n")
 
         # SQL Execution

@@ -1,16 +1,23 @@
 import re
 import logging
+from typing import Literal
 from itertools import chain
 
 all_tasks = {
-    "cleandata": [
-        "removenulls",
-        "converttodatetime",
-        "converttonumeric",
-        "converttocategorical",
+    "clean_data": [
+        "remove_nulls",
+        "convert_to_datetime",
+        "convert_to_numeric",
+        "convert_to_categorical",
     ],
-    "preprocess": ["onehotencode", "ordinalencode", "scale", "extracttimeperiod"],
-    "mathoperation": ["add", "subtract", "multiply", "divide"],
+    "transform": [
+        "one_hot_encode",
+        "ordinal_encode",
+        "scale",
+        "extract_time_period",
+        "select_indices",
+    ],
+    "math_operation": ["add", "subtract", "multiply", "divide"],
     "analysis": [
         "sortvalues",
         "filter",
@@ -112,9 +119,11 @@ def _check_task_and_type(step_details: dict) -> bool:
 
 
 # for output format dict
-def check_output_format(llm_output: str, logger: logging.Logger):
-    # remove all spaces in string
-    llm_output = re.sub(r"\s+", "", llm_output)
+def check_output_format(
+    llm_output: str,
+    logger: logging.Logger,
+    output_type: Literal["plot", "analysis"] = "analysis",
+):
     try:
         llm_output = eval(llm_output)
         logger.info("LLM output formet checked.\n")
@@ -128,15 +137,18 @@ def check_output_format(llm_output: str, logger: logging.Logger):
     except Exception as e:
         logger.info("Invalid output from LLM. Attempting to fix.")
 
-    # string checking
-    n_steps = _get_number_of_steps(llm_output)
-    steps_components = _get_component_elements(llm_output)
-    error_components = _check_num_components(steps_components, n_steps)
-    if len(error_components) != 0:
-        logger.info(f"Fixing components: {', '.join(error_components)}.")
-        llm_output = _fix_components(error_components, steps_components)
+    if output_type == "analysis":
+        # remove all spaces in string
+        llm_output = re.sub(r"\s+", "", llm_output)
+        # string checking
+        n_steps = _get_number_of_steps(llm_output)
+        steps_components = _get_component_elements(llm_output)
+        error_components = _check_num_components(steps_components, n_steps)
+        if len(error_components) != 0:
+            logger.info(f"Fixing components: {', '.join(error_components)}.")
+            llm_output = _fix_components(error_components, steps_components)
 
-    return check_output_format(llm_output, logger)
+        return check_output_format(llm_output, logger)
 
 
 def _get_component_elements(llm_output):
