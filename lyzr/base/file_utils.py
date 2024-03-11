@@ -58,12 +58,13 @@ def describe_dataset(
     if model is None:
         model = get_model(api_key, model_type, model_name)
 
-    model.prompt = Prompt("dataset_description_pt")
-    if model.prompt.get_variables() != []:
-        model.set_messages(
+    prompt = Prompt("dataset_description")
+    if prompt.get_variables() != []:
+        prompt.format(
             headers=df.columns.tolist(),
             df_sample=df.head(),
         )
+    model.set_messages(model_prompts=prompt.sections)
 
     output = model.run()
 

@@ -11,3 +11,5 @@ venv
 *.csv
 generated_plots/
 tests/
+testing/
+logs/
