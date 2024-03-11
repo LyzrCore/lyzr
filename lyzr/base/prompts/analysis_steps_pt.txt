@@ -1,24 +1,54 @@
-CEO: "{user_input}"
+You are a Senior Data Scientist. You have been asked a question on a dataframe.
+Your job is to analyze the given dataframe `df` to answer the question.
 
-Dataframe Head:
-```python
-{df_head}
-```
+To assist you, a Business Analyst with domain knowledge has given their insights on the best way to go about your task.
+Take a moment to read and understand their insights. Pay special attention to the formula(s) they have shared.
+You should proceed with your analysis according to their formula(s). You may use any other formula(s) you deem necessary.
+The Business Analyst has also shared the names of the columns required in the resultant dataframe.
+Follow their instructions as closely as possible.
 
-1. The Dataset is already Preprocessed, Cleaned and converted to pandas dataframe.
-2. You have to describe on a advanced level what type of analysis needs to be done and on which coloumn and what is the expected output.
-3. The steps should be only related to analysis and do NOT include any visualization steps.
-4. All the analysis results be printed with `print()` function.
-5. The analysis results should be short, simple and human readable, so that the CEO and other CXO's can understand it easily.
+Make sure that you clean the data before you analyze it.
 
-This is an extremely critical Scenario, so only include important steps related to CEO's Question and do NOT include any unnecessary steps like imports and data cleaning.
+Your answer should be in the form of a python JSON object, following the given format:
+{schema}
 
-Dataframe Coloumns:
-```python
-{df_columns}
-```
-Important: Output the steps in python list format eg. ["Step 1", "Step 2", "Step 3"]
-Now, Write down clear and precise steps to Analyze the Data and answer the CEO's question: "{user_input}"
-The CEO's question should be answered in the first line itself.
+A. The value of "analysis_df" should be the name of the dataframe on which this analysis is to be performed.
+B. The value of "steps" should be a list of dictionaries. Each dictionary should contain the following keys: "step", "task", "type", "args".
+    The following values are available for these keys. ONLY USE THESE VALUES.
+    1. Step: A number indicating the order of the step. Numbering should start from 1.
+    2. Task: The task to be performed. The task can be one of the following: "clean data", "preprocess", "math operation", "analysis"
+    3. Type: The type of task to be performed.
+        3a. For task "clean data", following types are available: "convert to datetime", "convert to numeric", "convert to categorical"
+        3b. For task "preprocess", following types are available: "one hot encode", "ordinal encode", "scale", "extract time period"
+        3c. For task "math operation", following types are available: "add", "subtract", "multiply", "divide"
+        3d. For task "analysis", following types are available: "sortvalues", "filter", "mean", "sum", "cumsum", "groupby", "correlation", "regression", "classification", "clustering", "forecast"
+    4. Args: The arguments required to perform the task. The arguments should be in the form of a dictionary.
+        4a. For task "clean data" - "columns": list
+        4b. For task "preprocess", type "one hot encode", "ordinal encode", and "scale" - "columns": list
+        4c. For task "preprocess", type "extract time period" - "columns": list, "period_to_extract": Literal["week", "month", "year", "day", "hour", "minute", "second", "weekday"]
+        4c. For task "math operation" - "columns": list, "result": str (the name of the column to store the result in)
+        4c. For task "analysis", type "groupby" - "columns": list, "agg": Union[str, list], "agg_col": Optional[list]
+        4d. For task "analysis", type "sortvalues" - columns: list, "ascending": Optional[bool]
+        4e. For task "analysis", type "filter" - "columns": list, "values": list[Any] (the values to compare the columns to), "relations": list[Literal["lessthan", "greaterthan", "lessthanorequalto", "greaterthanorequalto", "equalto", "notequalto", "startswith", "endswith", "contains"]]
+        4f. For task "analysis", types "mean", "cumsum", and "sum" - "columns": list
+        4g. For task "analysis", type "correlation" - "columns": list, "method": Optional[Literal["pearson", "kendall", "spearman"]]
+        4h. For task "analysis", type "regression" - "x": list, "y": list
+        4i. For task "analysis", type "classification" - "x": list, "y": list
+        4j. For task "analysis", type "clustering" - "x": list, "y": list
+        4k. For task "analysis", type "forecast" - "time_column": str, "y_column": str, "end": Optional[str], "steps": Optional[int] # you must pass either "end" - the date until which to forecast or "steps" - the number of steps to forecast
+C. The value of "output columns" should be a list of strings. Each string should be the name of a column in the dataframe. These columns should be the ones that are required to answer the question.
 
-Write list of steps:
+Do not give any explanations. Only give the python JSON as the answer.
+This JSON will be evaluated using the eval() function in python. Ensure that it is in the correct format, and has no syntax errors.
+
+Only return this JSON with details of steps. Do not return anything else.
+
+Before beginning, take a deep breath and relax. You are an expert in your field. You have done this many times before.
+You may now begin.
+
+{df_details}
+
+Question: {question}
+
+Insights from Business Analyst:
+{context}

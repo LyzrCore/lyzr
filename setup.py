@@ -28,6 +28,7 @@ setup(
         "pandas==2.0.2",
         "matplotlib==3.8.2",
         "weaviate-client==3.25.3",
+        "tabulate==0.9.0",
         "llmsherpa",
     ],
 )

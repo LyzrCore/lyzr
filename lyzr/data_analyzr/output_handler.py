@@ -141,15 +141,15 @@ def check_output_format(llm_output: str, logger: logging.Logger):
 
 def _get_component_elements(llm_output):
     # string matching
-    quotes = "('|\")"
-    number_regex = "\d+"
-    word_regex = f"{quotes}\w+{quotes}"
-    alphanum_regex = f"({word_regex}|{number_regex})"
-    list_0_regex = f"\[{alphanum_regex}(,{alphanum_regex})*?\]"
-    tasks_regex = "['\"]task['\"]:(.*?),"
-    task_types_regex = "['\"]type['\"]:(.*?),"
-    output_columns_regex = ("['\"]outputcolumns['\"]:(.*)", "['\"](\w+)['\"]")
-    output_columns_list_regex = f"{quotes}outputcolumns{quotes}:(\[{word_regex}(,{word_regex})+?\])"  # list of alphanumeric strings
+    quotes = r"('|\")"
+    number_regex = r"\d+"
+    word_regex = rf"{quotes}\w+{quotes}"
+    alphanum_regex = rf"({word_regex}|{number_regex})"
+    list_0_regex = rf"\[{alphanum_regex}(,{alphanum_regex})*?\]"
+    tasks_regex = r"['\"]task['\"]:(.*?),"
+    task_types_regex = r"['\"]type['\"]:(.*?),"
+    output_columns_regex = (r"['\"]outputcolumns['\"]:(.*)", r"['\"](\w+)['\"]")
+    output_columns_list_regex = rf"{quotes}outputcolumns{quotes}:(\[{word_regex}(,{word_regex})+?\])"  # list of alphanumeric strings
     args_dict_regex = (
         "{"
         + f"{word_regex}:({word_regex}|{number_regex}|{list_0_regex})(,{word_regex}:({word_regex}|{number_regex}|{list_0_regex}))*?"
@@ -160,7 +160,7 @@ def _get_component_elements(llm_output):
         + f"{word_regex}:({word_regex}|{number_regex}|{list_0_regex}|{args_dict_regex})(,{word_regex}:({word_regex}|{number_regex}|{list_0_regex}|{args_dict_regex}))*?"
         + "}"
     )  # dict with string keys and alphanum or list_0 or args_dict values
-    all_steps_regex = f"\[{step_details_dict_regex}(,{step_details_dict_regex})*?\]"  # list of step_details_dict
+    all_steps_regex = rf"\[{step_details_dict_regex}(,{step_details_dict_regex})*?\]"  # list of step_details_dict
     response_dict_regex = (
         "{"
         + f"'steps':{all_steps_regex},'outputcolumns':{output_columns_list_regex}"

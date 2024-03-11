@@ -14,6 +14,7 @@ import pandas as pd
 from lyzr.base.errors import (
     ImproperlyConfigured,
     ValidationError,
+    DependencyError,
 )
 
 
@@ -82,22 +83,6 @@ def import_modules(modules: dict[str, str]):
     return imported_modules
 
 
-class DependencyError(Exception):
-    """Exception raised when a required module is missing."""
-
-    def __init__(self, modules: dict[str, str]):
-        self.required_modules = modules
-        super().__init__(self._format_message())
-
-    def _format_message(self):
-        missing_modules = ", ".join(
-            f"{mod}: {ver}" for mod, ver in self.required_modules.items()
-        )
-        return (
-            f"Missing required module versions: {missing_modules}. Please install them."
-        )
-
-
 class DatabaseConnector:
     def __init__(self):
         """Parent class for all database connectors."""
@@ -123,10 +108,6 @@ class DatabaseConnector:
             return RedshiftConnector
         elif db_type == "postgres":
             return PostgresConnector
-        elif db_type == "snowflake":
-            return SnowflakeConnector
-        elif db_type == "mysql":
-            return MySQLConnector
         elif db_type == "sqlite":
             return SQLiteConnector
         else:
@@ -457,235 +438,6 @@ class RedshiftConnector(DatabaseConnector):
             self.conn.rollback()
             raise RuntimeError(
                 f"Error occurred while executing query on Redshift table: {e}"
-            ) from e
-
-
-class SnowflakeConnector(DatabaseConnector):
-
-    def __init__(
-        self,
-        account: str,
-        user: str,
-        password: str,
-        database: str,
-        role: str = None,
-        warehouse: str = None,
-        schema: str = None,
-        tables: list[str] = None,
-    ):
-        self.account = account or os.getenv("SNOWFLAKE_ACCOUNT")
-        self.user = user or os.getenv("SNOWFLAKE_USER")
-        self.password = password or os.getenv("SNOWFLAKE_PASSWORD")
-        self.database = database or os.getenv("SNOWFLAKE_DB")
-        if not all(
-            [
-                self.account,
-                self.user,
-                self.password,
-                self.database,
-            ]
-        ):
-            raise ImproperlyConfigured(
-                "Please provide all required environment variables for Snowflake connection: SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_DB"
-            )
-        self.role = role or os.getenv("SNOWFLAKE_ROLE") or None
-        self.warehouse = warehouse or os.getenv("SNOWFLAKE_WAREHOUSE") or None
-        self.schema = schema or os.getenv("SNOWFLAKE_SCHEMA") or None
-        self.tables = tables or os.getenv("SNOWFLAKE_TABLES") or None
-        (self.snowflake_connector,) = import_modules(
-            {"snowflake.connector": required_modules["snowflake.connector"]}
-        )
-        try:
-            self.conn = self.snowflake_connector.connect(
-                user=self.user,
-                password=self.password,
-                account=self.account,
-                database=self.database,
-            )
-        except self.snowflake_connector.Error as e:
-            self.conn = None
-            raise ValidationError(
-                f"Error occurred while connecting to Snowflake database: {e}"
-            ) from e
-
-        self.cursor = self.conn.cursor()
-        if self.role is not None:
-            self.cursor.execute(f"USE ROLE {self.role}")
-
-        if self.warehouse is not None:
-            self.cursor.execute(f"USE WAREHOUSE {self.warehouse}")
-        self.cursor.execute(f"USE DATABASE {self.database}")
-
-    def fetch_dataframes_dict(
-        self,
-        schema: str = None,
-        tables: list[str] = None,
-    ) -> dict[pd.DataFrame]:
-        schema = schema or self.schema
-        tables = tables or self.tables
-        if self.conn is None:
-            raise RuntimeError("No connection to the database.")
-        try:
-            if tables is None:
-                query = "SHOW TABLE_NAME FROM %(database)s"
-                query += ".%(schema)s;" if self.schema is not None else ";"
-                tables = self.cursor.execute(
-                    query, {"database": self.database, "schema": self.schema}
-                )
-                tables = tables.fetchall()
-                tables = [table[0] for table in tables]
-            dataframes = {
-                table: "SELECT * FROM %(database)s.%(schema)s.%(table)s;"
-                for table in tables
-            }
-            self.schema = self.schema or ""
-            for tablename, query in dataframes.items():
-                contents = self.cursor.execute(
-                    query,
-                    {
-                        "database": self.database,
-                        "schema": self.schema,
-                        "table": tablename,
-                    },
-                )
-                table_contents = contents.fetchall()
-                column_names = [desc[0] for desc in self.cursor.description]
-                dataframes[tablename] = pd.DataFrame(
-                    table_contents, columns=column_names
-                )
-
-            return dataframes
-        except self.snowflake_connector.Error as e:
-            raise ValidationError(
-                f"Error occurred while connecting to Snowflake database: {e}"
-            ) from e
-        except Exception as e:
-            raise RuntimeError(
-                f"Error occurred while fetching data from Snowflake table: {e}"
-            ) from e
-
-    def get_dbschema(self):
-        if self.conn is None:
-            raise RuntimeError("No connection to the database.")
-        return self.run_sql("SELECT * FROM INFORMATION_SCHEMA.COLUMNS")
-
-    def run_sql(self, sql: str, role: str = None) -> Union[pd.DataFrame, None]:
-        if self.conn is None:
-            raise RuntimeError("No connection to the database.")
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute(sql)
-            results = cursor.fetchall()
-            # Create a pandas dataframe from the results
-            df = pd.DataFrame(results, columns=[desc[0] for desc in cursor.description])
-            return df
-        except self.snowflake_connector.Error as e:
-            raise ValidationError(
-                f"Error occurred while connecting to Snowflake database: {e}"
-            ) from e
-        except Exception as e:
-            raise RuntimeError(
-                f"Error occurred while executing query on Snowflake table: {e}"
-            ) from e
-
-
-class MySQLConnector(DatabaseConnector):
-
-    def __init__(
-        self,
-        host: str,
-        user: str,
-        password: str,
-        database: str,
-        schema: str = None,
-        tables: list[str] = None,
-    ):
-        self.host = host or os.getenv("MYSQL_HOST")
-        self.user = user or os.getenv("MYSQL_USER")
-        self.password = password or os.getenv("MYSQL_PASSWORD")
-        self.database = database or os.getenv("MYSQL_DB")
-        if not all([self.host, self.user, self.password, self.database]):
-            raise ImproperlyConfigured(
-                "Please provide all required environment variables for MySQL connection: MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB"
-            )
-        self.schema = schema or os.getenv("MYSQL_SCHEMA") or None
-        self.tables = tables or os.getenv("MYSQL_TABLES") or None
-        (self.mysql_connector,) = import_modules(
-            {"mysql.connector": required_modules["mysql.connector"]}
-        )
-        try:
-            self.conn = self.mysql_connector.connect(
-                host=self.host,
-                user=self.user,
-                password=self.password,
-                database=self.database,
-            )
-        except self.mysql_connector.Error as e:
-            self.conn = None
-            raise ValidationError(
-                f"Error occurred while connecting to MySQL database: {e}"
-            ) from e
-
-    def fetch_dataframes_dict(
-        self,
-        schema: str = None,
-        tables: list[str] = None,
-    ) -> dict[pd.DataFrame]:
-        schema = schema or self.schema
-        tables = tables or self.tables
-        if self.conn is None:
-            raise RuntimeError("No connection to the database.")
-        try:
-            cursor = self.conn.cursor()
-
-            # Fetch all table names in the schema
-            if tables is None:
-                cursor.execute("SHOW TABLES;")
-                tables = cursor.fetchall()
-                tables = [table[0] for table in tables]
-
-            # Fetch all table contents and store in a dictionary as pandas dataframes
-            dataframes = {table: f"SELECT * FROM {table};" for table in tables}
-            for tablename, query in dataframes.items():
-                cursor.execute(query)
-                column_names = [desc[0] for desc in cursor.description]
-                dataframes[tablename] = pd.DataFrame(
-                    cursor.fetchall(), columns=column_names
-                )
-            return dataframes
-        except self.mysql_connector.Error as e:
-            raise RuntimeError(
-                f"Error occurred while connecting to MySQL database: {e}"
-            ) from e
-        except Exception as e:
-            raise RuntimeError(
-                f"Error occurred while fetching data from MySQL table: {e}"
-            ) from e
-
-    def get_dbschema(self):
-        if self.conn is None:
-            raise RuntimeError("No connection to the database.")
-        return self.run_sql("SELECT * FROM INFORMATION_SCHEMA.COLUMNS")
-
-    def run_sql(self, sql: str):
-        if self.conn is None:
-            raise RuntimeError("No connection to the database.")
-
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute(sql)
-            results = cursor.fetchall()
-
-            # Create a pandas dataframe from the results
-            df = pd.DataFrame(results, columns=[desc[0] for desc in cursor.description])
-            return df
-        except self.mysql_connector.Error as e:
-            raise ValidationError(
-                f"Error occurred while connecting to MySQL database: {e}"
-            ) from e
-        except Exception as e:
-            raise RuntimeError(
-                f"Error occurred while executing query on MySQL table: {e}"
             ) from e
 
 

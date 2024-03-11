@@ -23,12 +23,7 @@ def get_db_details(
         "files",
         "redshift",
         "postgres",
-        # "bigquery",
-        "snowflake",
-        "mysql",
         "sqlite",
-        # "azure_sql",
-        # "adls",
     ],
     config: dict,
     vector_store_config: dict,
@@ -71,11 +66,7 @@ def get_db_details(
             connector.create_database(
                 db_path=config.get("db_path", "./sqlite/sqlite.db"), df_dict=df_dict
             )
-        if (
-            isinstance(vector_store_config, dict)
-            and str(vector_store_config["pass"]).lower()
-            == "da69e55a-d0dd-11ee-a316-997f5f52ba5e"
-        ):
+        if isinstance(vector_store_config, dict):
             vector_store = ChromaDBVectorStore(
                 path=vector_store_config["path"],
                 remake_store=vector_store_config.get(

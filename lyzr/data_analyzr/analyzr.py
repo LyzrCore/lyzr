@@ -125,12 +125,7 @@ class DataAnalyzr:
             "files",
             "redshift",
             "postgres",
-            # "bigquery",
-            "snowflake",
-            "mysql",
             "sqlite",
-            # "azure_sql",
-            # "adls",
         ],
         config: dict,
         # if db_type == "files", config_keys = datasets, files_kwargs, db_path
@@ -151,11 +146,6 @@ class DataAnalyzr:
                 buffer = io.StringIO()
                 df.info(buf=buffer)
                 self.df_info_dict[name] = buffer.getvalue()
-
-        # if self.database_connector is not None:
-        #     self.df_info_dict = (
-        #         self.database_connector.fetch_dataframes_info_dict()
-        #     )  # TODO: Implement this method in child classes of DatabaseConnector
 
     def dataset_description(self, context: str) -> str:
         """

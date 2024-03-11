@@ -3,12 +3,12 @@ import os
 import json
 import uuid
 import logging
-from dataclasses import dataclass
 
 # local imports
 from lyzr.base.errors import (
     ValidationError,
     MissingValueError,
+    DependencyError,
 )
 from lyzr.data_analyzr.db_connector import (
     DatabaseConnector,
@@ -47,9 +47,16 @@ class ChromaDBVectorStore:
             self.add_training_plan(plan=connector.get_default_training_plan())
 
     def make_chroma_client(self, path: str):
-        import chromadb
-        from chromadb.config import Settings
-        from chromadb.utils import embedding_functions
+        try:
+            import chromadb
+            from chromadb.config import Settings
+            from chromadb.utils import embedding_functions
+        except ImportError:
+            raise DependencyError(
+                {
+                    "chromadb": "chromadb==0.4.22",
+                }
+            )
 
         self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
 
