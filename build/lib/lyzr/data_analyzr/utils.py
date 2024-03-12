@@ -25,8 +25,9 @@ def convert_to_numeric(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     for col in columns:
         try:
             df = df.dropna(subset=[col])
-            df.loc[:, [col]] = df.loc[:, col].apply(_remove_punctuation_from_string)
-            df[col] = pd.to_numeric(df[col])
+            df.loc[:, col] = df.loc[:, col].apply(_remove_punctuation_from_string)
+            df.loc[:, col] = pd.to_numeric(df.loc[:, col])
+            df.loc[:, col] = df.loc[:, col].astype("float")
         except Exception:
             pass
     return df

@@ -266,7 +266,7 @@ class DataAnalyzr:
                 self._analysis_model.get("name"),
                 **self._analysis_model_kwargs,
             )
-        if self.analysis_type == "sql":
+        if self.analysis_type == "sql" and analysis_steps is None:
             return self._txt_to_sql_analysis(user_input, analysis_context)
         if self.analysis_type == "ml" or analysis_steps is not None:
             return self._ml_analysis(
@@ -314,9 +314,9 @@ class DataAnalyzr:
             return self.visualisation_output
 
         if plot_path is None:
-            plot_path = Path("generated_plots/plot.png")
+            plot_path = Path("generated_plots/plot.png").as_posix()
         else:
-            plot_path = Path(plot_path)
+            plot_path = Path(plot_path).as_posix()
 
         if self.df_dict is None:
             self.logger.info("Fetching dataframes from database to make visualization.")
@@ -367,7 +367,7 @@ class DataAnalyzr:
                         "No analysis steps found. Using first dataframe for plotting.\n"
                     )
                     self.plot_df = self.df_dict[list(self.df_dict.keys())[0]]
-                self.logger.info(f"\nDF to be plot:\n{self.plot_df.head()}\n")
+
                 self.visualisation_output = plotter.get_visualisation(self.plot_df)
                 return self.visualisation_output
             except RecursionError:

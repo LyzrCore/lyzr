@@ -45,9 +45,20 @@ class PlotFactory:
         self.plotting_library = "matplotlib"
         self.output_format = "png"
 
-        self.plot_path = plot_path or "plot.png"
-        if not self.plot_path.endswith(".png"):
-            self.plot_path += ".png"
+        self.plot_path = plot_path
+        if not os.path.isfile(self.plot_path):
+            dir_path = os.path.dirname(self.plot_path)
+            if dir_path.strip() != "":
+                os.makedirs(dir_path, exist_ok=True)
+            if os.path.isdir(self.plot_path):
+                self.plot_path = os.path.join(self.plot_path, "plot.png")
+            else:
+                self.logger.warn(
+                    f'Incorrect path for plot image provided: {self.plot_path}. Defaulting to "generated_plots/plot.png".'
+                )
+                self.plot_path = "generated_plots/plot.png"
+        if os.path.splitext(self.plot_path)[1] != ".png":
+            self.plot_path = os.path.join(os.path.splitext(self.plot_path)[0], ".png")
 
     def _get_plotting_guide(self, user_input: str) -> str:
         self.model.set_messages(
@@ -183,9 +194,10 @@ class PlotFactory:
     ) -> None:
         columns = [plot.get("x"), plot.get("y")]
         columns.extend(plot.get("by", []))
-        df = convert_to_numeric(df, columns=columns)
+        df = convert_to_numeric(df, columns=columns).infer_objects()
 
         if plot_type == "line":
+            self.logger.info(f"\nDF to be plot:\n{df.head()}\n")
             df.plot.line(
                 x=plot.get("x"),
                 y=plot.get("y"),
@@ -215,15 +227,14 @@ class PlotFactory:
                 self.logger.warning(
                     f"\nToo many bars given. Plotting only the top {n_bars} bars."
                 )
-                num_cols = (
-                    df[columns].select_dtypes(include=["number"]).columns.tolist()
-                )
+                num_cols = df[columns].select_dtypes(include=np.number).columns.tolist()
                 df_bar = (
                     df[columns].sort_values(by=num_cols, ascending=False).head(n_bars)
                 )
             else:
                 df_bar = df[columns]
 
+            self.logger.info(f"\nDF to be plot:\n{df_bar.head()}\n")
             df_bar.plot.bar(
                 x=plot.get("x"),
                 y=plot.get("y"),
@@ -231,6 +242,7 @@ class PlotFactory:
                 **args,
             )
         elif plot_type == "barh":
+            self.logger.info(f"\nDF to be plot:\n{df.head()}\n")
             df.plot.barh(
                 x=plot.get("x"),
                 y=plot.get("y"),
@@ -238,6 +250,7 @@ class PlotFactory:
                 **args,
             )
         elif plot_type == "scatter":
+            self.logger.info(f"\nDF to be plot:\n{df.head()}\n")
             df.plot.scatter(
                 x=plot.get("x"),
                 y=plot.get("y"),
@@ -246,6 +259,7 @@ class PlotFactory:
             )
         elif plot_type == "hist":
             df_hist = df[plot.get("by")]
+            self.logger.info(f"\nDF to be plot:\n{df_hist.head()}\n")
             df_hist.plot.hist(
                 ax=axes,
                 **args,
@@ -284,9 +298,6 @@ class PlotFactory:
 
     def get_visualisation(self, df: pd.DataFrame) -> str:
         fig = self._create_plot(self.plotting_steps, df)
-        dir_path = os.path.dirname(self.plot_path)
-        if dir_path != "" and not os.path.exists(dir_path):
-            os.makedirs(dir_path, exist_ok=True)
         plt.tight_layout()
         fig.savefig(self.plot_path)
         plt.close(fig)
