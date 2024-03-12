@@ -314,9 +314,9 @@ class DataAnalyzr:
             return self.visualisation_output
 
         if plot_path is None:
-            plot_path = Path("generated_plots/plot.png")
+            plot_path = Path("generated_plots/plot.png").as_posix()
         else:
-            plot_path = Path(plot_path)
+            plot_path = Path(plot_path).as_posix()
 
         if self.df_dict is None:
             self.logger.info("Fetching dataframes from database to make visualization.")

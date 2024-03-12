@@ -45,9 +45,20 @@ class PlotFactory:
         self.plotting_library = "matplotlib"
         self.output_format = "png"
 
-        self.plot_path = plot_path or "plot.png"
-        if not self.plot_path.endswith(".png"):
-            self.plot_path += ".png"
+        self.plot_path = plot_path
+        if not os.path.isfile(self.plot_path):
+            dir_path = os.path.dirname(self.plot_path)
+            if dir_path.strip() != "":
+                os.makedirs(dir_path, exist_ok=True)
+            if os.path.isdir(self.plot_path):
+                self.plot_path = os.path.join(self.plot_path, "plot.png")
+            else:
+                self.logger.warn(
+                    f'Incorrect path for plot image provided: {self.plot_path}. Defaulting to "generated_plots/plot.png".'
+                )
+                self.plot_path = "generated_plots/plot.png"
+        if os.path.splitext(self.plot_path)[1] != ".png":
+            self.plot_path = os.path.join(os.path.splitext(self.plot_path)[0], ".png")
 
     def _get_plotting_guide(self, user_input: str) -> str:
         self.model.set_messages(
@@ -284,9 +295,6 @@ class PlotFactory:
 
     def get_visualisation(self, df: pd.DataFrame) -> str:
         fig = self._create_plot(self.plotting_steps, df)
-        dir_path = os.path.dirname(self.plot_path)
-        if dir_path != "" and not os.path.exists(dir_path):
-            os.makedirs(dir_path, exist_ok=True)
         plt.tight_layout()
         fig.savefig(self.plot_path)
         plt.close(fig)
