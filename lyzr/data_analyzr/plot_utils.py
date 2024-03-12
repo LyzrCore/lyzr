@@ -194,9 +194,10 @@ class PlotFactory:
     ) -> None:
         columns = [plot.get("x"), plot.get("y")]
         columns.extend(plot.get("by", []))
-        df = convert_to_numeric(df, columns=columns)
+        df = convert_to_numeric(df, columns=columns).infer_objects()
 
         if plot_type == "line":
+            self.logger.info(f"\nDF to be plot:\n{df.head()}\n")
             df.plot.line(
                 x=plot.get("x"),
                 y=plot.get("y"),
@@ -226,15 +227,14 @@ class PlotFactory:
                 self.logger.warning(
                     f"\nToo many bars given. Plotting only the top {n_bars} bars."
                 )
-                num_cols = (
-                    df[columns].select_dtypes(include=["number"]).columns.tolist()
-                )
+                num_cols = df[columns].select_dtypes(include=np.number).columns.tolist()
                 df_bar = (
                     df[columns].sort_values(by=num_cols, ascending=False).head(n_bars)
                 )
             else:
                 df_bar = df[columns]
 
+            self.logger.info(f"\nDF to be plot:\n{df_bar.head()}\n")
             df_bar.plot.bar(
                 x=plot.get("x"),
                 y=plot.get("y"),
@@ -242,6 +242,7 @@ class PlotFactory:
                 **args,
             )
         elif plot_type == "barh":
+            self.logger.info(f"\nDF to be plot:\n{df.head()}\n")
             df.plot.barh(
                 x=plot.get("x"),
                 y=plot.get("y"),
@@ -249,6 +250,7 @@ class PlotFactory:
                 **args,
             )
         elif plot_type == "scatter":
+            self.logger.info(f"\nDF to be plot:\n{df.head()}\n")
             df.plot.scatter(
                 x=plot.get("x"),
                 y=plot.get("y"),
@@ -257,6 +259,7 @@ class PlotFactory:
             )
         elif plot_type == "hist":
             df_hist = df[plot.get("by")]
+            self.logger.info(f"\nDF to be plot:\n{df_hist.head()}\n")
             df_hist.plot.hist(
                 ax=axes,
                 **args,
