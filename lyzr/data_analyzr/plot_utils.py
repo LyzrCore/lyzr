@@ -12,24 +12,8 @@ import matplotlib.pyplot as plt
 # local imports
 from lyzr.base.prompt import Prompt
 from lyzr.base.llms import LLM, set_model_params
+from lyzr.data_analyzr.utils import format_df_details
 from lyzr.data_analyzr.output_handler import check_output_format
-
-
-class Plot:
-    def __init__(self, x: list, y: list):
-        self.x = x
-        self.y = y
-
-
-def print_df_details(df_dict: dict[pd.DataFrame], df_info_dict: dict[str]) -> str:
-    str_output = ""
-    for name, df in df_dict.items():
-        var_name = name.lower().replace(" ", "_")
-        if name in df_info_dict and isinstance(df, pd.DataFrame):
-            str_output += f"Dataframe: `{var_name}`\nOutput of `{var_name}.head()`:\n{df.head()}\nOutput of `{var_name}.info()`:\n{df_info_dict[name]}\n"
-        else:
-            str_output += f"{name}: {df}\n"
-    return str_output
 
 
 class PlotFactory:
@@ -72,7 +56,7 @@ class PlotFactory:
                     "role": "system",
                     "content": Prompt("analysis_guide_pt")
                     .format(
-                        df_details=print_df_details(self.df_dict, self.df_info_dict),
+                        df_details=format_df_details(self.df_dict, self.df_info_dict),
                         question=user_input,
                         context=self.context,
                         plotting_lib=self.plotting_library,
@@ -164,7 +148,7 @@ class PlotFactory:
                         guide=self.plotting_guide,
                         schema=schema,
                         question=user_input,
-                        df_details=print_df_details(self.df_dict, self.df_info_dict),
+                        df_details=format_df_details(self.df_dict, self.df_info_dict),
                     )
                     .text,
                 },
@@ -266,7 +250,7 @@ class PlotFactory:
         if ylabel:
             axes.set_ylabel(ylabel)
 
-    def _create_plot(self, plot_details: dict, df: pd.DataFrame) -> Plot:
+    def _create_plot(self, plot_details: dict, df: pd.DataFrame) -> plt.Figure:
 
         nrows, ncols = plot_details.get("subplots", (1, 1))
         fig, ax = plt.subplots(

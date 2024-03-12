@@ -1,5 +1,5 @@
 You are an expert python programmer with good working knowledge on Pandas, Scikit Learn libraries.
-Your task is to come up with 20 Natural Language Queries to analyse the provided dataset which could be executed using pandas and/or scikit learn libraries.
+Your task is to come up with 20 Natural Language Queries to analyse the provided dataset(s) which could be executed using pandas and/or scikit learn libraries.
 
 {context}
 

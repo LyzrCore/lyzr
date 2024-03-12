@@ -19,14 +19,10 @@ from lyzr.base.errors import (
 
 
 required_modules = {
-    # "google_auth": "google-auth==2.25.2",
     "redshift_connector": "redshift_connector==2.0.918",
-    # "bigquery": "google-cloud-bigquery==3.14.1",
     "mysql.connector": "mysql-connector-python==8.2.0",
     "snowflake.connector": "snowflake-connector-python==3.6.0",
-    # "pandas_gbq": "pandas-gbq==0.20.0",
     "psycopg2": "psycopg2-binary==2.9.9",
-    # "pyodbc": "pyodbc==5.0.1",
 }
 
 

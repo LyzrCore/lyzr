@@ -10,7 +10,7 @@ import pandas as pd
 
 # local imports
 from lyzr.base.prompt import Prompt
-from lyzr.data_analyzr.file_utils import get_db_details
+from lyzr.data_analyzr.file_utils import get_db_details, read_file
 from lyzr.data_analyzr.txt_to_sql_utils import TxttoSQLFactory
 from lyzr.data_analyzr.ml_analysis_utils import MLAnalysisFactory
 from lyzr.base.errors import (
@@ -22,10 +22,16 @@ from lyzr.base.llms import (
     set_model_params,
 )
 from lyzr.data_analyzr.plot_utils import PlotFactory
+from lyzr.data_analyzr.utils import format_df_with_describe, format_df_with_info
 
 # imports for logging
 import sys
 import logging
+
+# imports for legacy usage
+from PIL import Image
+from pathlib import Path
+from pandas.errors import EmptyDataError
 
 
 class DataAnalyzr:
@@ -44,6 +50,12 @@ class DataAnalyzr:
         ] = "INFO",
         print_log: Optional[bool] = False,
         log_filename: Optional[str] = "dataanalyzr.log",
+        # legacy usage
+        df: Union[str, pd.DataFrame] = None,
+        model: Optional[LLM] = None,
+        model_type: Optional[str] = None,
+        model_name: Optional[str] = None,
+        seed: int = None,
     ):
         self.api_key = (
             api_key or os.environ.get("API_KEY") or os.environ.get("OPENAI_API_KEY")
@@ -51,33 +63,36 @@ class DataAnalyzr:
         if self.api_key is None:
             raise MissingValueError("api key")
 
-        if gen_model is None:
-            gen_model = {
-                "type": "openai",
-                "name": "gpt-4-1106-preview",
-                "kwargs": {},
-            }
-        if isinstance(gen_model, LLM):
-            self._gen_model = gen_model
-            self._gen_model_kwargs = {}
-        else:
-            self._gen_model_kwargs = gen_model["kwargs"]
-            self._gen_model = get_model(
-                self.api_key,
-                gen_model["type"],
-                gen_model["name"],
-                **self._gen_model_kwargs,
-            )
-
-        self.analysis_type = analysis_type.lower().strip()
-        self._analysis_model = analysis_model
-        self._plot_model = plot_model
-
-        self.context = context or ""
         self.user_input = user_input
-
         self.log_filename = log_filename
         self._set_logger(log_level, print_log)
+
+        if df is not None:
+            # legacy usage
+            self._legacy_usage(df, user_input, model, model_type, model_name, seed)
+        else:
+            if gen_model is None:
+                gen_model = {
+                    "type": "openai",
+                    "name": "gpt-4-1106-preview",
+                    "kwargs": {},
+                }
+            if isinstance(gen_model, LLM):
+                self._gen_model = gen_model
+                self._gen_model_kwargs = {}
+            else:
+                self._gen_model_kwargs = gen_model["kwargs"]
+                self._gen_model = get_model(
+                    self.api_key,
+                    gen_model["type"],
+                    gen_model["name"],
+                    **self._gen_model_kwargs,
+                )
+
+            self.analysis_type = analysis_type.lower().strip()
+            self._analysis_model = analysis_model
+            self._plot_model = plot_model
+            self.context = context or ""
 
         (
             self.dataset_description_output,
@@ -87,6 +102,66 @@ class DataAnalyzr:
             self.recommendations_output,
             self.tasks_output,
         ) = (None, None, None, None, None, None)
+
+    def _legacy_usage(
+        self,
+        df: Union[str, pd.DataFrame],
+        user_input: Optional[str],
+        model: Optional[LLM],
+        model_type: Optional[str],
+        model_name: Optional[str],
+        seed: int,
+    ):
+        self.logger.warning(
+            "The `df` parameter is deprecated and will be removed in a future version. Please use the `get_data` method to load data."
+        )
+        for param in ["model", "model_type", "model_name", "seed"]:
+            if locals()[param] is not None:
+                self.logger.warning(
+                    f"The `{param}` parameter is deprecated and will be removed in a future version. Please use the `analysis_model` parameter to set the analysis model, and the `gen_model` parameter to set the generation model."
+                )
+        self._gen_model = self._analysis_model = self._plot_model = (
+            model
+            or os.environ.get("LLM_MODEL")
+            or get_model(
+                api_key=self.api_key,
+                model_type=model_type or os.environ.get("MODEL_TYPE", "openai"),
+                model_name=model_name or os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
+            )
+        )
+        self._gen_model_kwargs = self._analysis_model_kwargs = (
+            self._plot_model_kwargs
+        ) = {"seed": seed}
+        self.context = ""
+        self.analysis_type = "ml"
+        self.user_input = user_input
+
+        def _clean_df(df: pd.DataFrame):
+            df = df[df.columns[df.isnull().mean() < 0.5]]
+            cat_columns = df.select_dtypes(include=["object"]).columns
+            num_columns = df.select_dtypes(include=[np.number]).columns
+            df[cat_columns] = df[cat_columns].apply(lambda x: x.fillna(x.mode()[0]))
+            df[num_columns] = df[num_columns].apply(lambda x: x.fillna(x.mean()))
+            df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+            df = df.drop_duplicates(keep="first")
+            return df
+
+        if isinstance(df, str):
+            self.database_connector, self.df_dict, self.vector_store = get_db_details(
+                "ml", "files", {"datasets": {"Dataset": df}}, {}, logger=self.logger
+            )
+            for name, df in self.df_dict.items():
+                if not isinstance(df, pd.DataFrame):
+                    continue
+                self.df_dict[name] = _clean_df(df)
+        elif isinstance(df, pd.DataFrame):
+            if df.empty:
+                raise EmptyDataError("The provided DataFrame is empty.")
+            self.df_dict = {"dataset": _clean_df(df)}
+            self.database_connector = None
+            self.vector_store = None
+        else:
+            raise ValueError("df must be a path to a file or a pd.DataFrame object.")
 
     def _set_logger(self, log_level, print_log):
         self.logger = logging.getLogger(__name__)
@@ -149,120 +224,6 @@ class DataAnalyzr:
                 buffer = io.StringIO()
                 df.info(buf=buffer)
                 self.df_info_dict[name] = buffer.getvalue()
-
-    def dataset_description(self, context: str) -> str:
-        """
-        Generate a brief description of the dataset currently in use.
-
-        Returns:
-        - str: A string providing a description of the dataset.
-        """
-        if "dataset_description" in self.__dict__ and self.context == context:
-            if self.dataset_description is not None:
-                return self.dataset_description
-
-        context = context or self.context
-        self._gen_model.set_messages(
-            messages=[
-                {
-                    "content": Prompt("dataset_description_context_pt")
-                    .format(context=context)
-                    .text,
-                    "role": "system",
-                },
-                {
-                    "content": Prompt("describe_dataset_pt")
-                    .format(
-                        df_head=(
-                            self.df_info_dict
-                            if self.df_dict is None
-                            else _format_df_dict_head(self.df_dict)
-                        ),
-                    )
-                    .text,
-                    "role": "user",
-                },
-            ]
-        )
-        self._gen_model_kwargs = set_model_params(
-            {
-                "temperature": 1,
-                "top_p": 0.3,
-                "frequency_penalty": 0.7,
-                "presence_penalty": 0.3,
-            },
-            self._gen_model_kwargs,
-        )
-        self.dataset_description_output = (
-            self._gen_model.run(**self._gen_model_kwargs).choices[0].message.content
-        )
-        return self.dataset_description_output
-
-    def ai_queries_df(
-        self, dataset_description: Optional[str] = None, context: Optional[str] = None
-    ) -> str:
-        """
-        Returns AI-generated queries for data analysis related to the dataset.
-
-        Parameters:
-        - dataset_description (str, optional):
-            A description of the dataset. If not provided, it will be generated.
-
-        Returns:
-        - str: Queries for data analysis related to the dataset.
-        """
-        if "ai_queries" in self.__dict__ and self.context == context:
-            if self.ai_queries is not None:
-                return self.ai_queries
-
-        context = context or self.context
-
-        if self.ai_queries is not None:
-            return self.ai_queries
-
-        self.dataset_description_output = (
-            dataset_description or self.dataset_description_output
-        )
-        if self.dataset_description_output is None:
-            self.dataset_description_output = self.dataset_description(context)
-
-        self._gen_model.set_messages(
-            messages=[
-                {
-                    "content": Prompt("ai_queries_context_pt")
-                    .format(context=context)
-                    .text,
-                    "role": "system",
-                },
-                {
-                    "content": Prompt("ai_queries_pt")
-                    .format(
-                        dataset_description=self.dataset_description_output,
-                        df_head=(
-                            self.df_info_dict
-                            if self.df_dict is None
-                            else _format_df_dict_head(self.df_dict)
-                        ),
-                    )
-                    .text,
-                    "role": "user",
-                },
-            ]
-        )
-        self._gen_model_kwargs = set_model_params(
-            {
-                "temperature": 1,
-                "top_p": 0.3,
-                "frequency_penalty": 0.7,
-                "presence_penalty": 0.3,
-            },
-            self._gen_model_kwargs,
-        )
-        self.ai_queries = (
-            self._gen_model.run(**self._gen_model_kwargs).choices[0].message.content
-        )
-
-        return self.ai_queries
 
     def analysis(
         self,
@@ -427,7 +388,7 @@ class DataAnalyzr:
                     .format(
                         user_input=user_input,
                         analysis_context=self.analysis_guide,
-                        analysis_output=_format_analysis_output(self.analysis_output),
+                        analysis_output=format_df_with_describe(self.analysis_output),
                         date=time.strftime("%d %b %Y"),
                     )
                     .text,
@@ -457,7 +418,27 @@ class DataAnalyzr:
         recommendations_context: Optional[str] = None,
         n_recommendations: Optional[int] = 3,
         output_type: Optional[Literal["text", "json"]] = "text",
+        # legacy usage
+        insights: Optional[str] = None,
+        schema: Optional[list] = None,
     ) -> str:
+        if insights is not None or schema is not None:
+            use_insights = True
+            output_type = "json"
+        if insights is not None:
+            self.logger.warning(
+                "The `insights` parameter is deprecated and will be removed in a future version. Please use the `insights_output` attribute to set the insights."
+            )
+            self.insights_output = insights
+        if schema is not None:
+            self.logger.warning(
+                "The `schema` parameter is deprecated and will be removed in a future version. Please use the `recs_format` parameter to set the recommendations format as a dictionary."
+            )
+            for elem in schema:
+                if isinstance(elem, dict):
+                    recs_format = elem
+                    break
+
         if recommendations_context is None or recommendations_context == "":
             recommendations_context = Prompt("rectxt_default_context_pt").text
 
@@ -498,7 +479,7 @@ class DataAnalyzr:
                 insights=(
                     "" if insights is None else f"\nAnalysis insights:\n{insights}\n"
                 ),
-                analysis_output=f"Analysis output:\n{_format_analysis_output(self.analysis_output)}",
+                analysis_output=f"Analysis output:\n{format_df_with_describe(self.analysis_output)}",
             )
             .text
         )
@@ -534,7 +515,20 @@ class DataAnalyzr:
         user_input: Optional[str] = None,
         tasks_context: Optional[str] = None,
         n_tasks: Optional[int] = 3,
+        # legacy usage
+        insights: Optional[str] = None,
+        recommendations: Optional[str] = None,
     ) -> str:
+        if insights is not None:
+            self.logger.warning(
+                "The `insights` parameter is deprecated and will be removed in a future version. Please use the `insights_output` attribute to set the insights."
+            )
+            self.insights_output = insights
+        if recommendations is not None:
+            self.logger.warning(
+                "The `recommendations` parameter is deprecated and will be removed in a future version. Please use the `recommendations_output` attribute to set the recommendations."
+            )
+            self.recommendations_output = recommendations
         self.logger.info("Generating tasks\n")
         self._gen_model.set_messages(
             messages=[
@@ -651,54 +645,141 @@ class DataAnalyzr:
             "tasks": self.tasks_output,
         }
 
+    # ---------------------------------------- Legacy functions, for backward compatibility ----------------------------------------
+    # ------------------------------ These functions are not used in the current version of the code. ------------------------------
 
-def _format_analysis_output(output_df, name: str = None) -> str:
-    if isinstance(output_df, pd.Series):
-        output_df = output_df.to_frame()
-    if isinstance(output_df, list):
-        return "\n".join([_format_analysis_output(df) for df in output_df])
-    if isinstance(output_df, dict):
-        return "\n".join(
-            [_format_analysis_output(df, name) for name, df in output_df.items()]
+    def analysis_insights(self, user_input: str) -> str:
+        self.logger.warning(
+            "The `analysis_insights` method is deprecated and will be removed in a future version. Use the `insights` method instead."
         )
-    if not isinstance(output_df, pd.DataFrame):
-        return str(output_df)
+        return self.insights(user_input)
 
-    name = name or "Dataframe"
-    if output_df.size > 100:
-        df_display = pd.concat([output_df.head(50), output_df.tail(50)], axis=0)
-        df_string = f"{name} snapshot:\n{_df_to_string(df_display)}\n\nOutput of `df.describe()`:\n{_df_to_string(output_df.describe())}"
-    else:
-        df_string = f"{name}:\n{_df_to_string(output_df)}"
-    return df_string
+    def visualizations(
+        self, user_input: str, dir_path: Path = Path("./generated_plots")
+    ) -> list[Image.Image]:
+        self.logger.warning(
+            "The `visualizations` method is deprecated and will be removed in a future version. Use the `visualisation` method instead."
+        )
+        return [self.visualisation(user_input, plot_path=str(dir_path / "plot.png"))]
 
+    def dataset_description(self, context: str) -> str:
+        self.logger.warning(
+            "The `dataset_description` method is deprecated and will be removed in a future version."
+        )
+        context = context or self.context
+        df_desc_dict = {}
+        for name, df in self.df_dict.items():
+            self._gen_model.set_messages(
+                messages=[
+                    {
+                        "content": Prompt("dataset_description_context_pt")
+                        .format(context=context)
+                        .text,
+                        "role": "system",
+                    },
+                    {
+                        "content": Prompt("dataset_description_pt")
+                        .format(
+                            df_head=df.head(),
+                        )
+                        .text,
+                        "role": "user",
+                    },
+                ]
+            )
+            self._gen_model_kwargs = set_model_params(
+                {
+                    "temperature": 1,
+                    "top_p": 0.3,
+                    "frequency_penalty": 0.7,
+                    "presence_penalty": 0.3,
+                },
+                self._gen_model_kwargs,
+            )
+            df_desc_dict[name] = (
+                self._gen_model.run(**self._gen_model_kwargs).choices[0].message.content
+            )
+        self.dataset_description_output = "\n".join(
+            [f"{name}:\n{desc}" for name, desc in df_desc_dict.items()]
+        )
+        return self.dataset_description_output
 
-def _df_to_string(output_df: pd.DataFrame) -> str:
-    # convert all datetime columns to datetime objects
-    datetimecols = [
-        col
-        for col in output_df.columns.tolist()
-        if ("date" in col.lower() or "time" in col.lower())
-        and output_df[col].dtype != np.number
-    ]
-    if "timestamp" in output_df.columns and "timestamp" not in datetimecols:
-        datetimecols.append("timestamp")
-    for col in datetimecols:
-        output_df[col] = output_df[col].astype(dtype="datetime64[ns]", errors="ignore")
-        output_df.loc[:, col] = pd.to_datetime(output_df[col], errors="ignore")
+    def ai_queries_df(
+        self, dataset_description: Optional[str] = None, context: Optional[str] = None
+    ) -> str:
+        self.logger.warning(
+            "The `ai_queries_df` method is deprecated and will be removed in a future version."
+        )
+        context = context or self.context
+        self.dataset_description_output = (
+            dataset_description or self.dataset_description_output
+        )
+        if self.dataset_description_output is None:
+            self.dataset_description_output = self.dataset_description(context)
 
-    datetimecols = output_df.select_dtypes(include=["datetime64"]).columns.tolist()
-    formatters = {col: _format_date for col in datetimecols}
-    return output_df.to_string(
-        float_format="{:,.2f}".format,
-        formatters=formatters,
-        na_rep="None",
-    )
+        self._gen_model.set_messages(
+            messages=[
+                {
+                    "content": Prompt("ai_queries_context_pt")
+                    .format(context=context)
+                    .text,
+                    "role": "system",
+                },
+                {
+                    "content": Prompt("ai_queries_pt")
+                    .format(
+                        df_details=format_df_with_describe(self.df_dict),
+                    )
+                    .text,
+                    "role": "user",
+                },
+            ]
+        )
+        self._gen_model_kwargs = set_model_params(
+            {
+                "temperature": 1,
+                "top_p": 0.3,
+                "frequency_penalty": 0.7,
+                "presence_penalty": 0.3,
+            },
+            self._gen_model_kwargs,
+        )
+        self.ai_queries = (
+            self._gen_model.run(**self._gen_model_kwargs).choices[0].message.content
+        )
 
+        return self.ai_queries
 
-def _format_date(date: pd.Timestamp):
-    return date.strftime("%d %b %Y %H:%M")
+    def analysis_recommendation(
+        self,
+        user_input: Optional[str] = None,
+        number_of_recommendations: Optional[int] = 4,
+    ):
+        self.logger.warning(
+            "The `analysis_recommendation` method is deprecated and will be removed in a future version."
+        )
+        formatted_user_input: str = (
+            Prompt("format_user_input_pt").format(user_input=user_input)
+            if user_input is not None
+            else ""
+        )
 
-
-def _format_df_dict_head(df_dict: dict[pd.DataFrame]) -> str:
-    return "\n".join([f"{name}:\n{df.head()}\n" for name, df in df_dict.items()])
+        self._gen_model.set_messages(
+            messages=[
+                {
+                    "prompt": Prompt("analysis_recommendations_pt").format(
+                        number_of_recommendations=number_of_recommendations,
+                        df_details=format_df_with_info(self.df_dict),
+                        formatted_user_input=formatted_user_input,
+                    ),
+                    "role": "system",
+                },
+            ]
+        )
+        self._gen_model_kwargs = set_model_params(
+            {"temperature": 0.2}, self._gen_model_kwargs
+        )
+        recommendations = (
+            self._gen_model.run(**self._gen_model_kwargs).choices[0].message.content
+        )
+        return recommendations
