@@ -1,0 +1,5 @@
+You have been given the original query asked by the user and the analysis results generated.
+You have to develop recommendations that the user can implement to solve the problem stated in their query.
+If it is not a problem, then your recommendations should be designed to help the user improve the outcome.
+Give numbers and exact values to support your recommendations.
+
