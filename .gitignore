@@ -14,3 +14,4 @@ tests/
 testing/
 logs/
 *.log
+.vscode/

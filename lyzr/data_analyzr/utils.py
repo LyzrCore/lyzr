@@ -1,9 +1,46 @@
 # standart-library imports
 import io
+import re
 
 # third-party imports
 import numpy as np
 import pandas as pd
+
+
+def _remove_punctuation_from_string(value) -> str:
+    if not isinstance(value, str):
+        return value
+    negative = False
+    value = value.strip()
+    if value[0] == "-":
+        negative = True
+    cleaned = re.sub(r"[^\d.]", "", str(value))
+    if cleaned.replace(".", "").isdigit():
+        return "-" + cleaned if negative else cleaned
+    else:
+        return value
+
+
+def convert_to_numeric(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+    for col in columns:
+        try:
+            df = df.dropna(subset=[col])
+            df.loc[:, [col]] = df.loc[:, col].apply(_remove_punctuation_from_string)
+            df[col] = pd.to_numeric(df[col])
+        except Exception:
+            pass
+    return df
+
+
+def get_info_dict_from_df_dict(df_dict: dict[pd.DataFrame]) -> dict[str]:
+    df_info_dict = {}
+    for name, df in df_dict.items():
+        if not isinstance(df, pd.DataFrame):
+            continue
+        buffer = io.StringIO()
+        df.info(buf=buffer)
+        df_info_dict[name] = buffer.getvalue()
+    return df_info_dict
 
 
 def format_df_details(df_dict: dict[pd.DataFrame], df_info_dict: dict[str]) -> str:
@@ -20,14 +57,7 @@ def format_df_details(df_dict: dict[pd.DataFrame], df_info_dict: dict[str]) -> s
 
 
 def format_df_with_info(df_dict: dict[pd.DataFrame]) -> str:
-    df_info_dict = {}
-    for name, df in df_dict.items():
-        if not isinstance(df, pd.DataFrame):
-            continue
-        buffer = io.StringIO()
-        df.info(buf=buffer)
-        df_info_dict[name] = buffer.getvalue()
-    return format_df_details(df_dict, df_info_dict)
+    return format_df_details(df_dict, get_info_dict_from_df_dict(df_dict))
 
 
 def format_df_with_describe(output_df, name: str = None) -> str:
@@ -52,6 +82,7 @@ def format_df_with_describe(output_df, name: str = None) -> str:
 
 
 def _df_to_string(output_df: pd.DataFrame) -> str:
+    output_df.columns = [str(col) for col in output_df.columns.tolist()]
     # convert all datetime columns to datetime objects
     datetimecols = [
         col

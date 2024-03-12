@@ -31,6 +31,12 @@ class LLM:
             self.set_messages(model_prompts)
         for param in kwargs:
             setattr(self, param, kwargs[param])
+        if self.model_name == "gpt-3.5-turbo":
+            self.model_max_tokens = 16_385
+        elif self.model_name.startswith("gpt-4-1106"):
+            self.model_max_tokens = 128_000
+        else:
+            self.model_max_tokens = None
 
     def set_messages(
         self,
@@ -91,6 +97,7 @@ class LLM:
             "voice",
             "input",
             "audiofile",
+            "model_max_tokens",
         ]:
             if param in params:
                 del params[param]

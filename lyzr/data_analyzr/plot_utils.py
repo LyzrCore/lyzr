@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 # local imports
 from lyzr.base.prompt import Prompt
 from lyzr.base.llms import LLM, set_model_params
-from lyzr.data_analyzr.utils import format_df_details
+from lyzr.data_analyzr.utils import format_df_details, convert_to_numeric
 from lyzr.data_analyzr.output_handler import check_output_format
 
 
@@ -181,6 +181,10 @@ class PlotFactory:
     def _plot_subplot(
         self, plot_type: str, axes: np.ndarray, args: dict, df: pd.DataFrame, plot: dict
     ) -> None:
+        columns = [plot.get("x"), plot.get("y")]
+        columns.extend(plot.get("by", []))
+        df = convert_to_numeric(df, columns=columns)
+
         if plot_type == "line":
             df.plot.line(
                 x=plot.get("x"),
@@ -206,13 +210,19 @@ class PlotFactory:
                 )
                 args["stacked"] = False
             n_bars = 25
-            if df[[plot.get("x"), plot.get("y")]].shape[0] > n_bars:
+            columns = [plot.get("x"), plot.get("y")]
+            if df[columns].shape[0] > n_bars:
                 self.logger.warning(
-                    f"\nToo many bars given. Plotting only the first {n_bars} bars."
+                    f"\nToo many bars given. Plotting only the top {n_bars} bars."
                 )
-                df_bar = df[[plot.get("x"), plot.get("y")]].head(n_bars)
+                num_cols = (
+                    df[columns].select_dtypes(include=["number"]).columns.tolist()
+                )
+                df_bar = (
+                    df[columns].sort_values(by=num_cols, ascending=False).head(n_bars)
+                )
             else:
-                df_bar = df[[plot.get("x"), plot.get("y")]]
+                df_bar = df[columns]
 
             df_bar.plot.bar(
                 x=plot.get("x"),
@@ -235,9 +245,8 @@ class PlotFactory:
                 **args,
             )
         elif plot_type == "hist":
-            df[plot.get("by")] = df[plot.get("by")].astype(float)
-            df.plot.hist(
-                by=plot.get("by"),
+            df_hist = df[plot.get("by")]
+            df_hist.plot.hist(
                 ax=axes,
                 **args,
             )
@@ -278,6 +287,7 @@ class PlotFactory:
         dir_path = os.path.dirname(self.plot_path)
         if dir_path != "" and not os.path.exists(dir_path):
             os.makedirs(dir_path, exist_ok=True)
+        plt.tight_layout()
         fig.savefig(self.plot_path)
         plt.close(fig)
         self.logger.info(f"\nPlot saved at: {self.plot_path}\n")

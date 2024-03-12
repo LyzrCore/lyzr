@@ -1,16 +1,17 @@
 # standard library imports
 import os
-import io
 import time
+import traceback
 from typing import Union, Literal, Optional, Any
 
 # third-party imports
 import numpy as np
 import pandas as pd
+from PIL import Image
 
 # local imports
 from lyzr.base.prompt import Prompt
-from lyzr.data_analyzr.file_utils import get_db_details, read_file
+from lyzr.data_analyzr.file_utils import get_db_details
 from lyzr.data_analyzr.txt_to_sql_utils import TxttoSQLFactory
 from lyzr.data_analyzr.ml_analysis_utils import MLAnalysisFactory
 from lyzr.base.errors import (
@@ -22,7 +23,11 @@ from lyzr.base.llms import (
     set_model_params,
 )
 from lyzr.data_analyzr.plot_utils import PlotFactory
-from lyzr.data_analyzr.utils import format_df_with_describe, format_df_with_info
+from lyzr.data_analyzr.utils import (
+    format_df_with_describe,
+    format_df_with_info,
+    get_info_dict_from_df_dict,
+)
 
 # imports for logging
 import sys
@@ -38,7 +43,7 @@ class DataAnalyzr:
 
     def __init__(
         self,
-        analysis_type: Literal["sql", "ml", "skip"],
+        analysis_type: Optional[Literal["sql", "ml", "skip"]] = None,
         api_key: Optional[str] = None,
         gen_model: Optional[Union[dict, LLM]] = None,
         analysis_model: Optional[Union[dict, LLM]] = None,
@@ -71,6 +76,8 @@ class DataAnalyzr:
             # legacy usage
             self._legacy_usage(df, user_input, model, model_type, model_name, seed)
         else:
+            if analysis_type is None:
+                raise MissingValueError("analysis_type")
             if gen_model is None:
                 gen_model = {
                     "type": "openai",
@@ -120,7 +127,12 @@ class DataAnalyzr:
                 self.logger.warning(
                     f"The `{param}` parameter is deprecated and will be removed in a future version. Please use the `analysis_model` parameter to set the analysis model, and the `gen_model` parameter to set the generation model."
                 )
-        self._gen_model = self._analysis_model = self._plot_model = (
+        self._gen_model = model or get_model(
+            api_key=self.api_key,
+            model_type=model_type or os.environ.get("MODEL_TYPE", "openai"),
+            model_name=model_name or os.environ.get("MODEL_NAME", "gpt-4-1106-preview"),
+        )
+        self._analysis_model = self._plot_model = (
             model
             or os.environ.get("LLM_MODEL")
             or get_model(
@@ -162,6 +174,7 @@ class DataAnalyzr:
             self.vector_store = None
         else:
             raise ValueError("df must be a path to a file or a pd.DataFrame object.")
+        self.df_info_dict = get_info_dict_from_df_dict(self.df_dict)
 
     def _set_logger(self, log_level, print_log):
         self.logger = logging.getLogger(__name__)
@@ -215,15 +228,11 @@ class DataAnalyzr:
         self.database_connector, self.df_dict, self.vector_store = get_db_details(
             self.analysis_type, db_type, config, vector_store_config, self.logger
         )
-        self.df_info_dict = None
-        if self.df_dict is not None:
-            self.df_info_dict = {}
-            for name, df in self.df_dict.items():
-                if not isinstance(df, pd.DataFrame):
-                    continue
-                buffer = io.StringIO()
-                df.info(buf=buffer)
-                self.df_info_dict[name] = buffer.getvalue()
+        self.df_info_dict = (
+            get_info_dict_from_df_dict(self.df_dict)
+            if self.df_dict is not None
+            else None
+        )
 
     def analysis(
         self,
@@ -304,6 +313,11 @@ class DataAnalyzr:
         if self.user_input == user_input and self.visualisation_output is not None:
             return self.visualisation_output
 
+        if plot_path is None:
+            plot_path = Path("generated_plots/plot.png")
+        else:
+            plot_path = Path(plot_path)
+
         if self.df_dict is None:
             self.logger.info("Fetching dataframes from database to make visualization.")
             self.df_dict = self.database_connector.fetch_dataframes_dict()
@@ -345,16 +359,16 @@ class DataAnalyzr:
                 analysis_steps = plotter.get_analysis_steps(self.user_input)
                 if analysis_steps is not None and "steps" in analysis_steps:
                     if len(analysis_steps["steps"]) == 0:
-                        plot_df = self.df_dict[analysis_steps["df_name"]]
+                        self.plot_df = self.df_dict[analysis_steps["df_name"]]
                     else:
-                        plot_df = self.analysis(user_input, "", analysis_steps)
+                        self.plot_df = self.analysis(user_input, "", analysis_steps)
                 else:
                     self.logger.info(
                         "No analysis steps found. Using first dataframe for plotting.\n"
                     )
-                    plot_df = self.df_dict[list(self.df_dict.keys())[0]]
-                print("Plotting dataframe:", plot_df)
-                self.visualisation_output = plotter.get_visualisation(plot_df)
+                    self.plot_df = self.df_dict[list(self.df_dict.keys())[0]]
+                self.logger.info(f"\nDF to be plot:\n{self.plot_df.head()}\n")
+                self.visualisation_output = plotter.get_visualisation(self.plot_df)
                 return self.visualisation_output
             except RecursionError:
                 raise RecursionError(
@@ -366,6 +380,7 @@ class DataAnalyzr:
                         "The request could not be completed. Please wait a while and try again."
                     )
                 self.logger.info(f"{e.__class__.__name__}: {e}")
+                self.logger.info("Traceback:\n{}\n".format(traceback.format_exc()))
                 continue
 
     def insights(
@@ -374,6 +389,8 @@ class DataAnalyzr:
         insights_context: Optional[str] = None,
         n_insights: Optional[int] = 3,
     ) -> str:
+        if "analysis_guide" not in self.__dict__:
+            self.analysis_guide = ""
         self.logger.info("Generating insights\n")
         self._gen_model.set_messages(
             messages=[
@@ -652,17 +669,30 @@ class DataAnalyzr:
         self.logger.warning(
             "The `analysis_insights` method is deprecated and will be removed in a future version. Use the `insights` method instead."
         )
+        self.analysis_output = self.analysis(
+            user_input=user_input,
+            analysis_context="",
+        )
         return self.insights(user_input)
 
     def visualizations(
-        self, user_input: str, dir_path: Path = Path("./generated_plots")
+        self, user_input: str, dir_path: Path = None
     ) -> list[Image.Image]:
         self.logger.warning(
             "The `visualizations` method is deprecated and will be removed in a future version. Use the `visualisation` method instead."
         )
-        return [self.visualisation(user_input, plot_path=str(dir_path / "plot.png"))]
+        return [
+            Image.open(
+                self.visualisation(
+                    user_input,
+                    plot_path=(
+                        str(dir_path / "plot.png") if dir_path is not None else None
+                    ),
+                )
+            )
+        ]
 
-    def dataset_description(self, context: str) -> str:
+    def dataset_description(self, context: str = None) -> str:
         self.logger.warning(
             "The `dataset_description` method is deprecated and will be removed in a future version."
         )

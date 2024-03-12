@@ -2,6 +2,7 @@
 import re
 import time
 import logging
+import traceback
 from typing import Union, Optional, Literal, Any
 
 # third-party imports
@@ -14,6 +15,7 @@ from lyzr.data_analyzr.output_handler import (
     check_output_format,
     validate_output_step_details,
 )
+from lyzr.base.errors import DependencyError
 
 
 def get_columns_names(
@@ -54,7 +56,7 @@ def run_analysis_step(
             arguments=step_details["args"],
             logger=logger,
         )
-        cleaner = DataCleanerUtil(
+        cleaner = CleanerUtil(
             data,
             step_details["type"],
             step_details["args"]["columns"],
@@ -66,7 +68,7 @@ def run_analysis_step(
             arguments=step_details["args"],
             logger=logger,
         )
-        transformer = Transformer(
+        transformer = TransformerUtil(
             data,
             step_details["type"],
         )
@@ -87,7 +89,7 @@ def run_analysis_step(
         if len(step_details["args"]["columns"]) < 2:
             logger.info("Math operation requires at least 2 columns. Skipping.")
             return data
-        operator = DataOperatorUtil(
+        operator = MathOperatorUtil(
             data,
             step_details["type"],
             logger,
@@ -96,7 +98,7 @@ def run_analysis_step(
         )
         data = operator.func()
     elif step_details["task"] == "analysis":
-        analyser = DataAnalyserUtil(data, step_details["type"], logger)
+        analyser = AnalyserUtil(data, step_details["type"], logger)
         data = analyser.func(**step_details["args"])
     return data
 
@@ -222,7 +224,8 @@ class MLAnalysisFactory:
                 raise TimeoutError(
                     "The request could not be completed. Please wait a while and try again."
                 )
-            self.logger.info(f"{e.__class__.__name__}: {e}")
+            self.logger.info(f"{e.__class__.__name__}: {e}\n")
+            self.logger.info("Traceback:\n{}\n".format(traceback.format_exc()))
             return self._get_and_run_analysis(user_input)
         return outputs, data
 
@@ -285,7 +288,7 @@ class MLAnalysisFactory:
         return self.output
 
 
-class DataCleanerUtil:
+class CleanerUtil:
 
     def __init__(
         self,
@@ -328,15 +331,23 @@ class DataCleanerUtil:
             self.df = self.df.to_frame()
         for col in self.columns:
             self.df.loc[:, col] = self.df.loc[:, col].apply(
-                self._remove_punctuation_from_string
+                CleanerUtil._remove_punctuation_from_string
             )
         return self.df
 
-    def _remove_punctuation_from_string(self, value) -> str:
-        return re.sub(r"[^\d.]", "", str(value))
+    @staticmethod
+    def _remove_punctuation_from_string(value) -> str:
+        if not isinstance(value, str):
+            return value
+        value = value.strip()
+        cleaned = re.sub(r"[^\d.]", "", str(value))
+        if cleaned.replace(".", "").isdigit():
+            return "-" + cleaned if value[0] == "-" else cleaned
+        else:
+            return value
 
 
-class Transformer:
+class TransformerUtil:
     def __init__(
         self,
         df: pd.DataFrame,
@@ -361,7 +372,10 @@ class Transformer:
         return encoded_df
 
     def ordinal_encode(self, columns) -> pd.DataFrame:
-        from sklearn.preprocessing import OrdinalEncoder
+        try:
+            from sklearn.preprocessing import OrdinalEncoder
+        except ImportError:
+            raise DependencyError({"scikit-learn": "scikit-learn==1.4.0"})
 
         encoder = OrdinalEncoder()
         encoded_df = self.df
@@ -374,7 +388,10 @@ class Transformer:
         return encoded_df
 
     def scale(self, columns) -> pd.DataFrame:
-        from sklearn.preprocessing import StandardScaler
+        try:
+            from sklearn.preprocessing import StandardScaler
+        except ImportError:
+            raise DependencyError({"scikit-learn": "scikit-learn==1.4.0"})
 
         scaler = StandardScaler()
         scaled_df = self.df
@@ -430,7 +447,7 @@ class Transformer:
         return self.df.loc[indices, columns]
 
 
-class DataOperatorUtil:
+class MathOperatorUtil:
     def __init__(
         self,
         df: pd.DataFrame,
@@ -468,7 +485,7 @@ class DataOperatorUtil:
         return self.df
 
 
-class DataAnalyserUtil:
+class AnalyserUtil:
     def __init__(
         self,
         df: pd.DataFrame,
@@ -639,7 +656,10 @@ class DataAnalyserUtil:
         return self.df.loc[:, columns].corr(method=method)
 
     def regression(self, x: list, y: list) -> pd.DataFrame:
-        from sklearn.linear_model import LinearRegression
+        try:
+            from sklearn.linear_model import LinearRegression
+        except ImportError:
+            raise DependencyError({"scikit-learn": "scikit-learn==1.4.0"})
 
         x = get_columns_names(self.df.columns, columns=x, logger=self.logger)
         y = get_columns_names(self.df.columns, columns=y, logger=self.logger)
@@ -654,7 +674,10 @@ class DataAnalyserUtil:
         end: Optional[str] = None,
         steps: Optional[int] = None,
     ):
-        import pmdarima as pm
+        try:
+            import pmdarima as pm
+        except ImportError:
+            raise DependencyError({"pmdarima": "pmdarima==2.0.4"})
 
         time_column = get_columns_names(
             self.df.columns, columns=[time_column], logger=self.logger
