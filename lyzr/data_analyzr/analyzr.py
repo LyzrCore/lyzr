@@ -287,9 +287,10 @@ class DataAnalyzr:
         if analysis_steps is not None:
             _, data = self.analyzer.run_analysis(analysis_steps)
             return data
-        self.analysis_output = self.analyzer.get_analysis_output(user_input)
-        self.analysis_guide = self.analyzer.analysis_guide
-        return self.analysis_output
+        else:
+            self.analysis_output = self.analyzer.get_analysis_output(user_input)
+            self.analysis_guide = self.analyzer.analysis_guide
+            return self.analysis_output
 
     def _txt_to_sql_analysis(self, user_input: str, analysis_context: str = None):
         self.analyzer = TxttoSQLFactory(
