@@ -7,7 +7,6 @@ from typing import Union, Literal, Optional, Any
 # third-party imports
 import numpy as np
 import pandas as pd
-from PIL import Image
 
 # local imports
 from lyzr.base.prompt import Prompt
@@ -105,10 +104,11 @@ class DataAnalyzr:
             self.dataset_description_output,
             self.ai_queries,
             self.analysis_output,
+            self.visualisation_output,
             self.insights_output,
             self.recommendations_output,
             self.tasks_output,
-        ) = (None, None, None, None, None, None)
+        ) = (None, None, None, None, None, None, None)
 
     def _legacy_usage(
         self,
@@ -620,6 +620,8 @@ class DataAnalyzr:
                 plot_context=context.get("visualisation", self.context),
                 plot_path=plot_path,
             )
+        else:
+            self.visualisation_output = ""
 
         if (
             "insights" in outputs
