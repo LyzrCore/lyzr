@@ -11,3 +11,7 @@ venv
 *.csv
 generated_plots/
 tests/
+testing/
+logs/
+*.log
+.vscode/

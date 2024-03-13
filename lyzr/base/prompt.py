@@ -1,7 +1,13 @@
-from lyzr.base import prompts
+# standard library imports
 from typing import Optional, Union
 from importlib import resources as impresources
-from lyzr.base.errors import MissingValueError, InvalidValueError
+
+# local imports
+from lyzr.base import prompts
+from lyzr.base.errors import (
+    MissingValueError,
+    InvalidValueError,
+)
 
 
 class Prompt:
@@ -55,8 +61,9 @@ class Prompt:
         try:
             prompt_text = prompt_text.format(**kwargs)
         except KeyError:
-            print(f"Please provide values for all variables: {self.variables}")
-            raise
+            raise ValueError(
+                f"Please provide values for all variables: {self.variables}"
+            )
         self.text = prompt_text
         return self
 

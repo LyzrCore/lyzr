@@ -1,3 +1,1 @@
-Dataset Description: {dataset_description}
-
-Dataset Sample: {df_head} 
+{df_details}

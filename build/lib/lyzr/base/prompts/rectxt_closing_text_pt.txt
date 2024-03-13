@@ -1,0 +1,5 @@
+Focus on clarity and succinctness.
+
+Do not describe the dataset or the prompt.
+Do not speak about charts.
+Do not share any title.

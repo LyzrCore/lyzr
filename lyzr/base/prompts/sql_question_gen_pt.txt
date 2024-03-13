@@ -1,0 +1,3 @@
+The user will give you SQL and you will try to guess what the business question this query is answering.
+Return just the question without any additional explanation.
+Do not reference the table name in the question.

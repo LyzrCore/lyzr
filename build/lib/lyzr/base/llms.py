@@ -1,8 +1,13 @@
+# standard library imports
 import os
-from openai import OpenAI
 from typing import Optional, Literal
+
+# third-party imports
+from openai import OpenAI
+
+# local imports
 from lyzr.base.prompt import get_prompt_text
-from lyzr.base.errors import MissingValueError, InvalidValueError
+from lyzr.base.errors import MissingValueError
 
 
 class LLM:
@@ -26,6 +31,12 @@ class LLM:
             self.set_messages(model_prompts)
         for param in kwargs:
             setattr(self, param, kwargs[param])
+        if self.model_name == "gpt-3.5-turbo":
+            self.model_max_tokens = 16_385
+        elif self.model_name.startswith("gpt-4-1106"):
+            self.model_max_tokens = 128_000
+        else:
+            self.model_max_tokens = None
 
     def set_messages(
         self,
@@ -35,16 +46,26 @@ class LLM:
         if model_prompts is None and messages is None and self.messages is None:
             raise ValueError("Please set a value for the prompt")
 
-        if messages is not None:
-            self.messages = messages
-            return self
+        if model_prompts is not None:
+            self.messages = []
+            for prompt in model_prompts:
+                self.messages.append(
+                    {"role": prompt["role"], "content": get_prompt_text(prompt)}
+                )
+        elif messages is not None:
+            self.messages = []
+            for message in messages:
+                if "role" not in message or (
+                    "prompt" not in message and "content" not in message
+                ):
+                    raise MissingValueError(["role", "prompt or content"])
+                self.messages.append(
+                    {
+                        "role": message["role"],
+                        "content": message.get("content", message.get("prompt")),
+                    }
+                )
 
-        messages = []
-        for prompt in model_prompts:
-            messages.append(
-                {"role": prompt["role"], "content": get_prompt_text(prompt)}
-            )
-        self.messages = messages
         return self
 
     def run(self, **kwargs):
@@ -76,6 +97,7 @@ class LLM:
             "voice",
             "input",
             "audiofile",
+            "model_max_tokens",
         ]:
             if param in params:
                 del params[param]
@@ -131,3 +153,18 @@ def get_model(
         model_name=model_name or os.getenv("MODEL_NAME") or "gpt-3.5-turbo",
         **kwargs,
     )
+
+
+def set_model_params(
+    params: dict, model_kwargs: dict, force: bool | dict = None
+) -> dict:
+    force = force or False
+    for param in params:
+        if (
+            param not in model_kwargs
+            or (isinstance(force, dict) and force.get(param))
+            or force
+        ):
+            model_kwargs[param] = params[param]
+
+    return model_kwargs
