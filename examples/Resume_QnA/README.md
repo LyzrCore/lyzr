@@ -1,4 +1,4 @@
-# CV-QnA-LyzrBot
+# Resume_QnA
 
 ## Purpose
 
