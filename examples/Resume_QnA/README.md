@@ -20,7 +20,7 @@ Follow these steps to run the Lyzr CV QA-Bot Streamlit App locally:
 
 2. **Run the App:**
     ```bash
-    streamlit run QAbotapp.py
+    streamlit run app.py
 
 3. **Provide API Key:**
 Enter your OpenAI API key in the sidebar to enable Lyzr SDK functionality.
