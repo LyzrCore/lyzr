@@ -18,7 +18,7 @@ from lyzr.utils.document_reading import (
 )
 
 
-def pdf_rag(
+def add_pdf_(
     input_dir: Optional[str] = None,
     input_files: Optional[List] = None,
     exclude_hidden: bool = True,
@@ -46,7 +46,7 @@ def pdf_rag(
     llm_params = (
         {
             "model": "gpt-4-0125-preview",
-            "temperature": 0,            
+            "temperature": 0,
         }
         if llm_params is None
         else llm_params
@@ -84,17 +84,12 @@ def pdf_rag(
         similarity_top_k=10,
     )
 
-    # retriever = LyzrRetriever.from_defaults(
-    #     **retriever_params, base_index=vector_store_index
-    # )
-
-    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
     query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
 
-def txt_rag(
+def add_text_(
     input_dir: Optional[str] = None,
     input_files: Optional[List] = None,
     exclude_hidden: bool = True,
@@ -122,7 +117,7 @@ def txt_rag(
     llm_params = (
         {
             "model": "gpt-4-0125-preview",
-            "temperature": 0,            
+            "temperature": 0,
         }
         if llm_params is None
         else llm_params
@@ -160,17 +155,12 @@ def txt_rag(
         similarity_top_k=10,
     )
 
-    # retriever = LyzrRetriever.from_defaults(
-    #     **retriever_params, base_index=vector_store_index
-    # )
-
-    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
     query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
 
-def docx_rag(
+def add_docx_(
     input_dir: Optional[str] = None,
     input_files: Optional[List] = None,
     exclude_hidden: bool = True,
@@ -198,7 +188,7 @@ def docx_rag(
     llm_params = (
         {
             "model": "gpt-4-0125-preview",
-            "temperature": 0,            
+            "temperature": 0,
         }
         if llm_params is None
         else llm_params
@@ -236,17 +226,12 @@ def docx_rag(
         similarity_top_k=10,
     )
 
-    # retriever = LyzrRetriever.from_defaults(
-    #     **retriever_params, base_index=vector_store_index
-    # )
-
-    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
     query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
 
-def webpage_rag(
+def add_webpage_(
     url: str = None,
     system_prompt: str = None,
     query_wrapper_prompt: str = None,
@@ -264,7 +249,7 @@ def webpage_rag(
     llm_params = (
         {
             "model": "gpt-4-0125-preview",
-            "temperature": 0,            
+            "temperature": 0,
         }
         if llm_params is None
         else llm_params
@@ -302,17 +287,12 @@ def webpage_rag(
         similarity_top_k=10,
     )
 
-    # retriever = LyzrRetriever.from_defaults(
-    #     **retriever_params, base_index=vector_store_index
-    # )
-
-    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
     query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
 
-def website_rag(
+def add_website_(
     url: str = None,
     system_prompt: str = None,
     query_wrapper_prompt: str = None,
@@ -330,7 +310,7 @@ def website_rag(
     llm_params = (
         {
             "model": "gpt-4-0125-preview",
-            "temperature": 0,            
+            "temperature": 0,
         }
         if llm_params is None
         else llm_params
@@ -368,17 +348,12 @@ def website_rag(
         similarity_top_k=10,
     )
 
-    # retriever = LyzrRetriever.from_defaults(
-    #     **retriever_params, base_index=vector_store_index
-    # )
-
-    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
     query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
 
-def youtube_rag(
+def add_youtube_(
     urls: List[str] = None,
     system_prompt: str = None,
     query_wrapper_prompt: str = None,
@@ -396,7 +371,7 @@ def youtube_rag(
     llm_params = (
         {
             "model": "gpt-4-0125-preview",
-            "temperature": 0,            
+            "temperature": 0,
         }
         if llm_params is None
         else llm_params
@@ -433,12 +408,7 @@ def youtube_rag(
         service_context=service_context,
         similarity_top_k=10,
     )
-
-    # retriever = LyzrRetriever.from_defaults(
-    #     **retriever_params, base_index=vector_store_index
-    # )
-
-    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
+ 
     query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
