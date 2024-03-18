@@ -193,6 +193,9 @@ class DataAnalyzr:
             self.logger.addHandler(handler)
 
         log_filename = self.log_filename
+        dir_path = os.path.dirname(log_filename)
+        if dir_path.strip() != "":
+            os.makedirs(dir_path, exist_ok=True)
         file_handler = logging.FileHandler(
             log_filename, mode="a"
         )  # Open the log file in append mode
