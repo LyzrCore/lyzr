@@ -16,5 +16,6 @@ __all__ = [
     "ChatBot",
     "FormulaGen",
     "DataAnalyzr",
-    "DataConnector" "VoiceBot",
+    "DataConnector",
+    "VoiceBot",
 ]
