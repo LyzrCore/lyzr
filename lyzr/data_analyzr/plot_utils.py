@@ -53,7 +53,7 @@ class PlotFactory:
             open(plot_path, "w").close()
             return plot_path
         except Exception:
-            self.logger.warn(
+            self.logger.warning(
                 f'Incorrect path for plot image provided: {self.plot_path}. Defaulting to "generated_plots/plot.png".'
             )
             return self._handle_plotpath("generated_plots/plot.png")
