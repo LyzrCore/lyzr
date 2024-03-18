@@ -1,0 +1,2 @@
+The user asked the following question: {user_input}
+Generate recommendations that enhance the user's question or are related to it.

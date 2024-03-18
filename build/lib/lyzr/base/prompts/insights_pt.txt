@@ -1,0 +1,7 @@
+Today is {date}.
+user query: {user_input}
+analysis context:
+{analysis_context}
+
+analysis output:
+{analysis_output}
