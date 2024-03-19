@@ -10,7 +10,7 @@ load_dotenv()
 api = os.getenv("OPENAI_API_KEY")
 
 st.set_page_config(
-    page_title="Lyzr IELLTS Coaching Agent",
+    page_title="Lyzr IELTS Coaching Agent",
     layout="centered",  # or "wide"
     initial_sidebar_state="auto",
     page_icon="lyzr-logo-cut.png",
