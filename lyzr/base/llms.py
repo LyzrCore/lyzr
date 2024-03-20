@@ -1,118 +1,72 @@
+# standard library imports
 import os
-from importlib import resources as impresources
-from typing import Optional
+from typing import Optional, Literal, Union
 
+# third-party imports
 from openai import OpenAI
 
-from . import prompts
-
-
-class Prompt:
-    def __init__(self, prompt_name: str, prompt_text: Optional[str] = None):
-        self.name = prompt_name
-        self.text = prompt_text
-        if self.text is None:
-            # in-built prompt names end with _pt
-            self.load_prompt()
-            self.variables = self.get_variables()
-            return None
-        else:
-            self.variables = self.get_variables()
-            self.save_prompt()
-            return None
-
-    def get_variables(self):
-        variables = []
-        for word in self.text.split():
-            if word.startswith("{") and word.endswith("}"):
-                variables.append(word[1:-1])
-        return variables
-
-    def save_prompt(self):
-        inp_file = impresources.files(prompts) / f"{self.name}.txt"
-        with inp_file.open("w+") as f:
-            f.write(self.text.encode("utf-8"))
-
-    def load_prompt(self):
-        try:
-            inp_file = impresources.files(prompts) / f"{self.name}.txt"
-            with inp_file.open("rb") as f:
-                self.text = f.read().decode("utf-8")
-        except FileNotFoundError:
-            raise ValueError(
-                f"No prompt with name '{self.name}' found. "
-                f"To use an in-built prompt, use one of the following prompt names: {get_prompts_list()}\n"
-                "Or create a new prompt by passing the prompt text.",
-            )
-
-    def edit_prompt(self, prompt_text: str):
-        self.text = prompt_text
-        self.variables = self.get_variables()
-        self.save_prompt()
-
-    def format(self, **kwargs):
-        if self.text is None:
-            raise ValueError(f"Please provide the text for the prompt '{self.name}'")
-        prompt_text = self.text
-        try:
-            prompt_text = prompt_text.format(**kwargs)
-        except KeyError:
-            print(f"Please provide values for all variables: {self.variables}")
-            raise
-        return prompt_text
+# local imports
+from lyzr.base.prompt import get_prompt_text
+from lyzr.base.errors import MissingValueError
 
 
 class LLM:
     def __init__(
         self,
         api_key: str,
-        model_type: Optional[str] = "openai",
-        model_name: Optional[str] = "gpt-3.5-turbo",
-        prompt_name: Optional[str] = None,
-        prompt: Optional[Prompt] = None,
+        model_type: Optional[str] = None,
+        model_name: Optional[str] = None,
+        model_prompts: Optional[list[dict]] = None,
+        voice: Optional[
+            Literal["echo", "alloy", "fable", "onyx", "nova", "shimmer"]
+        ] = None,  # Add support for specifying the voice model
         **kwargs,
     ):
         self.api_key = api_key
-        self.model_type = model_type
-        self.model_name = model_name
-        if prompt_name is not None:
-            self.prompt = Prompt(prompt_name)
-        elif prompt is not None:
-            self.prompt = prompt
+        self.model_type = model_type or "openai"
+        self.model_name = model_name or "gpt-3.5-turbo"
+        self.messages = None
+        self.voice = voice or "nova"  # Default voice for TTS
+        if model_prompts is not None:
+            self.set_messages(model_prompts)
         for param in kwargs:
             setattr(self, param, kwargs[param])
-        # llm_params = {
-        #     "temperature": 0,
-        #     "top_p": 1,
-        #     "presence_penalty": 0,
-        #     "frequency_penalty": 0,
-        #     "stop": None,
-        #     "n": 1,
-        #     "stream": False,
-        #     "functions": None,
-        #     "function_call": None,
-        #     "logit_bias": None,
-        #     "best_of": 1,
-        #     "echo": False,
-        #     "logprobs": None,
-        #     "suffix": None,
-        # }
-        # for param in llm_params:
-        #     setattr(self, param, kwargs.get(param, llm_params[param]))
+        if self.model_name == "gpt-3.5-turbo":
+            self.model_max_tokens = 16_385
+        elif self.model_name.startswith("gpt-4-1106"):
+            self.model_max_tokens = 128_000
+        else:
+            self.model_max_tokens = None
 
-    def set_prompt(
+    def set_messages(
         self,
-        prompt_name: Optional[str] = None,
-        prompt_text: Optional[str] = None,
-        **kwargs,
+        model_prompts: Optional[list[dict]] = None,
+        messages: Optional[list[dict]] = None,
     ):
-        if prompt_name is None and self.prompt is None:
+        if model_prompts is None and messages is None and self.messages is None:
             raise ValueError("Please set a value for the prompt")
 
-        if self.prompt is None:
-            self.prompt = Prompt(prompt_name, prompt_text)
+        if model_prompts is not None:
+            self.messages = []
+            for prompt in model_prompts:
+                self.messages.append(
+                    {"role": prompt["role"], "content": get_prompt_text(prompt)}
+                )
+        elif messages is not None:
+            self.messages = []
+            for message in messages:
+                if "role" not in message or (
+                    "prompt" not in message and "content" not in message
+                ):
+                    raise MissingValueError(["role", "prompt or content"])
+                self.messages.append(
+                    {
+                        "role": message["role"],
+                        "content": message.get("content", message.get("prompt")),
+                    }
+                )
 
-        self.prompt.text = self.prompt.format(**kwargs)
+        return self
 
     def run(self, **kwargs):
         if self.api_key is None:
@@ -120,48 +74,97 @@ class LLM:
                 "Please provide an API key or set the API_KEY environment variable."
             )
 
-        if "prompt" in kwargs:
-            self.set_prompt(kwargs.pop("prompt"), **kwargs)
-
-        empty_variables = self.prompt.get_variables()
-        if empty_variables != []:
-            raise ValueError(
-                f"Please provide values for the following variables: {empty_variables}"
-            )
-        messages = [{"role": "system", "content": self.prompt.text}]
+        if self.messages is None:
+            if "model_prompts" in kwargs:
+                self.set_messages(model_prompts=kwargs["model_prompts"])
+            elif "messages" in kwargs:
+                self.set_messages(messages=[kwargs["messages"]])
+            elif "input" in kwargs:
+                self.input = kwargs["input"]
+            elif "audiofile" in kwargs:
+                self.audiofile = kwargs["audiofile"]
+            else:
+                raise MissingValueError(["model_prompts", "messages"])
 
         params = self.__dict__.copy()
-        for param in ["api_key", "model_type", "model_name", "prompt"]:
-            del params[param]
         params.update(kwargs)
+        for param in [
+            "api_key",
+            "model_prompts",
+            "model_type",
+            "model_name",
+            "messages",
+            "voice",
+            "input",
+            "audiofile",
+            "model_max_tokens",
+        ]:
+            if param in params:
+                del params[param]
+
+        # Instantiate the OpenAI client
+        client = OpenAI(api_key=self.api_key)
 
         if self.model_type == "openai":
-            client = OpenAI(api_key=self.api_key) 
-            completion = client.completions.create(
-                model=self.model_name,
-                messages=messages,
-                **params,
-            )
-            return completion
+            # Check for Text-to-Speech models
+            if self.model_name in ["tts-1", "tts-1-hd"]:
+                if self.input is None:
+                    raise MissingValueError("input")
+                # Use 'voice' and any other options required by OpenAI's TTS endpoint
+                response = client.audio.speech.create(
+                    model=self.model_name,
+                    voice=self.voice,
+                    input=self.input,
+                    **params,
+                )
+                return response
+
+            # Check for transcription models like "whisper"
+            elif self.model_name.startswith("whisper"):
+                if self.audiofile is None:
+                    raise MissingValueError("audiofile")
+                # The transcription API may require a file-like object or binary data
+                response = client.audio.transcriptions.create(
+                    model=self.model_name,
+                    file=self.audiofile,
+                    **params,
+                )
+                return response
+
+            # Else, handle chat completions
+            else:
+                completion = client.chat.completions.create(
+                    model=self.model_name,
+                    messages=self.messages,
+                    **params,
+                )
+                return completion
 
 
 def get_model(
     api_key: Optional[str] = None,
     model_type: Optional[str] = None,
     model_name: Optional[str] = None,
+    **kwargs,
 ) -> LLM:
     return LLM(
         api_key=api_key or os.getenv("API_KEY"),
         model_type=model_type or os.getenv("MODEL_TYPE") or "openai",
         model_name=model_name or os.getenv("MODEL_NAME") or "gpt-3.5-turbo",
+        **kwargs,
     )
 
 
-def get_prompts_list() -> list:
-    # fix this path issue
-    all_prompts = [
-        pfile.stem
-        for pfile in impresources.files(prompts).iterdir()
-        if (pfile.suffix == ".txt") and (pfile.stem.endswith("_pt"))
-    ]
-    return all_prompts
+def set_model_params(
+    params: dict, model_kwargs: dict, force: Union[bool, dict] = None
+) -> dict:
+    force = force or False
+    for param in params:
+        if (
+            param not in model_kwargs
+            or (isinstance(force, dict) and force.get(param))
+            or force
+        ):
+            model_kwargs[param] = params[param]
+
+    return model_kwargs
