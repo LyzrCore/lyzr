@@ -1,6 +1,6 @@
 # standard library imports
 import os
-from typing import Optional, Literal
+from typing import Optional, Literal, Union
 
 # third-party imports
 from openai import OpenAI
@@ -156,7 +156,7 @@ def get_model(
 
 
 def set_model_params(
-    params: dict, model_kwargs: dict, force: bool | dict = None
+    params: dict, model_kwargs: dict, force: Union[bool, dict] = None
 ) -> dict:
     force = force or False
     for param in params:

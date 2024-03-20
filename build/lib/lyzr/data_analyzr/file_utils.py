@@ -1,6 +1,6 @@
 # standard library imports
 import os
-from typing import Literal
+from typing import Literal, Union
 
 # third-party imports
 import pandas as pd
@@ -91,7 +91,7 @@ def get_dict_of_files(datasets: dict, kwargs) -> dict[pd.DataFrame]:
 
 
 def read_file_or_folder(
-    name: str, filepath: str | pd.DataFrame, kwargs
+    name: str, filepath: Union[str, pd.DataFrame], kwargs
 ) -> dict[pd.DataFrame]:
     if isinstance(filepath, pd.DataFrame):
         return {name: filepath}
@@ -114,7 +114,7 @@ def read_file_or_folder(
         )
 
 
-def get_list_of_kwargs(datasets: dict, kwargs: dict | list) -> list[dict]:
+def get_list_of_kwargs(datasets: dict, kwargs: Union[dict, list]) -> list[dict]:
     if isinstance(kwargs, list) and len(kwargs) == len(datasets):
         return kwargs
     kwargs_list = [{} for _ in range(len(datasets))]
