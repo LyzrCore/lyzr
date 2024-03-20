@@ -1,0 +1,1 @@
+QueryGenius is an intuitive web application designed to simplify the process of converting natural language descriptions into SQL queries. With QueryGenius, users can effortlessly transform their textual descriptions of data requirements into SQL queries, streamlining the querying process and eliminating the need for manual query construction.
