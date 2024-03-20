@@ -91,3 +91,36 @@ class VoiceBot:
         notes = response.choices[0].message.content
 
         return notes
+    
+    def summarize(self, text):
+        if self.model.model_name != "gpt-4":
+            if self.model.model_type == "openai":
+                self.model = get_model(
+                    api_key=self.api_key,
+                    model_type=self.model.model_type,
+                    model_name="gpt-3.5-turbo",
+                )
+            else:
+                raise ValueError(
+                    "The text_to_notes function only works with the OpenAI's 'gpt-4' model."
+                )
+
+        # The system message acts as the prompt for the AI.
+        system_message = "You are an expert in summarizing big conversations. You make sure no important detail is left out."
+
+        # Format the user's message that will be sent to the model.
+        user_message = f"Can you create a summary for this? Generate only the summary and nothing else. The content: {text}."
+        self.model.set_messages(
+            model_prompts=[
+                {"role": "system", "text": system_message},
+                {"role": "user", "text": user_message},
+            ]
+        )
+        # Use the LLM instance to communicate with OpenAI's API.
+        response = self.model.run()
+
+        # Parse the response to extract the notes.
+        notes = response.choices[0].message.content
+
+        return notes
+    
