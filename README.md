@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./assets/logo.svg" width="200" alt="Lyzr Logo" />
+<img src="https://raw.githubusercontent.com/LyzrCore/lyzr/214f79adf5adf25091479ba5b5a8c18064a26b31/assets/logo.svg" width="200" alt="Lyzr Logo" />
 </p>
 <p align="center">
 The simplest agent framework to build <b>Private & Secure</b> GenAI apps faster
