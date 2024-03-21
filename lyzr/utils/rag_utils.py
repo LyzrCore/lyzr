@@ -18,7 +18,7 @@ from lyzr.utils.document_reading import (
 )
 
 
-def add_pdf_(
+def pdf_rag(
     input_dir: Optional[str] = None,
     input_files: Optional[List] = None,
     exclude_hidden: bool = True,
@@ -84,12 +84,17 @@ def add_pdf_(
         similarity_top_k=10,
     )
 
+    # retriever = LyzrRetriever.from_defaults(
+    #     **retriever_params, base_index=vector_store_index
+    # )
+
+    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
     query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
 
-def add_text_(
+def txt_rag(
     input_dir: Optional[str] = None,
     input_files: Optional[List] = None,
     exclude_hidden: bool = True,
@@ -155,12 +160,17 @@ def add_text_(
         similarity_top_k=10,
     )
 
+    # retriever = LyzrRetriever.from_defaults(
+    #     **retriever_params, base_index=vector_store_index
+    # )
+
+    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
     query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
 
-def add_docx_(
+def docx_rag(
     input_dir: Optional[str] = None,
     input_files: Optional[List] = None,
     exclude_hidden: bool = True,
@@ -226,12 +236,17 @@ def add_docx_(
         similarity_top_k=10,
     )
 
+    # retriever = LyzrRetriever.from_defaults(
+    #     **retriever_params, base_index=vector_store_index
+    # )
+
+    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
     query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
 
-def add_webpage_(
+def webpage_rag(
     url: str = None,
     system_prompt: str = None,
     query_wrapper_prompt: str = None,
@@ -287,12 +302,17 @@ def add_webpage_(
         similarity_top_k=10,
     )
 
+    # retriever = LyzrRetriever.from_defaults(
+    #     **retriever_params, base_index=vector_store_index
+    # )
+
+    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
     query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
 
-def add_website_(
+def website_rag(
     url: str = None,
     system_prompt: str = None,
     query_wrapper_prompt: str = None,
@@ -348,12 +368,17 @@ def add_website_(
         similarity_top_k=10,
     )
 
+    # retriever = LyzrRetriever.from_defaults(
+    #     **retriever_params, base_index=vector_store_index
+    # )
+
+    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
     query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
 
 
-def add_youtube_(
+def youtube_rag(
     urls: List[str] = None,
     system_prompt: str = None,
     query_wrapper_prompt: str = None,
@@ -408,7 +433,12 @@ def add_youtube_(
         service_context=service_context,
         similarity_top_k=10,
     )
- 
+
+    # retriever = LyzrRetriever.from_defaults(
+    #     **retriever_params, base_index=vector_store_index
+    # )
+
+    # query_engine = RetrieverQueryEngine.from_args(retriever, query_engine_params)
     query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
