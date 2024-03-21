@@ -1,0 +1,5 @@
+User Query: {user_input}
+
+Analysis results & insights: {insights}
+
+Recommendations: {recommendations}
