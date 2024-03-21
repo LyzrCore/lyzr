@@ -1,13 +1,15 @@
 from typing import Union, Optional, List
 
+from llama_index.chat_engine.types import BaseChatEngine, ChatMode
 from llama_index.embeddings.utils import EmbedType
-from llama_index.indices.query.base import BaseQueryEngine
-from llama_index.query_engine import RetrieverQueryEngine
+from llama_index.chat_engine import ContextChatEngine
+from llama_index.memory import ChatMemoryBuffer
 
 from lyzr.base.llm import LyzrLLMFactory
-from lyzr.base.retrievers import LyzrRetriever
 from lyzr.base.service import LyzrService
 from lyzr.base.vector_store import LyzrVectorStoreIndex
+from lyzr.base.retrievers import LyzrRetriever
+
 from lyzr.utils.document_reading import (
     read_pdf_as_documents,
     read_docx_as_documents,
@@ -18,7 +20,7 @@ from lyzr.utils.document_reading import (
 )
 
 
-def add_pdf_(
+def pdf_chat_(
     input_dir: Optional[str] = None,
     input_files: Optional[List] = None,
     exclude_hidden: bool = True,
@@ -31,9 +33,9 @@ def add_pdf_(
     llm_params: dict = None,
     vector_store_params: dict = None,
     service_context_params: dict = None,
-    query_engine_params: dict = None,
+    chat_engine_params: dict = None,
     retriever_params: dict = None,
-) -> BaseQueryEngine:
+) -> BaseChatEngine:
     documents = read_pdf_as_documents(
         input_dir=input_dir,
         input_files=input_files,
@@ -59,7 +61,7 @@ def add_pdf_(
     service_context_params = (
         {} if service_context_params is None else service_context_params
     )
-    query_engine_params = {} if query_engine_params is None else query_engine_params
+    chat_engine_params = {} if chat_engine_params is None else chat_engine_params
 
     retriever_params = (
         {"retriever_type": "QueryFusionRetriever"}
@@ -68,7 +70,6 @@ def add_pdf_(
     )
 
     llm = LyzrLLMFactory.from_defaults(**llm_params)
-
     service_context = LyzrService.from_defaults(
         llm=llm,
         embed_model=embed_model,
@@ -78,18 +79,27 @@ def add_pdf_(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params,
-        documents=documents,
-        service_context=service_context,
-        similarity_top_k=10,
+        **vector_store_params, documents=documents, service_context=service_context
     )
 
-    query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
+    retriever = LyzrRetriever.from_defaults(
+        **retriever_params, base_index=vector_store_index
+    )
 
-    return query_engine
+    memory = ChatMemoryBuffer.from_defaults(token_limit=4000)
+
+    chat_engine = ContextChatEngine(
+        llm=llm,
+        memory=memory,
+        retriever=retriever,
+        prefix_messages=list(),
+        **chat_engine_params,
+    )
+
+    return chat_engine
 
 
-def add_text_(
+def txt_chat_(
     input_dir: Optional[str] = None,
     input_files: Optional[List] = None,
     exclude_hidden: bool = True,
@@ -102,9 +112,9 @@ def add_text_(
     llm_params: dict = None,
     vector_store_params: dict = None,
     service_context_params: dict = None,
-    query_engine_params: dict = None,
+    chat_engine_params: dict = None,
     retriever_params: dict = None,
-) -> BaseQueryEngine:
+) -> BaseChatEngine:
     documents = read_txt_as_documents(
         input_dir=input_dir,
         input_files=input_files,
@@ -130,7 +140,7 @@ def add_text_(
     service_context_params = (
         {} if service_context_params is None else service_context_params
     )
-    query_engine_params = {} if query_engine_params is None else query_engine_params
+    chat_engine_params = {} if chat_engine_params is None else chat_engine_params
 
     retriever_params = (
         {"retriever_type": "QueryFusionRetriever"}
@@ -139,7 +149,6 @@ def add_text_(
     )
 
     llm = LyzrLLMFactory.from_defaults(**llm_params)
-
     service_context = LyzrService.from_defaults(
         llm=llm,
         embed_model=embed_model,
@@ -149,18 +158,27 @@ def add_text_(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params,
-        documents=documents,
-        service_context=service_context,
-        similarity_top_k=10,
+        **vector_store_params, documents=documents, service_context=service_context
     )
 
-    query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
+    retriever = LyzrRetriever.from_defaults(
+        **retriever_params, base_index=vector_store_index
+    )
 
-    return query_engine
+    memory = ChatMemoryBuffer.from_defaults(token_limit=4000)
+
+    chat_engine = ContextChatEngine(
+        llm=llm,
+        memory=memory,
+        retriever=retriever,
+        prefix_messages=list(),
+        **chat_engine_params,
+    )
+
+    return chat_engine
 
 
-def add_docx_(
+def docx_chat_(
     input_dir: Optional[str] = None,
     input_files: Optional[List] = None,
     exclude_hidden: bool = True,
@@ -173,9 +191,9 @@ def add_docx_(
     llm_params: dict = None,
     vector_store_params: dict = None,
     service_context_params: dict = None,
-    query_engine_params: dict = None,
+    chat_engine_params: dict = None,
     retriever_params: dict = None,
-) -> BaseQueryEngine:
+) -> BaseChatEngine:
     documents = read_docx_as_documents(
         input_dir=input_dir,
         input_files=input_files,
@@ -201,7 +219,7 @@ def add_docx_(
     service_context_params = (
         {} if service_context_params is None else service_context_params
     )
-    query_engine_params = {} if query_engine_params is None else query_engine_params
+    chat_engine_params = {} if chat_engine_params is None else chat_engine_params
 
     retriever_params = (
         {"retriever_type": "QueryFusionRetriever"}
@@ -210,7 +228,6 @@ def add_docx_(
     )
 
     llm = LyzrLLMFactory.from_defaults(**llm_params)
-
     service_context = LyzrService.from_defaults(
         llm=llm,
         embed_model=embed_model,
@@ -220,18 +237,27 @@ def add_docx_(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params,
-        documents=documents,
-        service_context=service_context,
-        similarity_top_k=10,
+        **vector_store_params, documents=documents, service_context=service_context
     )
 
-    query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
+    retriever = LyzrRetriever.from_defaults(
+        **retriever_params, base_index=vector_store_index
+    )
 
-    return query_engine
+    memory = ChatMemoryBuffer.from_defaults(token_limit=4000)
+
+    chat_engine = ContextChatEngine(
+        llm=llm,
+        memory=memory,
+        retriever=retriever,
+        prefix_messages=list(),
+        **chat_engine_params,
+    )
+
+    return chat_engine
 
 
-def add_webpage_(
+def webpage_chat_(
     url: str = None,
     system_prompt: str = None,
     query_wrapper_prompt: str = None,
@@ -239,9 +265,9 @@ def add_webpage_(
     llm_params: dict = None,
     vector_store_params: dict = None,
     service_context_params: dict = None,
-    query_engine_params: dict = None,
+    chat_engine_params: dict = None,
     retriever_params: dict = None,
-) -> BaseQueryEngine:
+) -> BaseChatEngine:
     documents = read_webpage_as_documents(
         url=url,
     )
@@ -262,7 +288,7 @@ def add_webpage_(
     service_context_params = (
         {} if service_context_params is None else service_context_params
     )
-    query_engine_params = {} if query_engine_params is None else query_engine_params
+    chat_engine_params = {} if chat_engine_params is None else chat_engine_params
 
     retriever_params = (
         {"retriever_type": "QueryFusionRetriever"}
@@ -271,7 +297,6 @@ def add_webpage_(
     )
 
     llm = LyzrLLMFactory.from_defaults(**llm_params)
-
     service_context = LyzrService.from_defaults(
         llm=llm,
         embed_model=embed_model,
@@ -281,18 +306,27 @@ def add_webpage_(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params,
-        documents=documents,
-        service_context=service_context,
-        similarity_top_k=10,
+        **vector_store_params, documents=documents, service_context=service_context
     )
 
-    query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
+    retriever = LyzrRetriever.from_defaults(
+        **retriever_params, base_index=vector_store_index
+    )
 
-    return query_engine
+    memory = ChatMemoryBuffer.from_defaults(token_limit=4000)
+
+    chat_engine = ContextChatEngine(
+        llm=llm,
+        memory=memory,
+        retriever=retriever,
+        prefix_messages=list(),
+        **chat_engine_params,
+    )
+
+    return chat_engine
 
 
-def add_website_(
+def website_chat_(
     url: str = None,
     system_prompt: str = None,
     query_wrapper_prompt: str = None,
@@ -300,9 +334,9 @@ def add_website_(
     llm_params: dict = None,
     vector_store_params: dict = None,
     service_context_params: dict = None,
-    query_engine_params: dict = None,
+    chat_engine_params: dict = None,
     retriever_params: dict = None,
-) -> BaseQueryEngine:
+) -> BaseChatEngine:
     documents = read_website_as_documents(
         url=url,
     )
@@ -323,7 +357,7 @@ def add_website_(
     service_context_params = (
         {} if service_context_params is None else service_context_params
     )
-    query_engine_params = {} if query_engine_params is None else query_engine_params
+    chat_engine_params = {} if chat_engine_params is None else chat_engine_params
 
     retriever_params = (
         {"retriever_type": "QueryFusionRetriever"}
@@ -332,7 +366,6 @@ def add_website_(
     )
 
     llm = LyzrLLMFactory.from_defaults(**llm_params)
-
     service_context = LyzrService.from_defaults(
         llm=llm,
         embed_model=embed_model,
@@ -342,18 +375,27 @@ def add_website_(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params,
-        documents=documents,
-        service_context=service_context,
-        similarity_top_k=10,
+        **vector_store_params, documents=documents, service_context=service_context
     )
 
-    query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
+    retriever = LyzrRetriever.from_defaults(
+        **retriever_params, base_index=vector_store_index
+    )
 
-    return query_engine
+    memory = ChatMemoryBuffer.from_defaults(token_limit=4000)
+
+    chat_engine = ContextChatEngine(
+        llm=llm,
+        memory=memory,
+        retriever=retriever,
+        prefix_messages=list(),
+        **chat_engine_params,
+    )
+
+    return chat_engine
 
 
-def add_youtube_(
+def youtube_chat_(
     urls: List[str] = None,
     system_prompt: str = None,
     query_wrapper_prompt: str = None,
@@ -361,9 +403,9 @@ def add_youtube_(
     llm_params: dict = None,
     vector_store_params: dict = None,
     service_context_params: dict = None,
-    query_engine_params: dict = None,
+    chat_engine_params: dict = None,
     retriever_params: dict = None,
-) -> BaseQueryEngine:
+) -> BaseChatEngine:
     documents = read_youtube_as_documents(
         urls=urls,
     )
@@ -384,7 +426,7 @@ def add_youtube_(
     service_context_params = (
         {} if service_context_params is None else service_context_params
     )
-    query_engine_params = {} if query_engine_params is None else query_engine_params
+    chat_engine_params = {} if chat_engine_params is None else chat_engine_params
 
     retriever_params = (
         {"retriever_type": "QueryFusionRetriever"}
@@ -393,7 +435,6 @@ def add_youtube_(
     )
 
     llm = LyzrLLMFactory.from_defaults(**llm_params)
-
     service_context = LyzrService.from_defaults(
         llm=llm,
         embed_model=embed_model,
@@ -403,12 +444,21 @@ def add_youtube_(
     )
 
     vector_store_index = LyzrVectorStoreIndex.from_defaults(
-        **vector_store_params,
-        documents=documents,
-        service_context=service_context,
-        similarity_top_k=10,
+        **vector_store_params, documents=documents, service_context=service_context
     )
 
-    query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
+    retriever = LyzrRetriever.from_defaults(
+        **retriever_params, base_index=vector_store_index
+    )
 
-    return query_engine
+    memory = ChatMemoryBuffer.from_defaults(token_limit=4000)
+
+    chat_engine = ContextChatEngine(
+        llm=llm,
+        memory=memory,
+        retriever=retriever,
+        prefix_messages=list(),
+        **chat_engine_params,
+    )
+
+    return chat_engine
