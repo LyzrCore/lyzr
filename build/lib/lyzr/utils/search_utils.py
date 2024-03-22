@@ -408,7 +408,7 @@ def add_youtube_(
         service_context=service_context,
         similarity_top_k=10,
     )
- 
+
     query_engine = vector_store_index.as_query_engine(similarity_top_k=10)
 
     return query_engine
