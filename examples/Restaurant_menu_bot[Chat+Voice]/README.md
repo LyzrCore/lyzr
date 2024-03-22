@@ -1,4 +1,4 @@
-# Voice Menu Chaatbot using Lyzr
+# Voice Menu Chatbot using Lyzr
 
 ## Purpose
 
@@ -6,7 +6,7 @@ In this App we'll explore how to integrate Lyzr's SDK with Streamlit to build a 
 
 ## Getting Started
 
-Follow these steps to run the Lyzr CV QA-Bot Streamlit App locally:
+Follow these steps to run the Lyzr Voice Menu Chatbot Streamlit App locally:
 
 1. **Install Dependencies:**
    ```bash
