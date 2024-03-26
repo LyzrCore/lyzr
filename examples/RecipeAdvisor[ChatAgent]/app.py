@@ -7,7 +7,7 @@ from lyzr import ChatBot
 from dotenv import load_dotenv; load_dotenv()
 
 st.set_page_config(
-    page_title="Lyzr QA Bot",
+    page_title="Recipe Advisor",
     layout="centered",  # or "wide"
     initial_sidebar_state="auto",
     page_icon="logo\lyzr-logo-cut.png",
@@ -30,7 +30,7 @@ image = Image.open("logo/lyzr-logo.png")
 st.image(image, width=150)
 
 # App title and introduction
-st.title("Lyzr QA-Bot Demo")
+st.title("Recipe Advisor")
 st.markdown("### Welcome to the Lyzr Recipe Bot!")
 
 
