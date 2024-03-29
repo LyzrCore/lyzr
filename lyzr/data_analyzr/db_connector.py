@@ -182,14 +182,15 @@ class DatabaseConnector:
 
 
 class PostgresConnector(DatabaseConnector):
+
     def __init__(
         self,
         host: str,
-        port: int | str,
+        port: Union[int, str],
         database: str,
         user: str,
         password: str,
-        schema: str | list = None,
+        schema: Union[list, str] = None,
         tables: list[str] = None,
     ):
         self.host = host or os.getenv("POSTGRES_HOST")
@@ -225,7 +226,7 @@ class PostgresConnector(DatabaseConnector):
 
     def fetch_dataframes_dict(
         self,
-        schema: str | list = None,
+        schema: Union[str, list] = None,
         tables: list[str] = None,
     ) -> dict[pd.DataFrame]:
         schema = schema or self.schema or None
@@ -451,7 +452,7 @@ class SQLiteConnector(DatabaseConnector):
             ) from e
 
     @staticmethod
-    def _download_db(url: str) -> str | None:
+    def _download_db(url: str) -> Union[str, None]:
         url = urlparse(url).path
         if os.path.exists(url):
             return url

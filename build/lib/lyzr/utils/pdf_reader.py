@@ -20,7 +20,7 @@ class LyzrPDFReader(BaseReader):
         loader = LayoutPDFReader(llmsherpa_api_url)
 
         doc = loader.read_pdf(str(file_path))
-        metadata = {"source": str(file_path)} 
+        metadata = {"source": str(file_path)}
         documents = []
         for chunk in doc.chunks():
             document = Document(text=chunk.to_context_text(), metadata=metadata)

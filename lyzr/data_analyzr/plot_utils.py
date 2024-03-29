@@ -45,20 +45,29 @@ class PlotFactory:
         self.plotting_library = "matplotlib"
         self.output_format = "png"
 
-        self.plot_path = plot_path
-        if not os.path.isfile(self.plot_path):
-            dir_path = os.path.dirname(self.plot_path)
-            if dir_path.strip() != "":
-                os.makedirs(dir_path, exist_ok=True)
-            if os.path.isdir(self.plot_path):
-                self.plot_path = os.path.join(self.plot_path, "plot.png")
-            else:
-                self.logger.warn(
-                    f'Incorrect path for plot image provided: {self.plot_path}. Defaulting to "generated_plots/plot.png".'
-                )
-                self.plot_path = "generated_plots/plot.png"
-        if os.path.splitext(self.plot_path)[1] != ".png":
-            self.plot_path = os.path.join(os.path.splitext(self.plot_path)[0], ".png")
+        self.plot_path = self._handle_plotpath(plot_path)
+
+    def _handle_plotpath(self, plot_path) -> str:
+        plot_path = PlotFactory._fix_plotpath(plot_path)
+        try:
+            open(plot_path, "w").close()
+            return plot_path
+        except Exception:
+            self.logger.warning(
+                f'Incorrect path for plot image provided: {self.plot_path}. Defaulting to "generated_plots/plot.png".'
+            )
+            return self._handle_plotpath("generated_plots/plot.png")
+
+    @staticmethod
+    def _fix_plotpath(plot_path: str) -> str:
+        if os.path.isdir(plot_path):
+            plot_path = os.path.join(plot_path, "plot.png")
+        if os.path.splitext(plot_path)[1] != ".png":
+            plot_path = os.path.splitext(plot_path)[0] + ".png"
+        dir_path = os.path.dirname(plot_path)
+        if dir_path.strip() != "":
+            os.makedirs(dir_path, exist_ok=True)
+        return plot_path
 
     def _get_plotting_guide(self, user_input: str) -> str:
         self.model.set_messages(
@@ -297,9 +306,29 @@ class PlotFactory:
         return fig
 
     def get_visualisation(self, df: pd.DataFrame) -> str:
-        fig = self._create_plot(self.plotting_steps, df)
+        self.fig = self._create_plot(self.plotting_steps, df)
         plt.tight_layout()
-        fig.savefig(self.plot_path)
-        plt.close(fig)
-        self.logger.info(f"\nPlot saved at: {self.plot_path}\n")
+        if not PlotFactory._savefig(self.fig, self.plot_path, self.logger):
+            self.logger.error(
+                f"Error saving plot at: {self.plot_path}. Plot not saved. Displaying plot instead. Access the plot using `.fig` attribute."
+            )
+            plt.show()
+        else:
+            self.logger.info(f"\nPlot saved at: {self.plot_path}\n")
+            plt.close(self.fig)
         return self.plot_path
+
+    @staticmethod
+    def _savefig(fig, path, logger):
+        try:
+            dir_path = os.path.dirname(path)
+            if dir_path.strip() != "":
+                os.makedirs(dir_path, exist_ok=True)
+            fig.savefig(path)
+            return True
+        except Exception:
+            logger.error(
+                f"Error saving plot at: {path}. Trying to save at default location: 'generated_plots/plot.png'."
+            )
+            PlotFactory._savefig(fig, "generated_plots/plot.png", logger)
+        return False

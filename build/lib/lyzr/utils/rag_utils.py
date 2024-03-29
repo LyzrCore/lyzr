@@ -46,7 +46,7 @@ def pdf_rag(
     llm_params = (
         {
             "model": "gpt-4-0125-preview",
-            "temperature": 0,            
+            "temperature": 0,
         }
         if llm_params is None
         else llm_params
@@ -122,7 +122,7 @@ def txt_rag(
     llm_params = (
         {
             "model": "gpt-4-0125-preview",
-            "temperature": 0,            
+            "temperature": 0,
         }
         if llm_params is None
         else llm_params
@@ -198,7 +198,7 @@ def docx_rag(
     llm_params = (
         {
             "model": "gpt-4-0125-preview",
-            "temperature": 0,            
+            "temperature": 0,
         }
         if llm_params is None
         else llm_params
@@ -264,7 +264,7 @@ def webpage_rag(
     llm_params = (
         {
             "model": "gpt-4-0125-preview",
-            "temperature": 0,            
+            "temperature": 0,
         }
         if llm_params is None
         else llm_params
@@ -330,7 +330,7 @@ def website_rag(
     llm_params = (
         {
             "model": "gpt-4-0125-preview",
-            "temperature": 0,            
+            "temperature": 0,
         }
         if llm_params is None
         else llm_params
@@ -396,7 +396,7 @@ def youtube_rag(
     llm_params = (
         {
             "model": "gpt-4-0125-preview",
-            "temperature": 0,            
+            "temperature": 0,
         }
         if llm_params is None
         else llm_params
