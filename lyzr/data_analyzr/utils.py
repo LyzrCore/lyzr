@@ -1,10 +1,51 @@
 # standart-library imports
 import io
 import re
+import string
+import logging
 
 # third-party imports
 import numpy as np
 import pandas as pd
+
+
+def get_columns_names(
+    df_columns: pd.DataFrame.columns,
+    arguments: dict = {},
+    columns: list = None,
+    logger: logging.Logger = None,
+) -> list:
+    if isinstance(df_columns, pd.MultiIndex):
+        df_columns = df_columns.levels[0]
+    if columns is None:
+        if "columns" not in arguments or not isinstance(arguments.get("columns"), list):
+            return df_columns.to_list()
+        columns = arguments.get("columns", [])
+    if len(columns) == 0:
+        return df_columns.to_list()
+    columns_dict = {remove_punctuation_from_string(col): col for col in df_columns}
+    column_names = []
+    for col in columns:
+        if remove_punctuation_from_string(col) not in columns_dict:
+            logger.warning(
+                "Invalid column name provided: {}. Skipping this column.".format(col)
+            )
+        else:
+            column_names.append(columns_dict[remove_punctuation_from_string(col)])
+    return column_names
+
+
+def remove_punctuation_from_string(value: str) -> str:
+    value = str(value).strip()
+    value = value.translate(str.maketrans("", "", string.punctuation))
+    value = value.replace(" ", "").lower()
+    return value
+
+
+def flatten_list(lst: list):
+    for el in lst:
+        if isinstance(el, list):
+            yield from flatten_list(el)
 
 
 def _remove_punctuation_from_string(value) -> str:
@@ -30,7 +71,7 @@ def convert_to_numeric(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
             df.loc[:, col] = df.loc[:, col].astype("float")
         except Exception:
             pass
-    return df
+    return df.infer_objects()
 
 
 def get_info_dict_from_df_dict(df_dict: dict[pd.DataFrame]) -> dict[str]:
@@ -108,7 +149,3 @@ def _df_to_string(output_df: pd.DataFrame) -> str:
 
 def _format_date(date: pd.Timestamp):
     return date.strftime("%d %b %Y %H:%M")
-
-
-def _format_df_dict_head(df_dict: dict[pd.DataFrame]) -> str:
-    return "\n".join([f"{name}:\n{df.head()}\n" for name, df in df_dict.items()])

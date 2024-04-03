@@ -8,6 +8,7 @@ from typing import Union, Literal, Optional, Any
 # third-party imports
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # local imports
 from lyzr.base.prompt import Prompt
@@ -388,10 +389,12 @@ class DataAnalyzr:
                 self.visualisation_output = plotter.get_visualisation(self.plot_df)
                 return self.visualisation_output
             except RecursionError:
+                plt.close()
                 raise RecursionError(
                     "The request could not be completed. Please wait a while and try again."
                 )
             except Exception as e:
+                plt.close()
                 if time.time() - self.start_time > 30:
                     raise TimeoutError(
                         "The request could not be completed. Please wait a while and try again."
