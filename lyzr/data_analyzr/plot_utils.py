@@ -25,6 +25,7 @@ class PlotFactory:
         logger: logging.Logger,
         plot_context: str,
         plot_path: str,
+        use_guide: bool = True,
     ):
         self.model = plotting_model
         self.model_kwargs = plotting_model_kwargs or {}
@@ -46,6 +47,7 @@ class PlotFactory:
         self.output_format = "png"
 
         self.plot_path = self._handle_plotpath(plot_path)
+        self.use_guide = use_guide
 
     def _handle_plotpath(self, plot_path) -> str:
         plot_path = PlotFactory._fix_plotpath(plot_path)
@@ -93,6 +95,64 @@ class PlotFactory:
         return output.choices[0].message.content
 
     def _get_plotting_steps(self, user_input: str) -> str:
+        schema = {
+            "figsize": (int, int),
+            "subplots": (int, int),
+            "title": str,
+            "plots": [
+                {
+                    "subplot": (int, int),
+                    "plot_type": "line",  # line, bar, barh, scatter, hist
+                    "x": str,
+                    "y": str,
+                    "args": {
+                        "xlabel": str,
+                        "ylabel": str,
+                        "color": str,
+                        "linestyle": str,  # for line plots
+                    },
+                },
+                {
+                    "subplot": (int, int),
+                    "plot_type": "bar",  # line, bar, barh, scatter, hist
+                    "x": str,
+                    "y": str,
+                    "args": {
+                        "xlabel": str,
+                        "ylabel": str,
+                        "color": str,
+                        "stacked": bool,  # for bar plots
+                    },
+                },
+            ],
+        }
+        self.model.set_messages(
+            messages=[
+                {
+                    "role": "system",
+                    "content": Prompt("plotting_steps_pt")
+                    .format(
+                        plotting_lib=self.plotting_library,
+                        schema=schema,
+                        question=user_input,
+                        df_details=format_df_details(self.df_dict, self.df_info_dict),
+                    )
+                    .text,
+                },
+            ]
+        )
+        self.model_kwargs = set_model_params(
+            {
+                "response_format": {"type": "json_object"},
+                "max_tokens": 2000,
+                "top_p": 1,
+            },
+            self.model_kwargs,
+        )
+        output = self.model.run(**self.model_kwargs)
+        return output.choices[0].message.content
+
+    def _get_plotting_steps_from_guide(self, user_input: str) -> str:
         schema = {
             "preprocess": {
                 "analysis_df": str,
@@ -162,7 +222,7 @@ class PlotFactory:
             messages=[
                 {
                     "role": "system",
-                    "content": Prompt("plotting_steps_pt")
+                    "content": Prompt("plotting_steps_with_analysis_pt")
                     .format(
                         plotting_lib=self.plotting_library,
                         guide=self.plotting_guide,
@@ -186,17 +246,27 @@ class PlotFactory:
         return output.choices[0].message.content
 
     def get_analysis_steps(self, user_input: str) -> str:
-        self.plotting_guide = self._get_plotting_guide(user_input)
-        self.logger.info(f"\nPlotting guide recieved:\n{self.plotting_guide}")
-        self.llm_output = self._get_plotting_steps(user_input)
-        self.all_steps = check_output_format(self.llm_output, self.logger, "plot")
-        self.logger.info(f"\nPlotting steps recieved:\n{self.all_steps}")
-        self.preprocess_steps = None
+        if self.use_guide:
+            self.plotting_guide = self._get_plotting_guide(user_input)
+            self.logger.info(f"\nPlotting guide recieved:\n{self.plotting_guide}")
+            self.llm_output = self._get_plotting_steps_from_guide(user_input)
+            self.all_steps = check_output_format(self.llm_output, self.logger, "plot")
+            self.logger.info(f"\nPlotting steps recieved:\n{self.all_steps}")
+            self.preprocess_steps = None
 
-        if "preprocess" in self.all_steps:
-            self.preprocess_steps = self.all_steps["preprocess"]
-        self.plotting_steps = self.all_steps["plot"]
-        return self.preprocess_steps
+            if "preprocess" in self.all_steps:
+                self.preprocess_steps = self.all_steps["preprocess"]
+            self.plotting_steps = self.all_steps["plot"]
+            return self.preprocess_steps
+        else:
+            self.all_steps = None
+            self.preprocess_steps = None
+            self.llm_output = self._get_plotting_steps(user_input)
+            self.plotting_steps = check_output_format(
+                self.llm_output, self.logger, "plot"
+            )
+            self.logger.info(f"\nPlotting steps recieved:\n{self.plotting_steps}")
+            return self.preprocess_steps
 
     def _plot_subplot(
         self, plot_type: str, axes: np.ndarray, args: dict, df: pd.DataFrame, plot: dict

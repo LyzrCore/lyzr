@@ -323,10 +323,6 @@ class DataAnalyzr:
         else:
             plot_path = Path(plot_path).as_posix()
 
-        if self.df_dict is None:
-            self.logger.info("Fetching dataframes from database to make visualization.")
-            self.df_dict = self.database_connector.fetch_dataframes_dict()
-
         plot_context = plot_context or self.context
         self.user_input = user_input or self.user_input
         if self.user_input is None:
@@ -347,6 +343,21 @@ class DataAnalyzr:
                 self._plot_model.get("name"),
                 **self._plot_model_kwargs,
             )
+        if (
+            self.analysis_type == "sql"
+            and "analysis_output" in self.__dict__
+            and isinstance(self.analysis_output, pd.DataFrame)
+        ):
+            use_guide = False
+            self.df_dict = {"dataset": self.analysis_output}
+        elif self.df_dict is None:
+            use_guide = True
+            self.logger.info("Fetching dataframes from database to make visualization.")
+            self.df_dict = self.database_connector.fetch_dataframes_dict()
+        df_keys = list(self.df_dict.keys())
+        for key in df_keys:
+            k_new = key.lower().replace(" ", "_")
+            self.df_dict[k_new] = self.df_dict.pop(key)
 
         self.visualisation_output = None
         self.start_time = time.time()
@@ -360,6 +371,7 @@ class DataAnalyzr:
                     logger=self.logger,
                     plot_context=plot_context,
                     plot_path=plot_path,
+                    use_guide=use_guide,
                 )
                 analysis_steps = plotter.get_analysis_steps(self.user_input)
                 if analysis_steps is not None and "steps" in analysis_steps:
