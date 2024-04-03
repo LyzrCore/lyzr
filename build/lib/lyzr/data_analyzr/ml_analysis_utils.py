@@ -16,32 +16,7 @@ from lyzr.data_analyzr.output_handler import (
     validate_output_step_details,
 )
 from lyzr.base.errors import DependencyError
-
-
-def get_columns_names(
-    df_columns: pd.DataFrame.columns,
-    arguments: dict = {},
-    columns: list = None,
-    logger: logging.Logger = None,
-) -> list:
-    if isinstance(df_columns, pd.MultiIndex):
-        df_columns = df_columns.levels[0]
-    if columns is None:
-        if "columns" not in arguments or not isinstance(arguments.get("columns"), list):
-            return df_columns.to_list()
-        columns = arguments.get("columns", [])
-    if len(columns) == 0:
-        return df_columns.to_list()
-    columns_dict = {col: col for col in df_columns}
-    column_names = []
-    for col in columns:
-        if col not in columns_dict:
-            logger.warning(
-                "Invalid column name provided: {}. Skipping this column.".format(col)
-            )
-        else:
-            column_names.append(columns_dict[col])
-    return column_names
+from lyzr.data_analyzr.utils import get_columns_names
 
 
 def run_analysis_step(
@@ -52,7 +27,7 @@ def run_analysis_step(
     logger.info(f"\nRunning step: {step_details}")
     if step_details["task"] == "clean_data":
         step_details["args"]["columns"] = get_columns_names(
-            data.columns,
+            df_columns=data.columns,
             arguments=step_details["args"],
             logger=logger,
         )
@@ -64,7 +39,7 @@ def run_analysis_step(
         data = cleaner.func()
     elif step_details["task"] == "transform":
         step_details["args"]["columns"] = get_columns_names(
-            data.columns,
+            df_columns=data.columns,
             arguments=step_details["args"],
             logger=logger,
         )
@@ -82,7 +57,7 @@ def run_analysis_step(
             else:
                 step_details["args"]["result"] = "result"
         step_details["args"]["columns"] = get_columns_names(
-            data.select_dtypes(include="number").columns,
+            df_columns=data.columns,
             arguments=step_details["args"],
             logger=logger,
         )
@@ -250,7 +225,7 @@ class MLAnalysisFactory:
             return
 
         output_columns = get_columns_names(
-            data.columns,
+            df_columns=data.columns,
             columns=self.analysis_dict["output_columns"],
             logger=self.logger,
         )
@@ -313,18 +288,18 @@ class CleanerUtil:
         self.df.loc[:, self.columns] = self.df.loc[:, self.columns].apply(
             pd.to_datetime, errors="coerce"
         )
-        return self.df
+        return self.df.infer_objects()
 
     def convert_to_numeric(self) -> pd.DataFrame:
         self.df = self.remove_nulls()
         self.df = self._remove_punctuation()
         self.df.loc[:, self.columns] = self.df.loc[:, self.columns].apply(pd.to_numeric)
-        return self.df
+        return self.df.infer_objects()
 
     def convert_to_categorical(self) -> pd.DataFrame:
         self.df = self.remove_nulls()
         self.df.loc[:, self.columns] = self.df.loc[:, self.columns].astype("category")
-        return self.df
+        return self.df.infer_objects()
 
     def _remove_punctuation(self) -> pd.DataFrame:
         if isinstance(self.df, pd.Series):
@@ -511,6 +486,14 @@ class AnalyserUtil:
         if isinstance(ascending, list) and len(ascending) == len(columns):
             for col, asc in zip(columns, ascending):
                 self.df = self._sorter([col], asc)
+        elif isinstance(ascending, str) or isinstance(ascending, bool):
+            self.df = self._sorter(columns, ascending)
+        else:
+            self.logger.warning(
+                "Invalid value provided for ascending. Defaulting to True."
+            )
+            self.df = self._sorter(columns, True)
+        return self.df
 
     def _sorter(self, columns: list, ascending: Any) -> pd.DataFrame:
         if isinstance(ascending, str):
@@ -529,7 +512,7 @@ class AnalyserUtil:
             )
             ascending = True
         columns = get_columns_names(
-            self.df.columns, columns=columns, logger=self.logger
+            df_columns=self.df.columns, columns=columns, logger=self.logger
         )
         return self.df.sort_values(columns, ascending=ascending)
 
@@ -552,7 +535,7 @@ class AnalyserUtil:
         ],
     ) -> pd.DataFrame:
         columns = get_columns_names(
-            self.df.columns, columns=columns, logger=self.logger
+            df_columns=self.df.columns, columns=columns, logger=self.logger
         )
 
         if len(columns) != len(values) and len(values) == 1:
@@ -591,7 +574,7 @@ class AnalyserUtil:
 
     def mean(self, columns: list, result: Optional[str] = None) -> pd.DataFrame:
         columns = get_columns_names(
-            self.df.columns, columns=columns, logger=self.logger
+            df_columns=self.df.columns, columns=columns, logger=self.logger
         )
         if result is not None:
             self.df.loc[:, result] = self.df.loc[:, columns].mean()
@@ -600,7 +583,7 @@ class AnalyserUtil:
 
     def sum(self, columns: list, result: Optional[str] = None) -> pd.DataFrame:
         columns = get_columns_names(
-            self.df.columns, columns=columns, logger=self.logger
+            df_columns=self.df.columns, columns=columns, logger=self.logger
         )
         if result is not None:
             self.df.loc[:, result] = self.df.loc[:, columns].sum()
@@ -609,7 +592,7 @@ class AnalyserUtil:
 
     def cumsum(self, columns: list, result: Optional[str] = None) -> pd.DataFrame:
         columns = get_columns_names(
-            self.df.columns, columns=columns, logger=self.logger
+            df_columns=self.df.columns, columns=columns, logger=self.logger
         )
         if result is not None:
             self.df.loc[:, result] = self.df.loc[:, columns].cumsum()
@@ -624,7 +607,7 @@ class AnalyserUtil:
         agg_col: Optional[list] = None,
     ) -> pd.DataFrame:
         columns = get_columns_names(
-            self.df.columns, columns=columns, logger=self.logger
+            df_columns=self.df.columns, columns=columns, logger=self.logger
         )
         if len(columns) == 0:
             self.logger.warning(
@@ -634,7 +617,7 @@ class AnalyserUtil:
         if agg_col is None:
             agg_col = self.df.columns.to_list()
         agg_col = get_columns_names(
-            self.df.columns, columns=agg_col, logger=self.logger
+            df_columns=self.df.columns, columns=agg_col, logger=self.logger
         )
         if result is not None:
             self.df.loc[:, result] = self.df.groupby(columns)[agg_col].agg(agg)
@@ -648,7 +631,7 @@ class AnalyserUtil:
         result: Optional[str] = None,
     ) -> pd.DataFrame:
         columns = get_columns_names(
-            self.df.columns, columns=columns, logger=self.logger
+            df_columns=self.df.columns, columns=columns, logger=self.logger
         )
         if result is not None:
             self.df.loc[:, result] = self.df.loc[:, columns].corr(method=method)
@@ -661,8 +644,8 @@ class AnalyserUtil:
         except ImportError:
             raise DependencyError({"scikit-learn": "scikit-learn==1.4.0"})
 
-        x = get_columns_names(self.df.columns, columns=x, logger=self.logger)
-        y = get_columns_names(self.df.columns, columns=y, logger=self.logger)
+        x = get_columns_names(df_columns=self.df.columns, columns=x, logger=self.logger)
+        y = get_columns_names(df_columns=self.df.columns, columns=y, logger=self.logger)
         model = LinearRegression()
         model.fit(self.df.loc[:, x], self.df.loc[:, y])
         return model
@@ -680,10 +663,10 @@ class AnalyserUtil:
             raise DependencyError({"pmdarima": "pmdarima==2.0.4"})
 
         time_column = get_columns_names(
-            self.df.columns, columns=[time_column], logger=self.logger
+            df_columns=self.df.columns, columns=[time_column], logger=self.logger
         )[0]
         y_column = get_columns_names(
-            self.df.columns, columns=[y_column], logger=self.logger
+            df_columns=self.df.columns, columns=[y_column], logger=self.logger
         )[0]
         data = self.df.loc[
             self.df[time_column].drop_duplicates().sort_values().index,

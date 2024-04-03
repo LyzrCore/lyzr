@@ -2,7 +2,6 @@
 import io
 import os
 import logging
-from typing import Literal, Union
 
 # third-party imports
 import numpy as np
@@ -12,8 +11,13 @@ import matplotlib.pyplot as plt
 # local imports
 from lyzr.base.prompt import Prompt
 from lyzr.base.llms import LLM, set_model_params
-from lyzr.data_analyzr.utils import format_df_details, convert_to_numeric
 from lyzr.data_analyzr.output_handler import check_output_format
+from lyzr.data_analyzr.utils import (
+    format_df_details,
+    convert_to_numeric,
+    flatten_list,
+    get_columns_names,
+)
 
 
 class PlotFactory:
@@ -25,6 +29,7 @@ class PlotFactory:
         logger: logging.Logger,
         plot_context: str,
         plot_path: str,
+        use_guide: bool = True,
     ):
         self.model = plotting_model
         self.model_kwargs = plotting_model_kwargs or {}
@@ -46,6 +51,7 @@ class PlotFactory:
         self.output_format = "png"
 
         self.plot_path = self._handle_plotpath(plot_path)
+        self.use_guide = use_guide
 
     def _handle_plotpath(self, plot_path) -> str:
         plot_path = PlotFactory._fix_plotpath(plot_path)
@@ -93,6 +99,64 @@ class PlotFactory:
         return output.choices[0].message.content
 
     def _get_plotting_steps(self, user_input: str) -> str:
+        schema = {
+            "figsize": (int, int),
+            "subplots": (int, int),
+            "title": str,
+            "plots": [
+                {
+                    "subplot": (int, int),
+                    "plot_type": "line",  # line, bar, barh, scatter, hist
+                    "x": str,
+                    "y": str,
+                    "args": {
+                        "xlabel": str,
+                        "ylabel": str,
+                        "color": str,
+                        "linestyle": str,  # for line plots
+                    },
+                },
+                {
+                    "subplot": (int, int),
+                    "plot_type": "bar",  # line, bar, barh, scatter, hist
+                    "x": str,
+                    "y": str,
+                    "args": {
+                        "xlabel": str,
+                        "ylabel": str,
+                        "color": str,
+                        "stacked": bool,  # for bar plots
+                    },
+                },
+            ],
+        }
+        self.model.set_messages(
+            messages=[
+                {
+                    "role": "system",
+                    "content": Prompt("plotting_steps_pt")
+                    .format(
+                        plotting_lib=self.plotting_library,
+                        schema=schema,
+                        question=user_input,
+                        df_details=format_df_details(self.df_dict, self.df_info_dict),
+                    )
+                    .text,
+                },
+            ]
+        )
+        self.model_kwargs = set_model_params(
+            {
+                "response_format": {"type": "json_object"},
+                "max_tokens": 2000,
+                "top_p": 1,
+            },
+            self.model_kwargs,
+        )
+        output = self.model.run(**self.model_kwargs)
+        return output.choices[0].message.content
+
+    def _get_plotting_steps_from_guide(self, user_input: str) -> str:
         schema = {
             "preprocess": {
                 "analysis_df": str,
@@ -162,7 +226,7 @@ class PlotFactory:
             messages=[
                 {
                     "role": "system",
-                    "content": Prompt("plotting_steps_pt")
+                    "content": Prompt("plotting_steps_with_analysis_pt")
                     .format(
                         plotting_lib=self.plotting_library,
                         guide=self.plotting_guide,
@@ -186,23 +250,71 @@ class PlotFactory:
         return output.choices[0].message.content
 
     def get_analysis_steps(self, user_input: str) -> str:
-        self.plotting_guide = self._get_plotting_guide(user_input)
-        self.logger.info(f"\nPlotting guide recieved:\n{self.plotting_guide}")
-        self.llm_output = self._get_plotting_steps(user_input)
-        self.all_steps = check_output_format(self.llm_output, self.logger, "plot")
-        self.logger.info(f"\nPlotting steps recieved:\n{self.all_steps}")
-        self.preprocess_steps = None
+        if self.use_guide:
+            self.plotting_guide = self._get_plotting_guide(user_input)
+            self.logger.info(f"\nPlotting guide recieved:\n{self.plotting_guide}")
+            self.llm_output = self._get_plotting_steps_from_guide(user_input)
+            self.all_steps = check_output_format(self.llm_output, self.logger, "plot")
+            self.logger.info(f"\nPlotting steps recieved:\n{self.all_steps}")
+            self.preprocess_steps = None
 
-        if "preprocess" in self.all_steps:
-            self.preprocess_steps = self.all_steps["preprocess"]
-        self.plotting_steps = self.all_steps["plot"]
-        return self.preprocess_steps
+            if "preprocess" in self.all_steps:
+                self.preprocess_steps = self.all_steps["preprocess"]
+            self.plotting_steps = self.all_steps["plot"]
+            return self.preprocess_steps
+        else:
+            self.all_steps = None
+            self.preprocess_steps = None
+            self.llm_output = self._get_plotting_steps(user_input)
+            self.plotting_steps = check_output_format(
+                self.llm_output, self.logger, "plot"
+            )
+            self.logger.info(f"\nPlotting steps recieved:\n{self.plotting_steps}")
+            return self.preprocess_steps
+
+    def _set_args_stacked(self, args: dict) -> bool:
+        stacked = args.get("stacked", False)
+        if isinstance(stacked, str):
+            if stacked.lower() == "true":
+                stacked = True
+            elif stacked.lower() == "false":
+                stacked = False
+            else:
+                stacked = False
+        if not isinstance(stacked, bool):
+            self.logger.warning(
+                f"Invalid value type provided for stacked: {type(args['stacked'])}. Defaulting to False."
+            )
+            stacked = False
+        return stacked
+
+    def _get_bar_df(self, df: pd.DataFrame, columns: list) -> pd.DataFrame:
+        n_bars = 25
+        print("columns: ", columns)
+        if df[columns].shape[0] > n_bars:
+            self.logger.warning(
+                f"\nToo many bars given. Plotting only the top {n_bars} bars."
+            )
+            num_cols = df[columns].select_dtypes(include=np.number).columns.tolist()
+            df_bar = df[columns].sort_values(by=num_cols, ascending=False).head(n_bars)
+        else:
+            df_bar = df[columns]
+        return df_bar
 
     def _plot_subplot(
         self, plot_type: str, axes: np.ndarray, args: dict, df: pd.DataFrame, plot: dict
     ) -> None:
-        columns = [plot.get("x"), plot.get("y")]
-        columns.extend(plot.get("by", []))
+        if "x" in plot and isinstance(plot["x"], list):
+            plot["x"] = plot["x"][0]
+        if "y" in plot and isinstance(plot["y"], list):
+            plot["y"] = plot["y"][0]
+        columns = get_columns_names(
+            df_columns=df.columns,
+            columns=list(
+                flatten_list([plot.get("x", []), plot.get("y", []), plot.get("by", [])])
+            ),
+            logger=self.logger,
+        )
         df = convert_to_numeric(df, columns=columns).infer_objects()
 
         if plot_type == "line":
@@ -214,35 +326,8 @@ class PlotFactory:
                 **args,
             )
         elif plot_type == "bar":
-            args["stacked"] = args.get("stacked", False)
-            if isinstance(args["stacked"], str):
-                if args["stacked"].lower() == "true":
-                    args["stacked"] = True
-                elif args["stacked"].lower() == "false":
-                    args["stacked"] = False
-                else:
-                    self.logger.warning(
-                        f"Invalid value provided for stacked: {args['stacked']}. Defaulting to False."
-                    )
-                    args["stacked"] = False
-            if not isinstance(args["stacked"], bool):
-                self.logger.warning(
-                    f"Invalid value type provided for stacked: {type(args['stacked'])}. Defaulting to False."
-                )
-                args["stacked"] = False
-            n_bars = 25
-            columns = [plot.get("x"), plot.get("y")]
-            if df[columns].shape[0] > n_bars:
-                self.logger.warning(
-                    f"\nToo many bars given. Plotting only the top {n_bars} bars."
-                )
-                num_cols = df[columns].select_dtypes(include=np.number).columns.tolist()
-                df_bar = (
-                    df[columns].sort_values(by=num_cols, ascending=False).head(n_bars)
-                )
-            else:
-                df_bar = df[columns]
-
+            args["stacked"] = self._set_args_stacked(args)
+            df_bar = self._get_bar_df(df, columns)
             self.logger.info(f"\nDF to be plot:\n{df_bar.head()}\n")
             df_bar.plot.bar(
                 x=plot.get("x"),
@@ -251,8 +336,10 @@ class PlotFactory:
                 **args,
             )
         elif plot_type == "barh":
-            self.logger.info(f"\nDF to be plot:\n{df.head()}\n")
-            df.plot.barh(
+            args["stacked"] = self._set_args_stacked(args)
+            df_bar = self._get_bar_df(df, columns)
+            self.logger.info(f"\nDF to be plot:\n{df_bar.head()}\n")
+            df_bar.plot.barh(
                 x=plot.get("x"),
                 y=plot.get("y"),
                 ax=axes,

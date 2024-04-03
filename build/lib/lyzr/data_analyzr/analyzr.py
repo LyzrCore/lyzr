@@ -1,12 +1,14 @@
 # standard library imports
 import os
 import time
+import uuid
 import traceback
 from typing import Union, Literal, Optional, Any
 
 # third-party imports
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # local imports
 from lyzr.base.prompt import Prompt
@@ -318,13 +320,9 @@ class DataAnalyzr:
             return self.visualisation_output
 
         if plot_path is None:
-            plot_path = Path("generated_plots/plot.png").as_posix()
+            plot_path = Path(f"generated_plots/{str(uuid.uuid4())}.png").as_posix()
         else:
             plot_path = Path(plot_path).as_posix()
-
-        if self.df_dict is None:
-            self.logger.info("Fetching dataframes from database to make visualization.")
-            self.df_dict = self.database_connector.fetch_dataframes_dict()
 
         plot_context = plot_context or self.context
         self.user_input = user_input or self.user_input
@@ -346,6 +344,20 @@ class DataAnalyzr:
                 self._plot_model.get("name"),
                 **self._plot_model_kwargs,
             )
+        use_guide = True
+        if "analysis_output" in self.__dict__ and isinstance(
+            self.analysis_output, pd.DataFrame
+        ):
+            use_guide = False
+            plot_df = {"dataset": self.analysis_output}
+        elif self.df_dict is None:
+            self.logger.info("Fetching dataframes from database to make visualization.")
+            self.df_dict = self.database_connector.fetch_dataframes_dict()
+            plot_df = self.df_dict
+        df_keys = list(self.df_dict.keys())
+        for key in df_keys:
+            k_new = key.lower().replace(" ", "_")
+            self.df_dict[k_new] = self.df_dict.pop(key)
 
         self.visualisation_output = None
         self.start_time = time.time()
@@ -355,10 +367,11 @@ class DataAnalyzr:
                 plotter = PlotFactory(
                     plotting_model=self._plot_model,
                     plotting_model_kwargs=self._plot_model_kwargs,
-                    df_dict=self.df_dict,
+                    df_dict=plot_df,
                     logger=self.logger,
                     plot_context=plot_context,
                     plot_path=plot_path,
+                    use_guide=use_guide,
                 )
                 analysis_steps = plotter.get_analysis_steps(self.user_input)
                 if analysis_steps is not None and "steps" in analysis_steps:
@@ -366,6 +379,8 @@ class DataAnalyzr:
                         self.plot_df = self.df_dict[analysis_steps["df_name"]]
                     else:
                         self.plot_df = self.analysis(user_input, "", analysis_steps)
+                elif not use_guide:
+                    self.plot_df = plot_df[list(plot_df.keys())[0]]
                 else:
                     self.logger.info(
                         "No analysis steps found. Using first dataframe for plotting.\n"
@@ -375,10 +390,12 @@ class DataAnalyzr:
                 self.visualisation_output = plotter.get_visualisation(self.plot_df)
                 return self.visualisation_output
             except RecursionError:
+                plt.close()
                 raise RecursionError(
                     "The request could not be completed. Please wait a while and try again."
                 )
             except Exception as e:
+                plt.close()
                 if time.time() - self.start_time > 30:
                     raise TimeoutError(
                         "The request could not be completed. Please wait a while and try again."
