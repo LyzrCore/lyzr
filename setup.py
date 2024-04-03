@@ -28,6 +28,7 @@ setup(
         "pandas==2.0.2",
         "weaviate-client==3.25.3",
         "llmsherpa",
+        "matplotlib==3.8.2",
     ],
     extras_require={
         "data-analyzr": [
@@ -37,7 +38,6 @@ setup(
             "tabulate==0.9.0",
             "pmdarima==2.0.4",
             "openpyxl==3.1.2",
-            "matplotlib==3.8.2",
             "redshift_connector==2.0.918",
             "mysql-connector-python==8.2.0",
             "psycopg2-binary==2.9.9",
