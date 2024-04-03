@@ -1,7 +1,6 @@
 # standard library imports
 import re
 import time
-import string
 import logging
 import traceback
 from typing import Union, Optional, Literal, Any
@@ -289,18 +288,18 @@ class CleanerUtil:
         self.df.loc[:, self.columns] = self.df.loc[:, self.columns].apply(
             pd.to_datetime, errors="coerce"
         )
-        return self.df
+        return self.df.infer_objects()
 
     def convert_to_numeric(self) -> pd.DataFrame:
         self.df = self.remove_nulls()
         self.df = self._remove_punctuation()
         self.df.loc[:, self.columns] = self.df.loc[:, self.columns].apply(pd.to_numeric)
-        return self.df
+        return self.df.infer_objects()
 
     def convert_to_categorical(self) -> pd.DataFrame:
         self.df = self.remove_nulls()
         self.df.loc[:, self.columns] = self.df.loc[:, self.columns].astype("category")
-        return self.df
+        return self.df.infer_objects()
 
     def _remove_punctuation(self) -> pd.DataFrame:
         if isinstance(self.df, pd.Series):
@@ -487,6 +486,14 @@ class AnalyserUtil:
         if isinstance(ascending, list) and len(ascending) == len(columns):
             for col, asc in zip(columns, ascending):
                 self.df = self._sorter([col], asc)
+        elif isinstance(ascending, str) or isinstance(ascending, bool):
+            self.df = self._sorter(columns, ascending)
+        else:
+            self.logger.warning(
+                "Invalid value provided for ascending. Defaulting to True."
+            )
+            self.df = self._sorter(columns, True)
+        return self.df
 
     def _sorter(self, columns: list, ascending: Any) -> pd.DataFrame:
         if isinstance(ascending, str):

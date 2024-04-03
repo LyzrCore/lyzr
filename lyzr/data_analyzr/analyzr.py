@@ -320,7 +320,7 @@ class DataAnalyzr:
             return self.visualisation_output
 
         if plot_path is None:
-            plot_path = Path(f"generated_plots/{str(uuid.uui4())}.png").as_posix()
+            plot_path = Path(f"generated_plots/{str(uuid.uuid4())}.png").as_posix()
         else:
             plot_path = Path(plot_path).as_posix()
 
@@ -344,17 +344,16 @@ class DataAnalyzr:
                 self._plot_model.get("name"),
                 **self._plot_model_kwargs,
             )
-        if (
-            self.analysis_type == "sql"
-            and "analysis_output" in self.__dict__
-            and isinstance(self.analysis_output, pd.DataFrame)
+        use_guide = True
+        if "analysis_output" in self.__dict__ and isinstance(
+            self.analysis_output, pd.DataFrame
         ):
             use_guide = False
-            self.df_dict = {"dataset": self.analysis_output}
+            plot_df = {"dataset": self.analysis_output}
         elif self.df_dict is None:
-            use_guide = True
             self.logger.info("Fetching dataframes from database to make visualization.")
             self.df_dict = self.database_connector.fetch_dataframes_dict()
+            plot_df = self.df_dict
         df_keys = list(self.df_dict.keys())
         for key in df_keys:
             k_new = key.lower().replace(" ", "_")
@@ -368,7 +367,7 @@ class DataAnalyzr:
                 plotter = PlotFactory(
                     plotting_model=self._plot_model,
                     plotting_model_kwargs=self._plot_model_kwargs,
-                    df_dict=self.df_dict,
+                    df_dict=plot_df,
                     logger=self.logger,
                     plot_context=plot_context,
                     plot_path=plot_path,
@@ -380,6 +379,8 @@ class DataAnalyzr:
                         self.plot_df = self.df_dict[analysis_steps["df_name"]]
                     else:
                         self.plot_df = self.analysis(user_input, "", analysis_steps)
+                elif not use_guide:
+                    self.plot_df = plot_df[list(plot_df.keys())[0]]
                 else:
                     self.logger.info(
                         "No analysis steps found. Using first dataframe for plotting.\n"
