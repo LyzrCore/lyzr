@@ -1,6 +1,7 @@
 # standard library imports
 import os
 import time
+import uuid
 import traceback
 from typing import Union, Literal, Optional, Any
 
@@ -318,7 +319,7 @@ class DataAnalyzr:
             return self.visualisation_output
 
         if plot_path is None:
-            plot_path = Path("generated_plots/plot.png").as_posix()
+            plot_path = Path(f"generated_plots/{str(uuid.uui4())}.png").as_posix()
         else:
             plot_path = Path(plot_path).as_posix()
 
