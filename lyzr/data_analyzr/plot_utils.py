@@ -290,7 +290,6 @@ class PlotFactory:
 
     def _get_bar_df(self, df: pd.DataFrame, columns: list) -> pd.DataFrame:
         n_bars = 25
-        print("columns: ", columns)
         if df[columns].shape[0] > n_bars:
             self.logger.warning(
                 f"\nToo many bars given. Plotting only the top {n_bars} bars."

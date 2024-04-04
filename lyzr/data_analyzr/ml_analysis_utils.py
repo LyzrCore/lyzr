@@ -281,7 +281,8 @@ class CleanerUtil:
         self.func = getattr(self, cleaning_type.lower())
 
     def remove_nulls(self) -> pd.DataFrame:
-        return self.df.dropna(subset=self.columns)
+        self.df.dropna(subset=self.columns, inplace=True)
+        return self.df
 
     def convert_to_datetime(self) -> pd.DataFrame:
         self.df = self.remove_nulls()
@@ -586,7 +587,7 @@ class AnalyserUtil:
             df_columns=self.df.columns, columns=columns, logger=self.logger
         )
         if result is not None:
-            self.df.loc[:, result] = self.df.loc[:, columns].sum()
+            self.df.loc[:, result] = self.df.loc[:, columns].sum(axis=1)
             return self.df
         return self.df.loc[:, columns].sum()
 

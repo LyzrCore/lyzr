@@ -186,6 +186,11 @@ class DataAnalyzr:
         self.logger.setLevel(numeric_level)
 
         if self.logger.hasHandlers():
+            for handler in self.logger.handlers:
+                try:
+                    handler.close()
+                except Exception:
+                    pass
             self.logger.handlers.clear()
 
         if print_log:
@@ -345,6 +350,7 @@ class DataAnalyzr:
                 **self._plot_model_kwargs,
             )
         use_guide = True
+        plot_df = self.df_dict
         if "analysis_output" in self.__dict__ and isinstance(
             self.analysis_output, pd.DataFrame
         ):
