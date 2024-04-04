@@ -30,6 +30,7 @@ lyzr/base/prompts/insights_context_pt.txt
 lyzr/base/prompts/insights_pt.txt
 lyzr/base/prompts/plotting_guide_pt.txt
 lyzr/base/prompts/plotting_steps_pt.txt
+lyzr/base/prompts/plotting_steps_with_analysis_pt.txt
 lyzr/base/prompts/recommendations_pt.txt
 lyzr/base/prompts/rectxt_closing_text_pt.txt
 lyzr/base/prompts/rectxt_default_context_pt.txt

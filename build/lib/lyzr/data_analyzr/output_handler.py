@@ -126,7 +126,7 @@ def check_output_format(
 ):
     try:
         llm_output = eval(llm_output)
-        logger.info("LLM output formet checked.\n")
+        logger.info("LLM output format checked.\n")
         return llm_output
     except NameError as e:
         e = str(e)

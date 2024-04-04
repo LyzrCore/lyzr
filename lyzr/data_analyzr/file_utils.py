@@ -1,5 +1,6 @@
 # standard library imports
 import os
+import uuid
 from typing import Literal, Union
 
 # third-party imports
@@ -64,11 +65,12 @@ def get_db_details(
         if connector is None:
             connector = SQLiteConnector()
             connector.create_database(
-                db_path=config.get("db_path", "./sqlite/sqlite.db"), df_dict=df_dict
+                db_path=config.get("db_path", f"./sqlite/{str(uuid.uuid4())}.db"),
+                df_dict=df_dict,
             )
         if isinstance(vector_store_config, dict):
             vector_store = ChromaDBVectorStore(
-                path=vector_store_config["path"],
+                path=vector_store_config.get("path", f"./chromadb/{str(uuid.uuid4())}"),
                 remake_store=vector_store_config.get(
                     "remake_store", vector_store_config.get("remake", True)
                 ),
