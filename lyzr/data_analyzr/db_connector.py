@@ -475,6 +475,14 @@ class SQLiteConnector(DatabaseConnector):
         try:
             self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
             for name, df in df_dict.items():
+                df = df.rename(
+                    columns=dict(
+                        zip(
+                            df.columns,
+                            [col.replace(" ", "_").lower() for col in df.columns],
+                        )
+                    )
+                )
                 df.to_sql(name, con=self.conn, index=False, if_exists="replace")
             return self.conn
         except sqlite3.Error as e:
