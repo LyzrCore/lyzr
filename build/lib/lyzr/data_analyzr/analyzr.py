@@ -360,10 +360,11 @@ class DataAnalyzr:
             self.logger.info("Fetching dataframes from database to make visualization.")
             self.df_dict = self.database_connector.fetch_dataframes_dict()
             plot_df = self.df_dict
-        df_keys = list(self.df_dict.keys())
-        for key in df_keys:
-            k_new = key.lower().replace(" ", "_")
-            self.df_dict[k_new] = self.df_dict.pop(key)
+        if plot_df is not None:
+            df_keys = list(plot_df.keys())
+            for key in df_keys:
+                k_new = key.lower().replace(" ", "_")
+                plot_df[k_new] = plot_df.pop(key)
 
         self.visualisation_output = None
         self.start_time = time.time()

@@ -15,7 +15,7 @@ A. The value of "preprocess" should be a dictionary with keys "df_name" and "ste
     2. Task: The task to be performed. The task can be one of the following: "clean_data", "transform", "math_operation", "analysis"
     3. Type: The type of task to be performed.
         3a. For task "clean_data", following types are available: "convert_to_datetime", "convert_to_numeric", "convert_to_categorical"
-        3b. For task "transform", following types are available: "one_hot_encode", "ordinal_encode", "scale", "extract_time_period"
+        3b. For task "transform", following types are available: "one_hot_encode", "ordinal_encode", "scale", "extract_time_period", "select_indices"
         3c. For task "math_operation", following types are available: "add", "subtract", "multiply", "divide"
         3d. For task "analysis", following types are available: "sortvalues", "filter", "mean", "sum", "cumsum", "groupby", "correlation", "regression", "classification", "clustering", "forecast"
     4. Args: The arguments required to perform the task. The arguments should be in the form of a dictionary.
