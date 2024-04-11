@@ -57,9 +57,13 @@ lyzr/data_analyzr/utils.py
 lyzr/data_analyzr/vector_store_utils.py
 lyzr/formula_generator/__init__.py
 lyzr/formula_generator/formula_generator.py
+lyzr/generator/__init__.py
+lyzr/generator/generator.py
 lyzr/qa/__init__.py
 lyzr/qa/qa_bot.py
 lyzr/qa/search_agent.py
+lyzr/summarizer/__init__.py
+lyzr/summarizer/summarizer.py
 lyzr/utils/__init__.py
 lyzr/utils/chat_utils.py
 lyzr/utils/constants.py
