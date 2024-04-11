@@ -58,7 +58,7 @@ class LiteLLM(LiteLLM):
 
     def run(self, **kwargs):
         if self._model_type == "chat":
-            return self.chat(
+            return self.chat_complete(
                 messages=kwargs.pop("messages", self.__dict__.get("messages", None)),
                 stream=kwargs.pop("stream", False),
                 logger=self.additional_kwargs.pop("logger", kwargs.pop("logger", None)),
@@ -74,7 +74,7 @@ class LiteLLM(LiteLLM):
             return self.stt(audiofile=kwargs.pop("audiofile", None), **kwargs)
         return None
 
-    def chat(
+    def chat_complete(
         self,
         messages: Sequence[ChatMessage],
         stream: bool = False,
