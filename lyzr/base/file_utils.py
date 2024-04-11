@@ -4,16 +4,17 @@ from typing import Optional
 
 import pandas as pd
 
-from lyzr.base.errors import InvalidValueError
-from lyzr.base.llms import LLM, get_model
-from lyzr.base.prompt import Prompt
+from lyzr.base.llm import LiteLLM, LyzrLLMFactory
+from lyzr.base.prompt import LyzrPromptFactory
 
 
 def read_file(
     filepath: str, encoding: Optional[str] = "utf-8", **kwargs
 ) -> pd.DataFrame:
     if not os.path.exists(filepath):
-        raise InvalidValueError(["filepath", "pandas DataFrame"])
+        raise ValueError(
+            f"File '{filepath}' not found. Please provide a valid filepath."
+        )
     file_extension = filepath.split(".")[-1]
     try:
         if file_extension == "csv":
@@ -46,26 +47,30 @@ def read_file(
 
 
 def describe_dataset(
-    model: Optional[LLM] = None,
+    model: Optional[LiteLLM] = None,
     df: Optional[pd.DataFrame] = None,
     api_key: Optional[str] = None,
     model_type: Optional[str] = None,
     model_name: Optional[str] = None,
 ) -> str:
     if not isinstance(df, pd.DataFrame):
-        raise InvalidValueError(["pandas DataFrame"])
+        raise ValueError("Please provide a valid pandas DataFrame.")
 
     if model is None:
-        model = get_model(api_key, model_type, model_name)
-
-    prompt = Prompt("dataset_description")
-    if prompt.get_variables() != []:
-        prompt.format(
-            headers=df.columns.tolist(),
-            df_sample=df.head(),
+        model = LyzrLLMFactory(
+            api_key=api_key,
+            api_type=model_type,
+            model=model_name,
         )
-    model.set_messages(model_prompts=prompt.sections)
 
-    output = model.run()
+    messages = [
+        LyzrPromptFactory(
+            name="dataset_description", prompt_type="system"
+        ).get_message(),
+        LyzrPromptFactory(name="dataset_description", prompt_type="user").get_message(
+            headers=df.columns.tolist(), df_sample=df.head()
+        ),
+    ]
+    output = model.run(messages=messages)
 
-    return output["choices"][0]["message"]["content"]
+    return output.message.content

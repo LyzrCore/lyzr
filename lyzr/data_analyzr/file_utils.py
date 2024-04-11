@@ -1,6 +1,7 @@
 # standard library imports
 import os
 import uuid
+import logging
 from typing import Literal, Union
 
 # third-party imports
@@ -28,14 +29,16 @@ def get_db_details(
     ],
     config: dict,
     vector_store_config: dict,
-    logger,
+    logger: logging.Logger,
 ):
     df_dict = None
     connector = None
     vector_store = None
     if db_type == "files":
         if "datasets" not in config:
-            raise MissingValueError(["datasets"])
+            raise MissingValueError(
+                "`datasets` is a required parameter for db_type='files'."
+            )
         datasets = config["datasets"]
         files_kwargs = config.get("files_kwargs", {})
         if not isinstance(datasets, dict):

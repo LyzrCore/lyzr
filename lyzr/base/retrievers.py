@@ -1,4 +1,3 @@
-from typing import Optional, Sequence
 from llama_index.retrievers import BaseRetriever
 from llama_index.indices import VectorStoreIndex
 
@@ -16,11 +15,11 @@ class LyzrRetriever:
         base_index: VectorStoreIndex = None,
         **kwargs
     ) -> BaseRetriever:
-        RetrieverClass = import_retriever_class(retriever_type)
+        retriever_class = import_retriever_class(retriever_type)
 
         if retriever_type == "QueryFusionRetriever":
             print("QueryFusionRetriever")
-            retriever = RetrieverClass(
+            retriever = retriever_class(
                 retrievers=[
                     base_index.as_retriever(
                         vector_store_query_mode="mmr",
@@ -40,5 +39,5 @@ class LyzrRetriever:
             )
             return retriever
         else:
-            retriever = RetrieverClass(**kwargs)
+            retriever = retriever_class(**kwargs)
             return retriever

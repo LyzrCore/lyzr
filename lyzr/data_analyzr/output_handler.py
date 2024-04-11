@@ -123,7 +123,7 @@ def check_output_format(
     llm_output: str,
     logger: logging.Logger,
     output_type: Literal["plot", "analysis"] = "analysis",
-):
+) -> dict:
     try:
         llm_output = eval(llm_output)
         logger.info("LLM output format checked.\n")

@@ -1,93 +1,61 @@
-# standard library imports
-from typing import Optional, Union
-from importlib import resources as impresources
-
-# local imports
-from lyzr.base import prompts
-from lyzr.base.errors import (
-    MissingValueError,
-    InvalidValueError,
-)
+import json
+from typing import Literal
+from lyzr.base.base import ChatMessage, UserMessage, SystemMessage, MessageRole
 
 
-class Prompt:
-    def __init__(self, prompt_name: str, prompt_text: Optional[str] = None):
-        self.name = prompt_name
-        self.text = prompt_text
-        if self.text is None:
-            # in-built prompt names end with _pt
-            self.load_prompt()
-            self.variables = self.get_variables()
-            return None
-        else:
-            self.variables = self.get_variables()
-            self.save_prompt()
-            return None
+class PromptRole:
+    def __init__(self, allowed_names: list):
+        self.allowed_names = allowed_names
 
-    def get_variables(self):
-        variables = []
-        for word in self.text.split():
-            if word.startswith("{") and word.endswith("}"):
-                variables.append(word[1:-1])
-        return variables
+    def __get__(self, instance, _):
+        return instance._name
 
-    def save_prompt(self):
-        inp_file = impresources.files(prompts) / f"{self.name}.txt"
-        with inp_file.open("wb") as f:
-            f.write(self.text.encode("utf-8"))
+    def __set__(self, instance, value):
+        if value not in self.allowed_names:
+            raise ValueError(f"Prompt type must be one of {self.allowed_names}")
+        instance._name = MessageRole(value)
 
-    def load_prompt(self):
-        try:
-            inp_file = impresources.files(prompts) / f"{self.name}.txt"
-            with inp_file.open("rb") as f:
-                self.text = f.read().decode("utf-8")
-        except FileNotFoundError:
-            raise ValueError(
-                f"No prompt with name '{self.name}' found. "
-                f"To use an in-built prompt, use one of the following prompt names: {get_prompts_list()}\n"
-                "Or create a new prompt by passing the prompt text.",
+
+class LyzrPromptFactory:
+    """Lyzr prompt factory."""
+
+    prompt_type: MessageRole = PromptRole(["user", "system"])
+    sections: dict
+    sections_to_use: list
+
+    def __init__(
+        self,
+        name: str,
+        prompt_type: Literal["user", "system"],
+        use_sections: list = None,
+    ) -> None:
+        self.prompt_type = prompt_type
+        with open("lyzr/base/prompt_texts.json", "r") as f:
+            try:
+                self.sections = json.load(f)[name][self.prompt_type.value]
+            except KeyError:
+                raise ValueError(f"Prompt name {name} not found.")
+        self.sections_to_use = use_sections or []
+
+    def select_sections(self, use_sections: list = None) -> None:
+        self.sections_to_use = (
+            use_sections
+            if (
+                (use_sections is not None)
+                and isinstance(use_sections, list)
+                and (len(use_sections) > 0)
             )
+            else self.sections_to_use
+        )
 
-    def edit_prompt(self, prompt_text: str):
-        self.text = prompt_text
-        self.variables = self.get_variables()
-        self.save_prompt()
-        return self
-
-    def format(self, **kwargs):
-        if self.text is None:
-            raise ValueError(f"Please provide the text for the prompt '{self.name}'")
-        prompt_text = self.text
-        try:
-            prompt_text = prompt_text.format(**kwargs)
-        except KeyError:
-            raise ValueError(
-                f"Please provide values for all variables: {self.variables}"
-            )
-        self.text = prompt_text
-        return self
-
-
-def get_prompts_list() -> list:
-    # fix this path issue
-    all_prompts = [
-        pfile.stem
-        for pfile in impresources.files(prompts).iterdir()
-        if (pfile.suffix == ".txt") and (pfile.stem.endswith("_pt"))
-    ]
-    return all_prompts
-
-
-def get_prompt_text(prompt: Union[dict, Prompt]):
-    if isinstance(prompt, Prompt):
-        return prompt.text
-    if not isinstance(prompt, dict):
-        raise InvalidValueError(["dict", "Prompt"])
-    if ("prompt" not in prompt) and ("text" not in prompt):
-        raise MissingValueError(["prompt", "text"])
-    if "prompt" in prompt:
-        return get_prompt_text(prompt["prompt"])
-    elif "name" in prompt:
-        return Prompt(prompt["name"], prompt["text"]).text
-    else:
-        return prompt["text"]
+    def get_message(self, use_sections: list = None, **kwargs) -> ChatMessage:
+        self.select_sections(use_sections)
+        if self.sections_to_use == []:
+            self.sections_to_use = list(self.sections.keys())
+        message = (
+            UserMessage() if self.prompt_type == MessageRole.USER else SystemMessage()
+        )
+        message.content = ""
+        for section in self.sections_to_use:
+            message.content += self.sections[section].format(**kwargs)
+        return message

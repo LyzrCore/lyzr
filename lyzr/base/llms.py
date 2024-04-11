@@ -6,7 +6,7 @@ from typing import Optional, Literal, Union
 from openai import OpenAI
 
 # local imports
-from lyzr.base.prompt import get_prompt_text
+from lyzr.base.prompt_dep import get_prompt_text
 from lyzr.base.errors import MissingValueError
 
 
