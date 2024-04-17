@@ -2,26 +2,24 @@
 import os
 import time
 import uuid
-import traceback
+import warnings
 from typing import Union, Literal, Optional, Any
 
 # third-party imports
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 # local imports
-from lyzr.base.prompt import Prompt
+from lyzr.base.prompt import LyzrPromptFactory
 from lyzr.data_analyzr.file_utils import get_db_details
 from lyzr.data_analyzr.txt_to_sql_utils import TxttoSQLFactory
 from lyzr.data_analyzr.ml_analysis_utils import MLAnalysisFactory
 from lyzr.base.errors import (
     MissingValueError,
 )
-from lyzr.base.llms import (
-    LLM,
-    get_model,
-    set_model_params,
+from lyzr.base.llm import (
+    LyzrLLMFactory,
+    LiteLLM,
 )
 from lyzr.data_analyzr.plot_utils import PlotFactory
 from lyzr.data_analyzr.utils import (
@@ -39,6 +37,8 @@ from PIL import Image
 from pathlib import Path
 from pandas.errors import EmptyDataError
 
+warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
+
 
 class DataAnalyzr:
 
@@ -46,9 +46,8 @@ class DataAnalyzr:
         self,
         analysis_type: Optional[Literal["sql", "ml", "skip"]] = None,
         api_key: Optional[str] = None,
-        gen_model: Optional[Union[dict, LLM]] = None,
-        analysis_model: Optional[Union[dict, LLM]] = None,
-        plot_model: Optional[Union[dict, LLM]] = None,
+        max_retries: Optional[int] = 5,
+        model: Optional[LiteLLM] = None,
         user_input: Optional[str] = None,
         context: Optional[str] = None,
         log_level: Optional[
@@ -58,50 +57,46 @@ class DataAnalyzr:
         log_filename: Optional[str] = "dataanalyzr.log",
         # legacy usage
         df: Union[str, pd.DataFrame] = None,
-        model: Optional[LLM] = None,
         model_type: Optional[str] = None,
         model_name: Optional[str] = None,
-        seed: int = None,
+        seed: Optional[int] = 0,
     ):
-        self.api_key = (
+        api_key = (
             api_key or os.environ.get("API_KEY") or os.environ.get("OPENAI_API_KEY")
         )
-        if self.api_key is None:
-            raise MissingValueError("api key")
-
+        if api_key is None:
+            raise MissingValueError(
+                "Provide a value for `api_key` or set the `OPENAI_API_KEY` environment variable."
+            )
+        self.max_retries = max_retries
         self.user_input = user_input
         self.log_filename = log_filename
         self._set_logger(log_level, print_log)
 
         if df is not None:
             # legacy usage
-            self._legacy_usage(df, user_input, model, model_type, model_name, seed)
+            self._legacy_usage(
+                api_key=api_key,
+                df=df,
+                user_input=user_input,
+                model=model,
+                model_type=model_type,
+                model_name=model_name,
+                seed=seed,
+            )
         else:
             if analysis_type is None:
-                raise MissingValueError("analysis_type")
-            if gen_model is None:
-                gen_model = {
-                    "type": "openai",
-                    "name": "gpt-4-1106-preview",
-                    "kwargs": {},
-                }
-            if isinstance(gen_model, LLM):
-                self._gen_model = gen_model
-                self._gen_model_kwargs = {}
-            else:
-                self._gen_model_kwargs = gen_model["kwargs"]
-                self._gen_model = get_model(
-                    self.api_key,
-                    gen_model["type"],
-                    gen_model["name"],
-                    **self._gen_model_kwargs,
+                raise MissingValueError("`analysis_type` is a required parameter.")
+            if model is None:
+                self.model = LyzrLLMFactory().from_defaults(
+                    model="gpt-4-1106-preview", api_key=api_key, seed=seed
                 )
+            elif isinstance(model, LiteLLM):
+                self.model = model
+            self.model.additional_kwargs["logger"] = self.logger
 
             self.analysis_type = analysis_type.lower().strip()
-            self._analysis_model = analysis_model
-            self._plot_model = plot_model
             self.context = context or ""
-
         (
             self.dataset_description_output,
             self.ai_queries,
@@ -114,38 +109,28 @@ class DataAnalyzr:
 
     def _legacy_usage(
         self,
+        api_key: str,
         df: Union[str, pd.DataFrame],
         user_input: Optional[str],
-        model: Optional[LLM],
+        model: Optional[LiteLLM],
         model_type: Optional[str],
         model_name: Optional[str],
         seed: int,
     ):
-        self.logger.warning(
+        warnings.warn(
             "The `df` parameter is deprecated and will be removed in a future version. Please use the `get_data` method to load data."
         )
         for param in ["model", "model_type", "model_name", "seed"]:
             if locals()[param] is not None:
-                self.logger.warning(
+                warnings.warn(
                     f"The `{param}` parameter is deprecated and will be removed in a future version. Please use the `analysis_model` parameter to set the analysis model, and the `gen_model` parameter to set the generation model."
                 )
-        self._gen_model = model or get_model(
-            api_key=self.api_key,
-            model_type=model_type or os.environ.get("MODEL_TYPE", "openai"),
-            model_name=model_name or os.environ.get("MODEL_NAME", "gpt-4-1106-preview"),
+        self.model = model or LyzrLLMFactory().from_defaults(
+            api_key=api_key,
+            api_type=model_type,
+            model=model_name or os.environ.get("MODEL_NAME", "gpt-4-1106-preview"),
+            seed=seed,
         )
-        self._analysis_model = self._plot_model = (
-            model
-            or os.environ.get("LLM_MODEL")
-            or get_model(
-                api_key=self.api_key,
-                model_type=model_type or os.environ.get("MODEL_TYPE", "openai"),
-                model_name=model_name or os.environ.get("MODEL_NAME", "gpt-3.5-turbo"),
-            )
-        )
-        self._gen_model_kwargs = self._analysis_model_kwargs = (
-            self._plot_model_kwargs
-        ) = {"seed": seed}
         self.context = ""
         self.analysis_type = "ml"
         self.user_input = user_input
@@ -261,38 +246,33 @@ class DataAnalyzr:
                 "No analysis performed. Analysis output is the given dataframe."
             )
             return self.analysis_output
-        self._analysis_model = self._analysis_model or {
-            "type": "openai",
-            "name": "gpt-3.5-turbo-1106",
-            "kwargs": {},
-        }
-        if isinstance(self._analysis_model, LLM):
-            self._analysis_model_kwargs = {}
-        elif isinstance(self._analysis_model, dict):
-            self._analysis_model_kwargs = self._analysis_model.get("kwargs", {})
-            self._analysis_model = get_model(
-                self.api_key,
-                self._analysis_model.get("type"),
-                self._analysis_model.get("name"),
-                **self._analysis_model_kwargs,
-            )
+        analysis_model = LyzrLLMFactory().from_defaults(model="gpt-3.5-turbo")
+        analysis_model.additional_kwargs["logger"] = self.logger
         if self.analysis_type == "sql" and analysis_steps is None:
-            return self._txt_to_sql_analysis(user_input, analysis_context)
+            return self._txt_to_sql_analysis(
+                analysis_model, user_input, analysis_context
+            )
         if self.analysis_type == "ml" or analysis_steps is not None:
             return self._ml_analysis(
-                user_input, analysis_context, analysis_steps=analysis_steps
+                analysis_model,
+                user_input,
+                analysis_context,
+                analysis_steps=analysis_steps,
             )
 
     def _ml_analysis(
-        self, user_input: str, analysis_context: str = None, analysis_steps: dict = None
+        self,
+        analysis_model,
+        user_input: str,
+        analysis_context: str = None,
+        analysis_steps: dict = None,
     ):
         self.analyzer = MLAnalysisFactory(
-            model=self._analysis_model,
+            model=analysis_model,
             data_dict=self.df_dict,
             data_info_dict=self.df_info_dict,
             logger=self.logger,
             context=analysis_context,
-            model_kwargs=self._analysis_model_kwargs,
         )
         if analysis_steps is not None:
             _, data = self.analyzer.run_analysis(analysis_steps)
@@ -302,13 +282,14 @@ class DataAnalyzr:
             self.analysis_guide = self.analyzer.analysis_guide
             return self.analysis_output
 
-    def _txt_to_sql_analysis(self, user_input: str, analysis_context: str = None):
+    def _txt_to_sql_analysis(
+        self, analysis_model, user_input: str, analysis_context: str = None
+    ):
         self.analyzer = TxttoSQLFactory(
-            model=self._analysis_model,
+            model=self.model,
             db_connector=self.database_connector,
             logger=self.logger,
             context=analysis_context,
-            model_kwargs=self._analysis_model_kwargs,
             vector_store=self.vector_store,
         )
         self.analysis_output = self.analyzer.get_analysis_output(user_input)
@@ -321,52 +302,12 @@ class DataAnalyzr:
         plot_context: str = None,
         plot_path: str = None,
     ):
-        if self.user_input == user_input and self.visualisation_output is not None:
-            return self.visualisation_output
-
         if plot_path is None:
             plot_path = Path(f"generated_plots/{str(uuid.uuid4())}.png").as_posix()
         else:
             plot_path = Path(plot_path).as_posix()
-
-        plot_context = plot_context or self.context
-        self.user_input = user_input or self.user_input
-        if self.user_input is None:
-            raise MissingValueError(["user_input"])
-
-        self._plot_model = self._plot_model or {
-            "type": "openai",
-            "name": "gpt-3.5-turbo-1106",
-            "kwargs": {},
-        }
-        if isinstance(self._plot_model, LLM):
-            self._plot_model_kwargs = {}
-        elif isinstance(self._plot_model, dict):
-            self._plot_model_kwargs = self._plot_model.get("kwargs", {})
-            self._plot_model = get_model(
-                self.api_key,
-                self._plot_model.get("type"),
-                self._plot_model.get("name"),
-                **self._plot_model_kwargs,
-            )
-        use_guide = True
-        plot_df = self.df_dict
-        if "analysis_output" in self.__dict__ and isinstance(
-            self.analysis_output, pd.DataFrame
-        ):
-            use_guide = False
-            plot_df = {"dataset": self.analysis_output}
-        elif self.df_dict is None:
-            self.logger.info("Fetching dataframes from database to make visualization.")
-            self.df_dict = self.database_connector.fetch_dataframes_dict()
-            plot_df = self.df_dict
-        if plot_df is not None:
-            df_keys = list(plot_df.keys())
-            for key in df_keys:
-                k_new = key.lower().replace(" ", "_")
-                plot_df[k_new] = plot_df.pop(key)
-
         self.visualisation_output = None
+<<<<<<< Updated upstream
         self.start_time = time.time()
         while True:
             try:
@@ -410,6 +351,68 @@ class DataAnalyzr:
                 self.logger.info(f"{e.__class__.__name__}: {e}")
                 self.logger.info("Traceback:\n{}\n".format(traceback.format_exc()))
                 continue
+=======
+        # self.start_time = time.time()
+
+        self.logger.info("Generating visualisation\n")
+        plotter = PlotFactory(
+            model=self.model,
+            logger=self.logger,
+            plot_context=plot_context,
+            plot_path=plot_path,
+            df_dict=self.df_dict,
+            database_connector=self.database_connector,
+            analysis_type=self.analysis_type,
+            analyzer=self.analyzer,
+            analysis_output=self.analysis_output,
+        )
+        self.visualisation_output = plotter.get_visualisation(user_input)
+        return self.visualisation_output
+        # while True:
+        #     try:
+        #         self.logger.info("Generating visualisation\n")
+        #         plotter = PlotFactory(
+        #             model=self.model,
+        #             plotting_model_kwargs=self._plot_model_kwargs,
+        #             df_dict=plot_df,
+        #             logger=self.logger,
+        #             plot_context=plot_context,
+        #             plot_path=plot_path,
+        #             use_guide=use_guide,
+        #         )
+        #         analysis_steps = plotter.get_plotting_and_analysis_steps(
+        #             self.user_input
+        #         )
+        #         if analysis_steps is not None and "steps" in analysis_steps:
+        #             if len(analysis_steps["steps"]) == 0:
+        #                 self.plot_df = self.df_dict[analysis_steps["df_name"]]
+        #             else:
+        #                 self.plot_df = self.analysis(user_input, "", analysis_steps)
+        #         elif not use_guide:
+        #             self.plot_df = plot_df[list(plot_df.keys())[0]]
+        #         else:
+        #             self.logger.info(
+        #                 "No analysis steps found. Using first dataframe for plotting.\n"
+        #             )
+        #             self.plot_df = self.df_dict[list(self.df_dict.keys())[0]]
+
+        #         self.visualisation_output = plotter.get_visualisation(self.plot_df)
+        #         return self.visualisation_output
+        #     except RecursionError:
+        #         plt.close()
+        #         raise RecursionError(
+        #             "The request could not be completed. Please wait a while and try again."
+        #         )
+        #     except Exception as e:
+        #         plt.close()
+        #         if time.time() - self.start_time > 30:
+        #             raise TimeoutError(
+        #                 "The request could not be completed. Please wait a while and try again."
+        #             )
+        #         self.logger.info(f"{e.__class__.__name__}: {e}")
+        #         self.logger.info("Traceback:\n{}\n".format(traceback.format_exc()))
+        #         continue
+>>>>>>> Stashed changes
 
     def insights(
         self,
@@ -419,40 +422,23 @@ class DataAnalyzr:
     ) -> str:
         if "analysis_guide" not in self.__dict__:
             self.analysis_guide = ""
-        self.logger.info("Generating insights\n")
-        self._gen_model.set_messages(
+        self.insights_output = self.model.run(
             messages=[
-                {
-                    "role": "system",
-                    "content": Prompt("insights_context_pt")
-                    .format(context=insights_context, n_insights=n_insights)
-                    .text,
-                },
-                {
-                    "content": Prompt("insights_pt")
-                    .format(
-                        user_input=user_input,
-                        analysis_context=self.analysis_guide,
-                        analysis_output=format_df_with_describe(self.analysis_output),
-                        date=time.strftime("%d %b %Y"),
-                    )
-                    .text,
-                    "role": "user",
-                },
-            ]
-        )
-        self._gen_model_kwargs = set_model_params(
-            {
-                "temperature": 0.3,
-                "top_p": 1,
-                "frequency_penalty": 0,
-                "presence_penalty": 0,
-            },
-            self._gen_model_kwargs,
-        )
-        self.insights_output = (
-            self._gen_model.run(**self._gen_model_kwargs).choices[0].message.content
-        )
+                LyzrPromptFactory(name="insights", prompt_type="system").get_message(
+                    context=insights_context.strip() + "\n\n", n_insights=n_insights
+                ),
+                LyzrPromptFactory(name="insights", prompt_type="user").get_message(
+                    user_input=user_input,
+                    analysis_guide=self.analysis_guide,
+                    analysis_output=format_df_with_describe(self.analysis_output),
+                    date=time.strftime("%d %b %Y"),
+                ),
+            ],
+            temperature=0.3,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0,
+        ).message.content.strip()
         return self.insights_output
 
     def recommendations(
@@ -471,12 +457,12 @@ class DataAnalyzr:
             use_insights = True
             output_type = "json"
         if insights is not None:
-            self.logger.warning(
+            warnings.warn(
                 "The `insights` parameter is deprecated and will be removed in a future version. Please use the `insights_output` attribute to set the insights."
             )
             self.insights_output = insights
         if schema is not None:
-            self.logger.warning(
+            warnings.warn(
                 "The `schema` parameter is deprecated and will be removed in a future version. Please use the `recs_format` parameter to set the recommendations format as a dictionary."
             )
             for elem in schema:
@@ -484,15 +470,24 @@ class DataAnalyzr:
                     recs_format = elem
                     break
 
-        if recommendations_context is None or recommendations_context == "":
-            recommendations_context = Prompt("rectxt_default_context_pt").text
+        system_message_sections = ["context"]
+        system_message_dict = {}
+        user_message_dict = {
+            "user_input": user_input,
+            "analysis_output": f"Analysis output:\n{format_df_with_describe(self.analysis_output)}",
+        }
+        if recommendations_context is not None and recommendations_context != "":
+            system_message_sections.append("external_context")
+            system_message_dict["context"] = recommendations_context.strip() + "\n\n"
 
         if not use_insights:
             insights = None
-            recommendations_context += Prompt("rectxt_task_no_insights_pt").text
+            system_message_sections.append("task_no_insights")
         else:
-            insights = self.insights_output
-            recommendations_context += Prompt("rectxt_task_with_insights_pt").text
+            system_message_sections.append("task_with_insights")
+            user_message_dict["insights"] = (
+                f"\nAnalysis insights:\n{self.insights_output}\n"
+            )
 
         if output_type.lower().strip() == "json":
             recs_format = recs_format or {
@@ -500,59 +495,35 @@ class DataAnalyzr:
                 "Basis of the Recommendation": "string",
                 "Impact if implemented": "string",
             }
-            recommendations_context += (
-                Prompt("rectxt_json_output_pt")
-                .format(
-                    output_json_keys=", ".join(recs_format.keys()),
-                    json_schema=[recs_format for _ in range(n_recommendations)],
-                )
-                .text
-            )
-            self._gen_model_kwargs["response_format"] = {"type": "json_object"}
-        elif output_type.lower().strip() == "text":
-            recommendations_context += (
-                Prompt("rectxt_text_output_pt")
-                .format(count_recommendations=n_recommendations)
-                .text
-            )
-        recommendations_context += Prompt("rectxt_closing_text_pt").text
-
-        recommendations_pt = (
-            Prompt("recommendations_pt")
-            .format(
-                user_input=f"User query: {user_input}",
-                insights=(
-                    "" if insights is None else f"\nAnalysis insights:\n{insights}\n"
-                ),
-                analysis_output=f"Analysis output:\n{format_df_with_describe(self.analysis_output)}",
-            )
-            .text
-        )
-        self.logger.info("Generating recommendations\n")
-        self._gen_model.set_messages(
-            messages=[
-                {
-                    "content": recommendations_context,
-                    "role": "system",
-                },
-                {
-                    "content": recommendations_pt,
-                    "role": "user",
-                },
+            system_message_sections.append("json_type")
+            system_message_dict["output_json_keys"] = ", ".join(recs_format.keys())
+            system_message_dict["json_schema"] = [
+                recs_format for _ in range(n_recommendations)
             ]
-        )
-        self._gen_model_kwargs = set_model_params(
-            {
-                "temperature": 0.3,
-                "top_p": 1,
-                "frequency_penalty": 0,
-                "presence_penalty": 0,
-            },
-            self._gen_model_kwargs,
-        )
-        self.recommendations_output = (
-            self._gen_model.run(**self._gen_model_kwargs).choices[0].message.content
-        )
+        elif output_type.lower().strip() == "text":
+            system_message_sections.append("text_type")
+            system_message_dict["n_recommendations"] = n_recommendations
+
+        system_message_sections.append("closing")
+        self.recommendations_output = self.model.run(
+            messages=[
+                LyzrPromptFactory(
+                    name="recommendations", prompt_type="system"
+                ).get_message(
+                    use_sections=system_message_sections, **system_message_dict
+                ),
+                LyzrPromptFactory(
+                    name="recommendations", prompt_type="user"
+                ).get_message(**user_message_dict),
+            ],
+            temperature=0.3,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0,
+            response_format=(
+                {"type": "json_object"} if output_type == "json" else {"type": "text"}
+            ),
+        ).message.content
         return self.recommendations_output
 
     def tasks(
@@ -565,48 +536,31 @@ class DataAnalyzr:
         recommendations: Optional[str] = None,
     ) -> str:
         if insights is not None:
-            self.logger.warning(
+            warnings.warn(
                 "The `insights` parameter is deprecated and will be removed in a future version. Please use the `insights_output` attribute to set the insights."
             )
             self.insights_output = insights
         if recommendations is not None:
-            self.logger.warning(
+            warnings.warn(
                 "The `recommendations` parameter is deprecated and will be removed in a future version. Please use the `recommendations_output` attribute to set the recommendations."
             )
             self.recommendations_output = recommendations
-        self.logger.info("Generating tasks\n")
-        self._gen_model.set_messages(
+        self.tasks_output = self.model.run(
             messages=[
-                {
-                    "content": Prompt("tasks_context_pt")
-                    .format(context=tasks_context, n_tasks=n_tasks)
-                    .text,
-                    "role": "system",
-                },
-                {
-                    "content": Prompt("tasks_pt")
-                    .format(
-                        user_input=user_input or self.user_input,
-                        insights=self.insights_output,
-                        recommendations=self.recommendations_output,
-                    )
-                    .text,
-                    "role": "user",
-                },
-            ]
-        )
-        self._gen_model_kwargs = set_model_params(
-            {
-                "temperature": 1,
-                "top_p": 0.3,
-                "frequency_penalty": 0.7,
-                "presence_penalty": 0.3,
-            },
-            self._gen_model_kwargs,
-        )
-        self.tasks_output = (
-            self._gen_model.run(**self._gen_model_kwargs).choices[0].message.content
-        )
+                LyzrPromptFactory(name="tasks", prompt_type="system").get_message(
+                    context=tasks_context.strip() + "\n\n", n_tasks=n_tasks
+                ),
+                LyzrPromptFactory(name="tasks", prompt_type="user").get_message(
+                    user_input=user_input or self.user_input,
+                    insights=self.insights_output,
+                    recommendations=self.recommendations_output,
+                ),
+            ],
+            temperature=1,
+            top_p=0.3,
+            frequency_penalty=0.7,
+            presence_penalty=0.3,
+        ).message.content.strip()
         return self.tasks_output
 
     def ask(
@@ -630,7 +584,9 @@ class DataAnalyzr:
         if outputs is None:
             outputs = ["visualisation", "insights", "recommendations", "tasks"]
         if user_input is None and self.user_input is None:
-            raise MissingValueError(["user_input"])
+            raise MissingValueError(
+                "`user_input` is a required parameter to generate outputs."
+            )
         if user_input is None:
             user_input = self.user_input
         context = context or {}
@@ -696,7 +652,7 @@ class DataAnalyzr:
     # ------------------------------ These functions are not used in the current version of the code. ------------------------------
 
     def analysis_insights(self, user_input: str) -> str:
-        self.logger.warning(
+        warnings.warn(
             "The `analysis_insights` method is deprecated and will be removed in a future version. Use the `insights` method instead."
         )
         self.analysis_output = self.analysis(
@@ -708,7 +664,7 @@ class DataAnalyzr:
     def visualizations(
         self, user_input: str, dir_path: Path = None
     ) -> list[Image.Image]:
-        self.logger.warning(
+        warnings.warn(
             "The `visualizations` method is deprecated and will be removed in a future version. Use the `visualisation` method instead."
         )
         return [
@@ -723,42 +679,29 @@ class DataAnalyzr:
         ]
 
     def dataset_description(self, context: str = None) -> str:
-        self.logger.warning(
+        warnings.warn(
             "The `dataset_description` method is deprecated and will be removed in a future version."
         )
         context = context or self.context
         df_desc_dict = {}
         for name, df in self.df_dict.items():
-            self._gen_model.set_messages(
+            df_desc_dict[name] = self.model.run(
                 messages=[
-                    {
-                        "content": Prompt("dataset_description_context_pt")
-                        .format(context=context)
-                        .text,
-                        "role": "system",
-                    },
-                    {
-                        "content": Prompt("dataset_description_pt")
-                        .format(
-                            df_head=df.head(),
-                        )
-                        .text,
-                        "role": "user",
-                    },
-                ]
-            )
-            self._gen_model_kwargs = set_model_params(
-                {
-                    "temperature": 1,
-                    "top_p": 0.3,
-                    "frequency_penalty": 0.7,
-                    "presence_penalty": 0.3,
-                },
-                self._gen_model_kwargs,
-            )
-            df_desc_dict[name] = (
-                self._gen_model.run(**self._gen_model_kwargs).choices[0].message.content
-            )
+                    LyzrPromptFactory(
+                        name="dataset_description", prompt_type="system"
+                    ).get_message(context=context.strip() + "\n\n"),
+                    LyzrPromptFactory(
+                        name="dataset_description", prompt_type="user"
+                    ).get_message(
+                        df_head=df.head(),
+                        headers=df.columns.tolist(),
+                    ),
+                ],
+                temperature=1,
+                top_p=0.3,
+                frequency_penalty=0.7,
+                presence_penalty=0.3,
+            ).message.content.strip()
         self.dataset_description_output = "\n".join(
             [f"{name}:\n{desc}" for name, desc in df_desc_dict.items()]
         )
@@ -767,7 +710,7 @@ class DataAnalyzr:
     def ai_queries_df(
         self, dataset_description: Optional[str] = None, context: Optional[str] = None
     ) -> str:
-        self.logger.warning(
+        warnings.warn(
             "The `ai_queries_df` method is deprecated and will be removed in a future version."
         )
         context = context or self.context
@@ -777,36 +720,20 @@ class DataAnalyzr:
         if self.dataset_description_output is None:
             self.dataset_description_output = self.dataset_description(context)
 
-        self._gen_model.set_messages(
+        self.ai_queries = self.model.run(
             messages=[
-                {
-                    "content": Prompt("ai_queries_context_pt")
-                    .format(context=context)
-                    .text,
-                    "role": "system",
-                },
-                {
-                    "content": Prompt("ai_queries_pt")
-                    .format(
-                        df_details=format_df_with_describe(self.df_dict),
-                    )
-                    .text,
-                    "role": "user",
-                },
-            ]
-        )
-        self._gen_model_kwargs = set_model_params(
-            {
-                "temperature": 1,
-                "top_p": 0.3,
-                "frequency_penalty": 0.7,
-                "presence_penalty": 0.3,
-            },
-            self._gen_model_kwargs,
-        )
-        self.ai_queries = (
-            self._gen_model.run(**self._gen_model_kwargs).choices[0].message.content
-        )
+                LyzrPromptFactory(name="ai_queries", prompt_type="system").get_message(
+                    context=context.strip() + "\n\n"
+                ),
+                LyzrPromptFactory(name="ai_queries", prompt_type="user").get_message(
+                    df_details=format_df_with_describe(self.df_dict)
+                ),
+            ],
+            temperature=1,
+            top_p=0.3,
+            frequency_penalty=0.7,
+            presence_penalty=0.3,
+        ).message.content.strip()
 
         return self.ai_queries
 
@@ -815,31 +742,24 @@ class DataAnalyzr:
         user_input: Optional[str] = None,
         number_of_recommendations: Optional[int] = 4,
     ):
-        self.logger.warning(
+        warnings.warn(
             "The `analysis_recommendation` method is deprecated and will be removed in a future version."
         )
         formatted_user_input: str = (
-            Prompt("format_user_input_pt").format(user_input=user_input)
+            LyzrPromptFactory("format_user_input", "system")
+            .get_message(user_input=user_input)
+            .content
             if user_input is not None
             else ""
         )
-
-        self._gen_model.set_messages(
+        recommendations = self.model.run(
             messages=[
-                {
-                    "prompt": Prompt("analysis_recommendations_pt").format(
-                        number_of_recommendations=number_of_recommendations,
-                        df_details=format_df_with_info(self.df_dict),
-                        formatted_user_input=formatted_user_input,
-                    ),
-                    "role": "system",
-                },
-            ]
-        )
-        self._gen_model_kwargs = set_model_params(
-            {"temperature": 0.2}, self._gen_model_kwargs
-        )
-        recommendations = (
-            self._gen_model.run(**self._gen_model_kwargs).choices[0].message.content
-        )
+                LyzrPromptFactory("analysis_recommendations", "system").get_message(
+                    number_of_recommendations=number_of_recommendations,
+                    df_details=format_df_with_info(self.df_dict),
+                    formatted_user_input=formatted_user_input,
+                ),
+            ],
+            temperature=0.2,
+        ).message.content.strip()
         return recommendations
