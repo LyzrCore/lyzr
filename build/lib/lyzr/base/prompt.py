@@ -1,5 +1,6 @@
 import json
 from typing import Literal
+from lyzr.base.prompt_texts import PROMPT_TEXTS
 from lyzr.base.base import ChatMessage, UserMessage, SystemMessage, MessageRole
 
 
@@ -30,11 +31,9 @@ class LyzrPromptFactory:
         use_sections: list = None,
     ) -> None:
         self.prompt_type = prompt_type
-        with open("lyzr/base/prompt_texts.json", "r") as f:
-            try:
-                self.sections = json.load(f)[name][self.prompt_type.value]
-            except KeyError:
-                raise ValueError(f"Prompt name {name} not found.")
+        if name.lower() not in PROMPT_TEXTS:
+            raise ValueError(f"Prompt name {name} not found.")
+        self.sections = PROMPT_TEXTS[name.lower()][self.prompt_type.value]
         self.sections_to_use = use_sections or []
 
     def select_sections(self, use_sections: list = None) -> None:

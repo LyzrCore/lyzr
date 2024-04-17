@@ -5,7 +5,7 @@ from lyzr.base.service import LyzrService
 from lyzr.base.vector_store import LyzrVectorStoreIndex
 from lyzr.base.retrievers import LyzrRetriever
 from lyzr.base.prompt import LyzrPromptFactory
-from lyzr.base.base import ChatMessage, UserMessage, SystemMessage
+from lyzr.base.base import ChatMessage, UserMessage, SystemMessage, AssistantMessage
 
 __all__ = [
     "LyzrLLMFactory",
@@ -21,4 +21,5 @@ __all__ = [
     "ChatMessage",
     "UserMessage",
     "SystemMessage",
+    "AssistantMessage",
 ]

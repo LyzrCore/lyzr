@@ -286,7 +286,7 @@ class DataAnalyzr:
         self, analysis_model, user_input: str, analysis_context: str = None
     ):
         self.analyzer = TxttoSQLFactory(
-            model=self.model,
+            model=analysis_model,
             db_connector=self.database_connector,
             logger=self.logger,
             context=analysis_context,
@@ -323,50 +323,6 @@ class DataAnalyzr:
         )
         self.visualisation_output = plotter.get_visualisation(user_input)
         return self.visualisation_output
-        # while True:
-        #     try:
-        #         self.logger.info("Generating visualisation\n")
-        #         plotter = PlotFactory(
-        #             model=self.model,
-        #             plotting_model_kwargs=self._plot_model_kwargs,
-        #             df_dict=plot_df,
-        #             logger=self.logger,
-        #             plot_context=plot_context,
-        #             plot_path=plot_path,
-        #             use_guide=use_guide,
-        #         )
-        #         analysis_steps = plotter.get_plotting_and_analysis_steps(
-        #             self.user_input
-        #         )
-        #         if analysis_steps is not None and "steps" in analysis_steps:
-        #             if len(analysis_steps["steps"]) == 0:
-        #                 self.plot_df = self.df_dict[analysis_steps["df_name"]]
-        #             else:
-        #                 self.plot_df = self.analysis(user_input, "", analysis_steps)
-        #         elif not use_guide:
-        #             self.plot_df = plot_df[list(plot_df.keys())[0]]
-        #         else:
-        #             self.logger.info(
-        #                 "No analysis steps found. Using first dataframe for plotting.\n"
-        #             )
-        #             self.plot_df = self.df_dict[list(self.df_dict.keys())[0]]
-
-        #         self.visualisation_output = plotter.get_visualisation(self.plot_df)
-        #         return self.visualisation_output
-        #     except RecursionError:
-        #         plt.close()
-        #         raise RecursionError(
-        #             "The request could not be completed. Please wait a while and try again."
-        #         )
-        #     except Exception as e:
-        #         plt.close()
-        #         if time.time() - self.start_time > 30:
-        #             raise TimeoutError(
-        #                 "The request could not be completed. Please wait a while and try again."
-        #             )
-        #         self.logger.info(f"{e.__class__.__name__}: {e}")
-        #         self.logger.info("Traceback:\n{}\n".format(traceback.format_exc()))
-        #         continue
 
     def insights(
         self,
