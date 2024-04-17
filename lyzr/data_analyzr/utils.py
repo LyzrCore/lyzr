@@ -48,7 +48,7 @@ def flatten_list(lst: list):
             yield from flatten_list(el)
 
 
-def _remove_punctuation_from_string(value) -> str:
+def _remove_punctuation_from_numeric_string(value) -> str:
     if not isinstance(value, str):
         return value
     negative = False
@@ -66,7 +66,9 @@ def convert_to_numeric(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     for col in columns:
         try:
             df = df.dropna(subset=[col])
-            df.loc[:, col] = df.loc[:, col].apply(_remove_punctuation_from_string)
+            df.loc[:, col] = df.loc[:, col].apply(
+                _remove_punctuation_from_numeric_string
+            )
             df.loc[:, col] = pd.to_numeric(df.loc[:, col])
             df.loc[:, col] = df.loc[:, col].astype("float")
         except Exception:
@@ -149,3 +151,31 @@ def _df_to_string(output_df: pd.DataFrame) -> str:
 
 def _format_date(date: pd.Timestamp):
     return date.strftime("%d %b %Y %H:%M")
+
+
+def run_n_times(max_tries=1, *, logger: logging.Logger, log_messages={}):
+    def dec_wrapper(func):
+        def wrapped_func(*args, **kwargs):
+            result = None
+            if "start" in log_messages:
+                logger.info(log_messages["start"])
+            for i in range(max_tries):
+                logger.info(f"Try num: {i + 1}")
+                try:
+                    result = func(*args, **kwargs)
+                    if result is not None:
+                        logger.info(f"Result recieved: {result}")
+                        break
+                except Exception as e:
+                    logger.error(
+                        f"Error in try {i + 1}. {e.__class__.__name__}: {e}. Traceback: {e.__traceback__}"
+                    )
+            if result is None:
+                logger.info("Result is None")
+            if "end" in log_messages:
+                logger.info(log_messages["end"])
+            return result
+
+        return wrapped_func
+
+    return dec_wrapper

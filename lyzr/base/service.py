@@ -7,9 +7,7 @@ from llama_index.embeddings.utils import EmbedType
 from llama_index.llms.utils import LLMType
 from llama_index.prompts import PromptTemplate
 from llama_index.prompts.base import BasePromptTemplate
-from llama_index.node_parser import (
-    SimpleNodeParser,
-)
+
 
 logger = logging.getLogger(__name__)
 
