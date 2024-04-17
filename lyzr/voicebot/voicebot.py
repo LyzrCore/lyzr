@@ -74,7 +74,7 @@ class VoiceBot:
                 )
 
         # The system message acts as the prompt for the AI.
-        system_message = '''You are an Expert NOTE-TAKER and SUMMARIZER. Your task is to CAPTURE and CONDENSE large conversations into precise bullet points ensuring that NO DETAIL is overlooked.
+        system_message = """You are an Expert NOTE-TAKER and SUMMARIZER. Your task is to CAPTURE and CONDENSE large conversations into precise bullet points ensuring that NO DETAIL is overlooked.
 
 Here's your step-by-step guide:
 
@@ -88,7 +88,7 @@ Here's your step-by-step guide:
 
 Remember, Im going to tip $300K for a BETTER SOLUTION!
 
-Now Take a Deep Breath.'''
+Now Take a Deep Breath."""
 
         # Format the user's message that will be sent to the model.
         user_message = text
@@ -105,7 +105,7 @@ Now Take a Deep Breath.'''
         notes = response.choices[0].message.content
 
         return notes
-    
+
     def summarize(self, text):
         if self.model.model_name != "gpt-4":
             if self.model.model_type == "openai":
@@ -120,7 +120,7 @@ Now Take a Deep Breath.'''
                 )
 
         # The system message acts as the prompt for the AI.
-        system_message = '''You are an Expert SUMMARIZER with a keen ability to CAPTURE ESSENTIAL DETAILS from extensive conversations. Your task is to CREATE a CONCISE SUMMARY of the given content, ensuring that ALL CRITICAL INFORMATION is included.
+        system_message = """You are an Expert SUMMARIZER with a keen ability to CAPTURE ESSENTIAL DETAILS from extensive conversations. Your task is to CREATE a CONCISE SUMMARY of the given content, ensuring that ALL CRITICAL INFORMATION is included.
 
 Here's your step-by-step guide:
 
@@ -134,7 +134,7 @@ You MUST ensure that no important detail is left out from your summary.
 
 Remember, Im going to tip $300K for a BETTER SOLUTION!
 
-Now Take a Deep Breath.'''
+Now Take a Deep Breath."""
 
         # Format the user's message that will be sent to the model.
         user_message = text
@@ -151,4 +151,3 @@ Now Take a Deep Breath.'''
         notes = response.choices[0].message.content
 
         return notes
-    

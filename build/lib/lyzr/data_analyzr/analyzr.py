@@ -275,10 +275,10 @@ class DataAnalyzr:
             context=analysis_context,
         )
         if analysis_steps is not None:
-            _, data = self.analyzer.run_analysis(analysis_steps)
+            _, data = self.analyzer.get_analysis_from_steps(analysis_steps)
             return data
         else:
-            self.analysis_output = self.analyzer.get_analysis_output(user_input)
+            self.analysis_output = self.analyzer.run_complete_analysis(user_input)
             self.analysis_guide = self.analyzer.analysis_guide
             return self.analysis_output
 
@@ -292,7 +292,7 @@ class DataAnalyzr:
             context=analysis_context,
             vector_store=self.vector_store,
         )
-        self.analysis_output = self.analyzer.get_analysis_output(user_input)
+        self.analysis_output = self.analyzer.run_complete_analysis(user_input)
         self.analysis_guide = self.analyzer.analysis_guide
         return self.analysis_output
 
@@ -313,7 +313,7 @@ class DataAnalyzr:
             try:
                 self.logger.info("Generating visualisation\n")
                 plotter = PlotFactory(
-                    plotting_model=self._plot_model,
+                    model=self._plot_model,
                     plotting_model_kwargs=self._plot_model_kwargs,
                     df_dict=plot_df,
                     logger=self.logger,
@@ -321,7 +321,9 @@ class DataAnalyzr:
                     plot_path=plot_path,
                     use_guide=use_guide,
                 )
-                analysis_steps = plotter.get_analysis_steps(self.user_input)
+                analysis_steps = plotter.get_plotting_and_analysis_steps(
+                    self.user_input
+                )
                 if analysis_steps is not None and "steps" in analysis_steps:
                     if len(analysis_steps["steps"]) == 0:
                         self.plot_df = self.df_dict[analysis_steps["df_name"]]

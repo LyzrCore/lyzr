@@ -44,7 +44,7 @@ Lyzr SDKs helps you build all your favorite GenAI SaaS products as enterprise ap
 
 ## Key Features
 
-- **Lyzr’s Pre-built Agents**: Deploy in minutes
+- **Lyzr's Pre-built Agents**: Deploy in minutes
   - Chat agent
   - Knowledge search
   - RAG powered apps
@@ -69,7 +69,7 @@ Lyzr SDKs helps you build all your favorite GenAI SaaS products as enterprise ap
 
 - **CTOs, CPOs**: integrate generative AI features into your apps seamlessly with local SDKs and private APIs, all with your in-house tech team. The required learning curve to build on Lyzr is literally just a few minutes.
 
-- **CIOs**: introduce generative AI to your enterprise with the comfort of 100% data privacy and security as Lyzr runs locally on your cloud. And Lyzr’s AI Management System (AIMS) makes it easy to manage agents, monitor events logs, build using AI studios, and even help your team learn generative AI with the in-built Lyzr academy.
+- **CIOs**: introduce generative AI to your enterprise with the comfort of 100% data privacy and security as Lyzr runs locally on your cloud. And Lyzr's AI Management System (AIMS) makes it easy to manage agents, monitor events logs, build using AI studios, and even help your team learn generative AI with the in-built Lyzr academy.
 
 ## Links
 
@@ -140,7 +140,7 @@ from lyzr import ChatBot
 my_chatbot = ChatBot.pdf_chat(input_files=["pdf_file_path"])
 ```
 
-4. That’s it. Just query and start chatting with your chatbot.
+4. That's it. Just query and start chatting with your chatbot.
 
 ```python
 response = chatbot.chat("Your question here")

@@ -8,6 +8,8 @@ from lyzr.data_analyzr import DataAnalyzr
 from lyzr.data_analyzr import DataConnector
 from lyzr.voicebot import VoiceBot
 from lyzr.qa.search_agent import SearchAgent
+from lyzr.summarizer import Summarizer
+from lyzr.generator import Generator
 
 __all__ = [
     "LyzrLLMFactory",
@@ -20,4 +22,6 @@ __all__ = [
     "DataConnector",
     "VoiceBot",
     "SearchAgent",
+    "Summarizer",
+    "Generator",
 ]
