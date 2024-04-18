@@ -22,16 +22,16 @@ class Summarizer:
     def summarize(
             self, 
             text:str,
-            style: Optional[str] = "Summary" #Could be summary or notes or even a tweet
+            instructions: Optional[str] = "Summary" #Could be summary or notes or even a tweet
             ) -> str:
         '''
-    Generates a concise summary or notes from the provided text using a preconfigured Large Language Model (LLM), specifically targeting OpenAI's GPT-4 model. This function is designed to streamline extensive paragraphs or conversations into a more digestible format, according to the specified style. It internally configures a detailed instruction set for the AI, ensuring the output captures all critical information while omitting superfluous details.
+    Generates a concise summary or notes from the provided text using a preconfigured Large Language Model (LLM), specifically targeting OpenAI's GPT-4 model. This function is designed to streamline extensive paragraphs or conversations into a more digestible format, according to the specified instructions. It internally configures a detailed instruction set for the AI, ensuring the output captures all critical information while omitting superfluous details.
 
     Parameters:
     
     - `text` (str): The substantial text or conversation input that needs to be summarized or condensed.
       
-    - `style` (Optional[str], default = "Summary"): Specifies the type of output desired. Options include "Summary" for a straightforward summarization, "Notes" for a bullet-point or outlined form, or custom styles such as a "Tweet" for extremely concise content. This parameter influences the instruction set given to the AI, tailoring its approach to content generation.
+    - `instructions` (Optional[str], default = "Summary"): Specifies the type of output desired. Options include "Summary" for a straightforward summarization, "Notes" for a bullet-point or outlined form, or custom instructions such as a "Tweet" for extremely concise content. This parameter influences the instruction set given to the AI, tailoring its approach to content generation.
     
     Return:
     
@@ -47,12 +47,12 @@ class Summarizer:
     summary = summarizer.summarize(text)
     print(summary)
     
-    # Or for a different style
-    notes = summarizer.summarize(text, style='Notes')
+    # Or for a different format:
+    notes = summarizer.summarize(text, instructions='Notes')
     print(notes)
     ```
     
-    This functionality leverages advanced language model capabilities for creating succinct and accurate representations of larger bodies of text, adjustable to various output styles for enhanced utility in information processing and content creation scenarios.
+    This functionality leverages advanced language model capabilities for creating succinct and accurate representations of larger bodies of text, adjustable to various output instructions for enhanced utility in information processing and content creation scenarios.
         '''
         if self.model.model_name != "gpt-4":
             if self.model.model_type == "openai":
@@ -63,13 +63,13 @@ class Summarizer:
                 )
             else:
                 raise ValueError(
-                    "The text_to_notes function only works with the OpenAI's 'gpt-4' model."
+                    "This function only works with the OpenAI's 'gpt-4' model."
                 )
 
         # The system message acts as the prompt for the AI.
         system_message = f'''You are an Expert SUMMARIZER with a keen ability to CAPTURE ESSENTIAL DETAILS from extensive conversations. Your task is to CREATE a CONCISE SUMMARY of the given content, ensuring that ALL CRITICAL INFORMATION is included.
 
-The style of the summary should be: {style}        
+The Format of the summary should be based on these instructions: {instructions}        
 
 Here's your step-by-step guide:
 
@@ -78,10 +78,7 @@ Here's your step-by-step guide:
 3. ORGANIZE these points into a LOGICAL STRUCTURE that reflects the progression of the conversation.
 4. WRITE a CLEAR and COHERENT summary that seamlessly integrates all significant details without superfluous information.
 5. REVIEW your summary to VERIFY that it accurately represents the original conversation and includes all pertinent data.
-
-You MUST ensure that no important detail is left out from your summary.
-
-Remember, Im going to tip $300K for a BETTER SOLUTION!
+6. DON'T display anything that is not relevant to the summary such as comments or instructions.
 
 Now Take a Deep Breath.'''
 
