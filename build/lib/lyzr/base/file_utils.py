@@ -57,7 +57,7 @@ def describe_dataset(
         raise ValueError("Please provide a valid pandas DataFrame.")
 
     if model is None:
-        model = LyzrLLMFactory(
+        model = LyzrLLMFactory.from_defaults(
             api_key=api_key,
             api_type=model_type,
             model=model_name,

@@ -112,12 +112,12 @@ class MLAnalysisFactory:
         output = self.model.run(
             messages=[
                 LyzrPromptFactory(
-                    name="analysis_guide", prompt_type="system"
+                    name="ml_analysis_guide", prompt_type="system"
                 ).get_message(
                     context=self.context,
                 ),
                 LyzrPromptFactory(
-                    name="analysis_guide", prompt_type="user"
+                    name="ml_analysis_guide", prompt_type="user"
                 ).get_message(
                     df_details=print_df_details(self.df_dict, self.df_info_dict),
                     question=user_input,
@@ -162,10 +162,10 @@ class MLAnalysisFactory:
             "output columns": ["col1", "col2", "col3"],
         }
         messages = [
-            LyzrPromptFactory(name="analysis_steps", prompt_type="system").get_message(
-                schema=schema
-            ),
-            LyzrPromptFactory(name="analysis_steps", prompt_type="user").get_message(
+            LyzrPromptFactory(
+                name="ml_analysis_steps", prompt_type="system"
+            ).get_message(schema=schema),
+            LyzrPromptFactory(name="ml_analysis_steps", prompt_type="user").get_message(
                 df_details=print_df_details(self.df_dict, self.df_info_dict),
                 question=user_input,
                 context=self.analysis_guide,

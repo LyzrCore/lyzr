@@ -15,8 +15,8 @@ DEFAULT_LLM = "gpt-4-0125-preview"
 
 
 class LyzrLLMFactory:
-
-    def from_defaults(self, model: str = DEFAULT_LLM, **kwargs) -> LLM:
+    @staticmethod
+    def from_defaults(model: str = DEFAULT_LLM, **kwargs) -> LLM:
         # model_type -> api_type
         # model_name -> model
         # model_prompts -> Sequence[ChatMessage]

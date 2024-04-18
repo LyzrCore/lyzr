@@ -88,7 +88,7 @@ class DataAnalyzr:
             if analysis_type is None:
                 raise MissingValueError("`analysis_type` is a required parameter.")
             if model is None:
-                self.model = LyzrLLMFactory().from_defaults(
+                self.model = LyzrLLMFactory.from_defaults(
                     model="gpt-4-1106-preview", api_key=api_key, seed=seed
                 )
             elif isinstance(model, LiteLLM):
@@ -125,7 +125,7 @@ class DataAnalyzr:
                 warnings.warn(
                     f"The `{param}` parameter is deprecated and will be removed in a future version. Please use the `analysis_model` parameter to set the analysis model, and the `gen_model` parameter to set the generation model."
                 )
-        self.model = model or LyzrLLMFactory().from_defaults(
+        self.model = model or LyzrLLMFactory.from_defaults(
             api_key=api_key,
             api_type=model_type,
             model=model_name or os.environ.get("MODEL_NAME", "gpt-4-1106-preview"),
@@ -246,7 +246,7 @@ class DataAnalyzr:
                 "No analysis performed. Analysis output is the given dataframe."
             )
             return self.analysis_output
-        analysis_model = LyzrLLMFactory().from_defaults(model="gpt-3.5-turbo")
+        analysis_model = LyzrLLMFactory.from_defaults(model="gpt-3.5-turbo")
         analysis_model.additional_kwargs["logger"] = self.logger
         if self.analysis_type == "sql" and analysis_steps is None:
             return self._txt_to_sql_analysis(
@@ -393,6 +393,7 @@ class DataAnalyzr:
         if not use_insights:
             insights = None
             system_message_sections.append("task_no_insights")
+            user_message_dict["insights"] = ""
         else:
             system_message_sections.append("task_with_insights")
             user_message_dict["insights"] = (
@@ -412,7 +413,7 @@ class DataAnalyzr:
             ]
         elif output_type.lower().strip() == "text":
             system_message_sections.append("text_type")
-            system_message_dict["n_recommendations"] = n_recommendations
+        system_message_dict["n_recommendations"] = n_recommendations
 
         system_message_sections.append("closing")
         self.recommendations_output = self.model.run(
@@ -461,7 +462,7 @@ class DataAnalyzr:
                     context=tasks_context.strip() + "\n\n", n_tasks=n_tasks
                 ),
                 LyzrPromptFactory(name="tasks", prompt_type="user").get_message(
-                    user_input=user_input or self.user_input,
+                    user_input=user_input,
                     insights=self.insights_output,
                     recommendations=self.recommendations_output,
                 ),
