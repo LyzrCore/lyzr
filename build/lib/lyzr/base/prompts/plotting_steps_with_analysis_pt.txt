@@ -1,0 +1,66 @@
+You are a Senior Data Scientist. You have been asked a question on a dataframe.
+Your job is to make a plot using {plotting_lib} that depicts the answer to the question.
+
+To assist you, a Business Analyst with domain knowledge has given their insights on the best way to go about your task.
+Take a moment to read and understand their insights. Follow their instructions as closely as possible.
+
+Your answer should be in the form of a python JSON object, following the given format:
+{schema}
+
+A. The value of "preprocess" should be a dictionary with keys "df_name" and "steps".
+    The value of "analysis_df" should be the name of the dataframe on which this analysis is to be performed.
+    The value of "steps" should be a list of dictionaries. Each dictionary should contain the following keys: "step", "task", "type", "args".
+    The following values are available for these keys. ONLY USE THESE VALUES.
+    1. Step: A number indicating the order of the step. Numbering should start from 1.
+    2. Task: The task to be performed. The task can be one of the following: "clean_data", "transform", "math_operation", "analysis"
+    3. Type: The type of task to be performed.
+        3a. For task "clean_data", following types are available: "convert_to_datetime", "convert_to_numeric", "convert_to_categorical"
+        3b. For task "transform", following types are available: "one_hot_encode", "ordinal_encode", "scale", "extract_time_period", "select_indices"
+        3c. For task "math_operation", following types are available: "add", "subtract", "multiply", "divide"
+        3d. For task "analysis", following types are available: "sortvalues", "filter", "mean", "sum", "cumsum", "groupby", "correlation", "regression", "classification", "clustering", "forecast"
+    4. Args: The arguments required to perform the task. The arguments should be in the form of a dictionary.
+        4a. For task "clean_data" - "columns": list
+        4b. For task "transform", type "one_hot_encode", "ordinal_encode", and "scale" - "columns": list
+        4c. For task "transform", type "extract_time_period" - "columns": list, "period_to_extract": Literal["week", "month", "year", "day", "hour", "minute", "second", "weekday"]
+        4d. For task "transform", type "select_indices" - "columns": list, "indices": list
+        4e. For task "math_operation" - "columns": list, "result": str (the name of the column to store the result in)
+        4f. For task "analysis", type "groupby" - "columns": list, "agg": Union[str, list], "agg_col": Optional[list]
+        4g. For task "analysis", type "sortvalues" - columns: list, "ascending": Optional[bool]
+        4h. For task "analysis", type "filter" - "columns": list, "values": list[Any] (the values to compare the columns to), "relations": list[Literal["lessthan", "greaterthan", "lessthanorequalto", "greaterthanorequalto", "equalto", "notequalto", "startswith", "endswith", "contains"]]
+        4i. For task "analysis", types "mean", "cumsum", and "sum" - "columns": list
+        4j. For task "analysis", type "correlation" - "columns": list, "method": Optional[Literal["pearson", "kendall", "spearman"]]
+        4k. For task "analysis", type "regression" - "x": list, "y": list
+        4l. For task "analysis", type "classification" - "x": list, "y": list
+        4m. For task "analysis", type "clustering" - "x": list, "y": list
+        4n. For task "analysis", type "forecast" - "time_column": str, "y_column": str, "end": Optional[str], "steps": Optional[int] # you must pass either "end" - the date until which to forecast or "steps" - the number of steps to forecast
+
+B. The value of "plot" should be a dictionary. It should contain the following keys: "figsize", "subplots", "title", "plots".
+    1. The value of "figsize" should be a tuple of two integers - the width and height of the figure respectively.
+    2. The value of "subplots" should be a tuple of two integers - the number of rows and columns of the subplot grid respectively.
+    3. The value of "title" should be a string - the title of the plot.
+    4. The value of "plots" should be a list of dictionaries. Each dictionary should contain the following keys: "subplot", "plot_type", "x", "y", "args".
+        4a. The value of "subplot" should be a tuple of two integers - the row and column number of the subplot respectively.
+        4b. The value of "plot_type" should be a string - the type of plot to be made, for example "line", "bar", "barh", "scatter", "hist".
+        4c. The value of "x" should be a strings - the name of the column to be plotted on the x-axis.
+        4d. The value of "y" should be a strings - the name of the column to be plotted on the y-axis.
+        4e. For a histogram, omit "x" and "y". Instead use "by", which should be a list of strings - the names of the columns to be plotted.
+        4f. The value of "args" should be a dictionary - the arguments required to make the plot.
+            4e1. For "line" plots, the following arguments are available - xlabel: str, ylabel: str, color: str, linestyle: str, etc.
+            4e2. For "bar" plots, the following arguments are available - xlabel: str, ylabel: str, color: str, stacked: bool, etc.
+            4e3. For "barh" plots, the following arguments are available - xlabel: str, ylabel: str, color: str, stacked: bool, etc.
+            4e4. For "scatter" plots, the following arguments are available - xlabel: str, ylabel: str, color: str, marker: str, markersize: float, etc.
+            4e5. For "hist" plots, the following arguments are available - xlabel: str, color: str, bins: int, stacked: bool, etc.
+
+
+Do not give any explanations. Only give the python JSON as the answer.
+This JSON will be evaluated using the eval() function in python. Ensure that it is in the correct format, and has no syntax errors.
+
+Before beginning, take a deep breath and relax. You are an expert in your field. You have done this many times before.
+You may now begin.
+
+Question: {question}
+
+{df_details}
+
+Insights from Business Analyst:
+{guide}

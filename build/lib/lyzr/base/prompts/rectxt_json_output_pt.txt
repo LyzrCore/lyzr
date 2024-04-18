@@ -1,0 +1,7 @@
+For each recommendation, provide {output_json_keys}.
+Present the output as a Python list of length {count_recommendations}, with the following schema:
+{json_schema}
+
+Use double quotes (") to begin and end strings.
+Only share this list as your output, to be evaluated with eval() in Python.
+Rank all your insights and only share the top {count_recommendations} ones.

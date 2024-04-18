@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="lyzr",
-    version="0.1.34",
+    version="0.1.35",
     author="lyzr",
     description="",
     long_description=open("README.md").read(),
