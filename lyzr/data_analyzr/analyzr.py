@@ -35,6 +35,7 @@ import logging
 # imports for legacy usage
 from PIL import Image
 from pathlib import Path
+from lyzr.base.llms import LLM
 from pandas.errors import EmptyDataError
 
 warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
@@ -47,7 +48,8 @@ class DataAnalyzr:
         analysis_type: Optional[Literal["sql", "ml", "skip"]] = None,
         api_key: Optional[str] = None,
         max_retries: Optional[int] = 5,
-        model: Optional[LiteLLM] = None,
+        generator_model: Optional[LiteLLM] = None,
+        analysis_model: Optional[LiteLLM] = None,
         user_input: Optional[str] = None,
         context: Optional[str] = None,
         log_level: Optional[
@@ -57,6 +59,7 @@ class DataAnalyzr:
         log_filename: Optional[str] = "dataanalyzr.log",
         # legacy usage
         df: Union[str, pd.DataFrame] = None,
+        model: Optional[LLM] = None,
         model_type: Optional[str] = None,
         model_name: Optional[str] = None,
         seed: Optional[int] = 0,
@@ -87,13 +90,20 @@ class DataAnalyzr:
         else:
             if analysis_type is None:
                 raise MissingValueError("`analysis_type` is a required parameter.")
-            if model is None:
-                self.model = LyzrLLMFactory.from_defaults(
+            if generator_model is None:
+                self.generator_model = LyzrLLMFactory.from_defaults(
                     model="gpt-4-1106-preview", api_key=api_key, seed=seed
                 )
-            elif isinstance(model, LiteLLM):
-                self.model = model
-            self.model.additional_kwargs["logger"] = self.logger
+            elif isinstance(generator_model, LiteLLM):
+                self.generator_model = generator_model
+            self.generator_model.additional_kwargs["logger"] = self.logger
+            if analysis_model is None:
+                self.analysis_model = LyzrLLMFactory.from_defaults(
+                    model="gpt-3.5-turbo", api_key=api_key, seed=seed
+                )
+            elif isinstance(analysis_model, LiteLLM):
+                self.analysis_model = analysis_model
+            self.analysis_model.additional_kwargs["logger"] = self.logger
 
             self.analysis_type = analysis_type.lower().strip()
             self.context = context or ""
@@ -112,7 +122,7 @@ class DataAnalyzr:
         api_key: str,
         df: Union[str, pd.DataFrame],
         user_input: Optional[str],
-        model: Optional[LiteLLM],
+        model: Optional[LLM],
         model_type: Optional[str],
         model_name: Optional[str],
         seed: int,
@@ -123,13 +133,33 @@ class DataAnalyzr:
         for param in ["model", "model_type", "model_name", "seed"]:
             if locals()[param] is not None:
                 warnings.warn(
-                    f"The `{param}` parameter is deprecated and will be removed in a future version. Please use the `analysis_model` parameter to set the analysis model, and the `gen_model` parameter to set the generation model."
+                    f"The `{param}` parameter is deprecated and will be removed in a future version. Please use the `analysis_model` parameter to set the analysis model, and the `generator_model` parameter to set the generation model."
                 )
-        self.model = model or LyzrLLMFactory.from_defaults(
+        if isinstance(model, LLM):
+            api_key = model.api_key
+            model_name = model.model_name
+            model_type = model.model_type
+            model_kwargs = {}
+            for attr in model.__dict__:
+                if attr not in ["api_key", "model_name"]:
+                    model_kwargs[attr] = model.__dict__[attr]
+        else:
+            model_kwargs = {}
+            model_type = model_type or os.environ.get("MODEL_TYPE", None)
+            model_name = model_name or os.environ.get("MODEL_NAME", None)
+        self.generator_model = LyzrLLMFactory.from_defaults(
             api_key=api_key,
             api_type=model_type,
-            model=model_name or os.environ.get("MODEL_NAME", "gpt-4-1106-preview"),
+            model=model_name or "gpt-4-1106-preview",
             seed=seed,
+            **model_kwargs,
+        )
+        self.analysis_model = LyzrLLMFactory.from_defaults(
+            api_key=api_key,
+            api_type=model_type,
+            model=model_name or "gpt-3.5-turbo",
+            seed=seed,
+            **model_kwargs,
         )
         self.context = ""
         self.analysis_type = "ml"
@@ -246,15 +276,13 @@ class DataAnalyzr:
                 "No analysis performed. Analysis output is the given dataframe."
             )
             return self.analysis_output
-        analysis_model = LyzrLLMFactory.from_defaults(model="gpt-3.5-turbo")
-        analysis_model.additional_kwargs["logger"] = self.logger
         if self.analysis_type == "sql" and analysis_steps is None:
             return self._txt_to_sql_analysis(
-                analysis_model, user_input, analysis_context
+                self.analysis_model, user_input, analysis_context
             )
         if self.analysis_type == "ml" or analysis_steps is not None:
             return self._ml_analysis(
-                analysis_model,
+                self.analysis_model,
                 user_input,
                 analysis_context,
                 analysis_steps=analysis_steps,
@@ -311,7 +339,7 @@ class DataAnalyzr:
 
         self.logger.info("Generating visualisation\n")
         plotter = PlotFactory(
-            model=self.model,
+            model=self.analysis_model,
             logger=self.logger,
             plot_context=plot_context,
             plot_path=plot_path,
@@ -332,7 +360,7 @@ class DataAnalyzr:
     ) -> str:
         if "analysis_guide" not in self.__dict__:
             self.analysis_guide = ""
-        self.insights_output = self.model.run(
+        self.insights_output = self.generator_model.run(
             messages=[
                 LyzrPromptFactory(name="insights", prompt_type="system").get_message(
                     context=insights_context.strip() + "\n\n", n_insights=n_insights
@@ -416,7 +444,7 @@ class DataAnalyzr:
         system_message_dict["n_recommendations"] = n_recommendations
 
         system_message_sections.append("closing")
-        self.recommendations_output = self.model.run(
+        self.recommendations_output = self.generator_model.run(
             messages=[
                 LyzrPromptFactory(
                     name="recommendations", prompt_type="system"
@@ -456,7 +484,7 @@ class DataAnalyzr:
                 "The `recommendations` parameter is deprecated and will be removed in a future version. Please use the `recommendations_output` attribute to set the recommendations."
             )
             self.recommendations_output = recommendations
-        self.tasks_output = self.model.run(
+        self.tasks_output = self.generator_model.run(
             messages=[
                 LyzrPromptFactory(name="tasks", prompt_type="system").get_message(
                     context=tasks_context.strip() + "\n\n", n_tasks=n_tasks
@@ -596,7 +624,7 @@ class DataAnalyzr:
         context = context or self.context
         df_desc_dict = {}
         for name, df in self.df_dict.items():
-            df_desc_dict[name] = self.model.run(
+            df_desc_dict[name] = self.generator_model.run(
                 messages=[
                     LyzrPromptFactory(
                         name="dataset_description", prompt_type="system"
@@ -631,7 +659,7 @@ class DataAnalyzr:
         if self.dataset_description_output is None:
             self.dataset_description_output = self.dataset_description(context)
 
-        self.ai_queries = self.model.run(
+        self.ai_queries = self.generator_model.run(
             messages=[
                 LyzrPromptFactory(name="ai_queries", prompt_type="system").get_message(
                     context=context.strip() + "\n\n"
@@ -663,7 +691,7 @@ class DataAnalyzr:
             if user_input is not None
             else ""
         )
-        recommendations = self.model.run(
+        recommendations = self.generator_model.run(
             messages=[
                 LyzrPromptFactory("analysis_recommendations", "system").get_message(
                     number_of_recommendations=number_of_recommendations,
