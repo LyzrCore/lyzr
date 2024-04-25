@@ -9,8 +9,9 @@ from typing import Union, Optional, Literal, Any
 import pandas as pd
 
 # local imports
-from lyzr.base.prompt import Prompt
-from lyzr.base.llms import LLM, set_model_params
+from lyzr.base.base import SystemMessage, AssistantMessage
+from lyzr.base.prompt import LyzrPromptFactory
+from lyzr.base.llm import LiteLLM
 from lyzr.data_analyzr.output_handler import (
     check_output_format,
     validate_output_step_details,
@@ -92,42 +93,41 @@ def print_df_details(df_dict: dict[pd.DataFrame], df_info_dict: dict[str]) -> st
 class MLAnalysisFactory:
     def __init__(
         self,
-        model: LLM,
+        model: LiteLLM,
         data_dict: list[pd.DataFrame],
         data_info_dict: list[str],
         logger: logging.Logger,
         context: str,
-        model_kwargs: dict = None,
     ):
         self.model = model
-        self.model_kwargs = set_model_params(
-            {"seed": 123, "temperature": 0.1, "top_p": 0.5}, model_kwargs or {}
+        self.model.set_model_kwargs(
+            model_kwargs={"seed": 123, "temperature": 0.1, "top_p": 0.5}
         )
         self.df_dict = data_dict
         self.df_info_dict = data_info_dict
-        self.context = context
+        self.context = context.strip() + "\n\n" if context != "" else ""
         self.logger = logger
 
     def _get_analysis_guide(self, user_input: str) -> str:
-        self.model.set_messages(
+        output = self.model.run(
             messages=[
-                {
-                    "role": "system",
-                    "content": Prompt("analysis_guide_pt")
-                    .format(
-                        df_details=print_df_details(self.df_dict, self.df_info_dict),
-                        question=user_input,
-                        context=self.context,
-                    )
-                    .text,
-                },
-            ]
+                LyzrPromptFactory(
+                    name="ml_analysis_guide", prompt_type="system"
+                ).get_message(
+                    context=self.context,
+                ),
+                LyzrPromptFactory(
+                    name="ml_analysis_guide", prompt_type="user"
+                ).get_message(
+                    df_details=print_df_details(self.df_dict, self.df_info_dict),
+                    question=user_input,
+                ),
+            ],
+            max_tokens=250,
         )
-        self.model_kwargs["max_tokens"] = 250
-        output = self.model.run(**self.model_kwargs)
-        return output.choices[0].message.content
+        return output.message.content.strip()
 
-    def _get_analysis_steps(self, user_input: str) -> dict:
+    def _get_analysis_steps_messages_kwargs(self, user_input: str) -> tuple:
         schema = {
             "analysis_df": str,  # Name of the dataframe
             "steps": [
@@ -161,50 +161,68 @@ class MLAnalysisFactory:
             ],
             "output columns": ["col1", "col2", "col3"],
         }
-        self.model.set_messages(
-            messages=[
-                {
-                    "role": "system",
-                    "content": Prompt("analysis_steps_pt")
-                    .format(
-                        schema=schema,
-                        df_details=print_df_details(self.df_dict, self.df_info_dict),
-                        question=user_input,
-                        context=self.analysis_guide,
-                    )
-                    .text,
-                },
-            ]
+        messages = [
+            LyzrPromptFactory(
+                name="ml_analysis_steps", prompt_type="system"
+            ).get_message(schema=schema),
+            LyzrPromptFactory(name="ml_analysis_steps", prompt_type="user").get_message(
+                df_details=print_df_details(self.df_dict, self.df_info_dict),
+                question=user_input,
+                context=self.analysis_guide,
+            ),
+        ]
+        return messages, dict(
+            response_format={"type": "json_object"},
+            max_tokens=2000,
+            top_p=1,
         )
-        self.model_kwargs["response_format"] = {"type": "json_object"}
-        self.model_kwargs["max_tokens"] = 2000
-        # if "max_tokens" in self.model_kwargs:
-        #     del self.model_kwargs["max_tokens"]
-        self.model_kwargs["top_p"] = 1
-        output = self.model.run(**self.model_kwargs)
-        return output.choices[0].message.content
+        # output = self.model.run(
+        #     messages=[
+        #         LyzrPromptFactory(
+        #             name="analysis_steps", prompt_type="system"
+        #         ).get_message(schema=schema),
+        #         LyzrPromptFactory(
+        #             name="analysis_steps", prompt_type="user"
+        #         ).get_message(
+        #             df_details=print_df_details(self.df_dict, self.df_info_dict),
+        #             question=user_input,
+        #             context=self.analysis_guide,
+        #         ),
+        #     ],
+        #     response_format={"type": "json_object"},
+        #     max_tokens=2000,
+        #     top_p=1,
+        # )
+        # return output.message.content
 
     def _get_and_run_analysis(self, user_input) -> tuple:
-        self.llm_output = self._get_analysis_steps(user_input)
-        self.logger.info("\nSecond analysis LLM output:\n{}".format(self.llm_output))
-        try:
-            self.analysis_dict = check_output_format(self.llm_output, self.logger)
-            outputs, data = self.run_analysis(self.analysis_dict)
-        except RecursionError:
-            raise RecursionError(
-                "The request could not be completed. Please wait a while and try again."
-            )
-        except Exception as e:
-            if time.time() - self.start_time > 30:
-                raise TimeoutError(
+        messages, kwargs = self._get_analysis_steps_messages_kwargs(user_input)
+        for _ in range(5):
+            try:
+                llm_output = self.model.run(messages=messages, **kwargs).message.content
+                messages.append(AssistantMessage(content=llm_output))
+                self.logger.info("\nSecond analysis LLM output:\n{}".format(llm_output))
+                self.analysis_dict = check_output_format(llm_output, self.logger)
+                outputs, data = self.get_analysis_from_steps(self.analysis_dict)
+                return outputs, data
+            except RecursionError:
+                raise RecursionError(
                     "The request could not be completed. Please wait a while and try again."
                 )
-            self.logger.info(f"{e.__class__.__name__}: {e}\n")
-            self.logger.info("Traceback:\n{}\n".format(traceback.format_exc()))
-            return self._get_and_run_analysis(user_input)
-        return outputs, data
+            except Exception as e:
+                if time.time() - self.start_time > 30:
+                    raise TimeoutError(
+                        "The request could not be completed. Please wait a while and try again."
+                    )
+                self.logger.info(f"{e.__class__.__name__}: {e}\n")
+                self.logger.info("Traceback:\n{}\n".format(traceback.format_exc()))
+                messages.append(
+                    SystemMessage(
+                        content=f"Your response resulted in the following error:\n{e.__class__.__name__}: {e}\n{traceback.format_exc()}\n\nPlease correct your response to prevent this error."
+                    )
+                )
 
-    def run_analysis(self, analysis_dict):
+    def get_analysis_from_steps(self, analysis_dict):
         df_name = analysis_dict["analysis_df"]
         data = self.df_dict[df_name].copy(deep=True)
         outputs = []
@@ -241,7 +259,7 @@ class MLAnalysisFactory:
 
         self.output = outputs
 
-    def get_analysis_output(self, user_input: str) -> dict:
+    def run_complete_analysis(self, user_input: str) -> Union[list, pd.DataFrame]:
         # Get analysis steps from LLM using user_input
         self.analysis_guide = self._get_analysis_guide(user_input)
         if (
@@ -420,7 +438,7 @@ class TransformerUtil:
         return self.df
 
     def select_indices(self, columns, indices) -> pd.DataFrame:
-        return self.df.loc[indices, columns]
+        return self.df.loc[indices, :]
 
 
 class MathOperatorUtil:

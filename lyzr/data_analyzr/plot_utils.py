@@ -1,7 +1,9 @@
 # standard library imports
-import io
 import os
+import time
 import logging
+import traceback
+from typing import Union
 
 # third-party imports
 import numpy as np
@@ -9,49 +11,60 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # local imports
-from lyzr.base.prompt import Prompt
-from lyzr.base.llms import LLM, set_model_params
+from lyzr.base.base import SystemMessage, AssistantMessage
+from lyzr.base.prompt import LyzrPromptFactory
+from lyzr.base.llm import LiteLLM
+from lyzr.data_analyzr.data_connector import DataConnector
+from lyzr.data_analyzr.txt_to_sql_utils import TxttoSQLFactory
 from lyzr.data_analyzr.output_handler import check_output_format
+from lyzr.data_analyzr.ml_analysis_utils import MLAnalysisFactory
 from lyzr.data_analyzr.utils import (
-    format_df_details,
     convert_to_numeric,
     flatten_list,
     get_columns_names,
+    format_df_with_describe,
 )
 
 
 class PlotFactory:
+
     def __init__(
         self,
-        plotting_model: LLM,
-        plotting_model_kwargs: dict,
-        df_dict: list[pd.DataFrame],
+        model: LiteLLM,
         logger: logging.Logger,
         plot_context: str,
         plot_path: str,
-        use_guide: bool = True,
+        df_dict: dict,
+        database_connector: DataConnector,
+        analysis_type: str,
+        analyzer: Union[MLAnalysisFactory, TxttoSQLFactory],
+        analysis_output: Union[pd.DataFrame, list],
     ):
-        self.model = plotting_model
-        self.model_kwargs = plotting_model_kwargs or {}
-        self.model_kwargs = set_model_params(
-            {"seed": 123, "temperature": 0.1, "top_p": 0.5}, self.model_kwargs
+        self.model = model
+        self.model.set_model_kwargs(
+            model_kwargs=dict(seed=123, temperature=0.1, top_p=0.5)
         )
-
-        self.df_dict = df_dict
-        self.df_info_dict = {}
-        for df_name in self.df_dict:
-            buffer = io.StringIO()
-            self.df_dict[df_name].info(buf=buffer)
-            self.df_info_dict[df_name] = buffer.getvalue()
-
+        if not isinstance(analysis_output, pd.DataFrame) or analysis_output.size < 2:
+            self.use_analysis = True
+            self.analysis_type = analysis_type
+            self.analyzer = analyzer
+            self.df_dict = df_dict
+            self.database_connector = database_connector
+            self.analysis_output = analysis_output
+        else:
+            self.use_analysis = False
+            self.analysis_output = analysis_output
+            self.df_dict = None
+            self.database_connector = None
+            self.analyzer = None
+            self.analysis_type = None
         self.logger = logger
-        self.context = plot_context
-
+        self.context = (
+            plot_context.strip() + "\n\n" if plot_context.strip() != "" else ""
+        )
         self.plotting_library = "matplotlib"
         self.output_format = "png"
-
         self.plot_path = self._handle_plotpath(plot_path)
-        self.use_guide = use_guide
 
     def _handle_plotpath(self, plot_path) -> str:
         plot_path = PlotFactory._fix_plotpath(plot_path)
@@ -76,29 +89,34 @@ class PlotFactory:
         return plot_path
 
     def _get_plotting_guide(self, user_input: str) -> str:
-        self.model.set_messages(
+        plotting_guide_sections = ["context", "external_context"]
+        if self.use_analysis and (self.analysis_type == "ml"):
+            plotting_guide_sections.append("task_with_analysis")
+            df_details = format_df_with_describe(self.df_dict)
+        else:
+            plotting_guide_sections.append("task_no_analysis")
+            df_details = format_df_with_describe(self.analysis_output)
+        output = self.model.run(
             messages=[
-                {
-                    "role": "system",
-                    "content": Prompt("analysis_guide_pt")
-                    .format(
-                        df_details=format_df_details(self.df_dict, self.df_info_dict),
-                        question=user_input,
-                        context=self.context,
-                        plotting_lib=self.plotting_library,
-                    )
-                    .text,
-                },
-            ]
+                LyzrPromptFactory(
+                    name="plotting_guide", prompt_type="system"
+                ).get_message(
+                    use_sections=plotting_guide_sections,
+                    context=self.context,
+                    plotting_lib=self.plotting_library,
+                ),
+                LyzrPromptFactory(
+                    name="plotting_guide", prompt_type="user"
+                ).get_message(
+                    df_details=df_details,
+                    question=user_input,
+                ),
+            ],
+            max_tokens=500,
         )
-        self.model_kwargs = set_model_params(
-            {"max_tokens": 500},
-            self.model_kwargs,
-        )
-        output = self.model.run(**self.model_kwargs)
-        return output.choices[0].message.content
+        return output.message.content.strip()
 
-    def _get_plotting_steps(self, user_input: str) -> str:
+    def _get_plotting_steps_no_analysis_messages(self, user_input: str) -> list:
         schema = {
             "figsize": (int, int),
             "subplots": (int, int),
@@ -130,33 +148,21 @@ class PlotFactory:
                 },
             ],
         }
-        self.model.set_messages(
-            messages=[
-                {
-                    "role": "system",
-                    "content": Prompt("plotting_steps_pt")
-                    .format(
-                        plotting_lib=self.plotting_library,
-                        schema=schema,
-                        question=user_input,
-                        df_details=format_df_details(self.df_dict, self.df_info_dict),
-                    )
-                    .text,
-                },
-            ]
-        )
-        self.model_kwargs = set_model_params(
-            {
-                "response_format": {"type": "json_object"},
-                "max_tokens": 2000,
-                "top_p": 1,
-            },
-            self.model_kwargs,
-        )
-        output = self.model.run(**self.model_kwargs)
-        return output.choices[0].message.content
+        messages = [
+            LyzrPromptFactory(name="plotting_steps", prompt_type="system").get_message(
+                use_sections=["context", "task_no_analysis", "closing"],
+                plotting_lib=self.plotting_library,
+                schema=schema,
+            ),
+            LyzrPromptFactory(name="plotting_steps", prompt_type="user").get_message(
+                question=user_input,
+                df_details=format_df_with_describe(self.analysis_output),
+                guide=self.plotting_guide,
+            ),
+        ]
+        return messages
 
-    def _get_plotting_steps_from_guide(self, user_input: str) -> str:
+    def _get_plotting_steps_with_analysis_messages(self, user_input: str) -> list:
         schema = {
             "preprocess": {
                 "analysis_df": str,
@@ -222,55 +228,64 @@ class PlotFactory:
                 ],
             },
         }
-        self.model.set_messages(
-            messages=[
-                {
-                    "role": "system",
-                    "content": Prompt("plotting_steps_with_analysis_pt")
-                    .format(
-                        plotting_lib=self.plotting_library,
-                        guide=self.plotting_guide,
-                        schema=schema,
-                        question=user_input,
-                        df_details=format_df_details(self.df_dict, self.df_info_dict),
+        messages = [
+            LyzrPromptFactory(name="plotting_steps", prompt_type="system").get_message(
+                use_sections=["context", "task_with_analysis", "closing"],
+                plotting_lib=self.plotting_library,
+                schema=schema,
+            ),
+            LyzrPromptFactory(name="plotting_steps", prompt_type="user").get_message(
+                question=user_input,
+                df_details=format_df_with_describe(self.analysis_output),
+                guide=self.plotting_guide,
+            ),
+        ]
+        return messages
+
+    def retry_plotting_steps(
+        self,
+        messages: list,
+    ) -> bool:
+        for _ in range(5):
+            try:
+                llm_output = self.model.run(
+                    messages=messages,
+                    response_format={"type": "json_object"},
+                    max_tokens=2000,
+                    top_p=1,
+                ).message.content
+                messages.append(AssistantMessage(content=llm_output))
+                self.all_steps = check_output_format(llm_output, self.logger, "plot")
+                self.logger.info(f"\nPlotting steps recieved:\n{self.all_steps}")
+                self.preprocess_steps = self.all_steps.get("preprocess", None)
+                if self.preprocess_steps is not None and len(self.preprocess_steps) > 0:
+                    _, self.analysis_output = self.analyzer.get_analysis_from_steps(
+                        self.preprocess_steps
                     )
-                    .text,
-                },
-            ]
-        )
-        self.model_kwargs = set_model_params(
-            {
-                "response_format": {"type": "json_object"},
-                "max_tokens": 2000,
-                "top_p": 1,
-            },
-            self.model_kwargs,
-        )
-        output = self.model.run(**self.model_kwargs)
-        return output.choices[0].message.content
-
-    def get_analysis_steps(self, user_input: str) -> str:
-        if self.use_guide:
-            self.plotting_guide = self._get_plotting_guide(user_input)
-            self.logger.info(f"\nPlotting guide recieved:\n{self.plotting_guide}")
-            self.llm_output = self._get_plotting_steps_from_guide(user_input)
-            self.all_steps = check_output_format(self.llm_output, self.logger, "plot")
-            self.logger.info(f"\nPlotting steps recieved:\n{self.all_steps}")
-            self.preprocess_steps = None
-
-            if "preprocess" in self.all_steps:
-                self.preprocess_steps = self.all_steps["preprocess"]
-            self.plotting_steps = self.all_steps["plot"]
-            return self.preprocess_steps
-        else:
-            self.all_steps = None
-            self.preprocess_steps = None
-            self.llm_output = self._get_plotting_steps(user_input)
-            self.plotting_steps = check_output_format(
-                self.llm_output, self.logger, "plot"
-            )
-            self.logger.info(f"\nPlotting steps recieved:\n{self.plotting_steps}")
-            return self.preprocess_steps
+                    self.plotting_steps = self.all_steps["plot"]
+                else:
+                    self.plotting_steps = self.all_steps
+                self.fig = self._create_plot(self.analysis_output)
+                return True
+            except RecursionError:
+                plt.close("all")
+                raise RecursionError(
+                    "The request could not be completed. Please wait a while and try again."
+                )
+            except Exception as e:
+                plt.close("all")
+                if time.time() - self.start_time > 30:
+                    raise TimeoutError(
+                        "The request could not be completed. Please wait a while and try again."
+                    )
+                self.logger.info(f"{e.__class__.__name__}: {e}\n")
+                self.logger.info("Traceback:\n{}\n".format(traceback.format_exc()))
+                messages.append(
+                    SystemMessage(
+                        content=f"Your response resulted in the following error:\n{e.__class__.__name__}: {e}\n{traceback.format_exc()}\n\nPlease correct your response to prevent this error."
+                    )
+                )
+        return False
 
     def _set_args_stacked(self, args: dict) -> bool:
         stacked = args.get("stacked", False)
@@ -368,11 +383,10 @@ class PlotFactory:
         if ylabel:
             axes.set_ylabel(ylabel)
 
-    def _create_plot(self, plot_details: dict, df: pd.DataFrame) -> plt.Figure:
-
-        nrows, ncols = plot_details.get("subplots", (1, 1))
+    def _create_plot(self, df: pd.DataFrame) -> plt.Figure:
+        nrows, ncols = self.plotting_steps.get("subplots", (1, 1))
         fig, ax = plt.subplots(
-            figsize=plot_details.get("figsize", (10, 10)),
+            figsize=self.plotting_steps.get("figsize", (10, 10)),
             nrows=nrows,
             ncols=ncols,
         )
@@ -380,8 +394,8 @@ class PlotFactory:
             ax = np.array([ax])
         ax = ax.reshape((nrows, ncols))
 
-        fig.suptitle(plot_details.get("title", "Plot"))
-        for plot in plot_details.get("plots", []):
+        fig.suptitle(self.plotting_steps.get("title", "Plot"))
+        for plot in self.plotting_steps.get("plots", []):
             self.logger.info(f"\nPlotting: {plot}")
             plot_type = plot.get("plot_type", "line")
             axes = ax[
@@ -391,8 +405,7 @@ class PlotFactory:
             self._plot_subplot(plot_type, axes, args, df, plot)
         return fig
 
-    def get_visualisation(self, df: pd.DataFrame) -> str:
-        self.fig = self._create_plot(self.plotting_steps, df)
+    def get_visualisation_image(self) -> str:
         plt.tight_layout()
         if not PlotFactory._savefig(self.fig, self.plot_path, self.logger):
             self.logger.error(
@@ -418,3 +431,21 @@ class PlotFactory:
             )
             PlotFactory._savefig(fig, "generated_plots/plot.png", logger)
         return False
+
+    def get_visualisation(self, user_input: str) -> str:
+        self.start_time = time.time()
+        self.plotting_guide = self._get_plotting_guide(user_input)
+        self.logger.info(f"\nPlotting guide recieved:\n{self.plotting_guide}")
+        if self.use_analysis:
+            if self.analysis_type == "ml":
+                messages = self._get_plotting_steps_with_analysis_messages(user_input)
+            elif self.analysis_type == "sql":
+                self.analysis_output = self.analyzer.run_analysis_for_plotting(
+                    user_input=user_input
+                )
+                messages = self._get_plotting_steps_no_analysis_messages(user_input)
+        else:
+            messages = self._get_plotting_steps_no_analysis_messages(user_input)
+        if self.retry_plotting_steps(messages):
+            self.get_visualisation_image()
+            return self.plot_path
