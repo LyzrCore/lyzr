@@ -226,7 +226,7 @@ class DataAnalyzr:
         # Optionally, you can set a formatter for the file handler if you want a different format for file logs
         formatter = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s\n%(message)s\n",
-            datefmt="%d-%b-%y %H:%M:%S",
+            datefmt="%d-%b-%y %H:%M:%S %Z",
         )
         formatter.converter = time.gmtime
         file_handler.setFormatter(formatter)

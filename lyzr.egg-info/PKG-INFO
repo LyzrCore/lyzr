@@ -1,8 +1,11 @@
 Metadata-Version: 2.1
 Name: lyzr
-Version: 0.1.36
-Home-page: 
+Version: 0.1.37
+Summary: UNKNOWN
+Home-page: UNKNOWN
 Author: lyzr
+License: UNKNOWN
+Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
@@ -162,3 +165,5 @@ response = chatbot.chat("Your question here")
 ## License
 
 `lyzr` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+
+
