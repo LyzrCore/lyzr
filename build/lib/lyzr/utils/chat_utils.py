@@ -88,11 +88,12 @@ def pdf_chat_(
 
     memory = ChatMemoryBuffer.from_defaults(token_limit=4000)
 
-    chat_engine = ContextChatEngine(
+    chat_engine = ContextChatEngine.from_defaults(
         llm=llm,
         memory=memory,
+        system_prompt=system_prompt,
+        service_context=service_context,
         retriever=retriever,
-        prefix_messages=list(),
         **chat_engine_params,
     )
 
@@ -167,11 +168,12 @@ def txt_chat_(
 
     memory = ChatMemoryBuffer.from_defaults(token_limit=4000)
 
-    chat_engine = ContextChatEngine(
+    chat_engine = ContextChatEngine.from_defaults(
         llm=llm,
         memory=memory,
+        system_prompt=system_prompt,
+        service_context=service_context,
         retriever=retriever,
-        prefix_messages=list(),
         **chat_engine_params,
     )
 
@@ -246,11 +248,12 @@ def docx_chat_(
 
     memory = ChatMemoryBuffer.from_defaults(token_limit=4000)
 
-    chat_engine = ContextChatEngine(
+    chat_engine = ContextChatEngine.from_defaults(
         llm=llm,
         memory=memory,
+        system_prompt=system_prompt,
+        service_context=service_context,
         retriever=retriever,
-        prefix_messages=list(),
         **chat_engine_params,
     )
 
@@ -315,11 +318,12 @@ def webpage_chat_(
 
     memory = ChatMemoryBuffer.from_defaults(token_limit=4000)
 
-    chat_engine = ContextChatEngine(
+    chat_engine = ContextChatEngine.from_defaults(
         llm=llm,
         memory=memory,
+        system_prompt=system_prompt,
+        service_context=service_context,
         retriever=retriever,
-        prefix_messages=list(),
         **chat_engine_params,
     )
 
@@ -384,11 +388,12 @@ def website_chat_(
 
     memory = ChatMemoryBuffer.from_defaults(token_limit=4000)
 
-    chat_engine = ContextChatEngine(
+    chat_engine = ContextChatEngine.from_defaults(
         llm=llm,
         memory=memory,
+        system_prompt=system_prompt,
+        service_context=service_context,
         retriever=retriever,
-        prefix_messages=list(),
         **chat_engine_params,
     )
 
@@ -453,11 +458,12 @@ def youtube_chat_(
 
     memory = ChatMemoryBuffer.from_defaults(token_limit=4000)
 
-    chat_engine = ContextChatEngine(
+    chat_engine = ContextChatEngine.from_defaults(
         llm=llm,
         memory=memory,
+        system_prompt=system_prompt,
+        service_context=service_context,
         retriever=retriever,
-        prefix_messages=list(),
         **chat_engine_params,
     )
 
