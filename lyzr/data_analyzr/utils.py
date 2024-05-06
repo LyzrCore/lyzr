@@ -1,12 +1,26 @@
 # standart-library imports
 import io
 import re
+import time
 import string
 import logging
+import hashlib
+from typing import Union
 
 # third-party imports
 import numpy as np
 import pandas as pd
+
+
+def deterministic_uuid(content: Union[str, bytes, list] = None):
+    if content is None:
+        content = str(time.time())
+    if isinstance(content, list):
+        content = "/".join([str(x) for x in content if x is not None])
+    if isinstance(content, str):
+        content = content.encode("utf-8")
+    hash_object = hashlib.md5(content)
+    return hash_object.hexdigest()
 
 
 def get_columns_names(

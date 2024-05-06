@@ -1,6 +1,5 @@
 # standard library imports
 import os
-import uuid
 import logging
 from typing import Literal, Union
 
@@ -16,6 +15,7 @@ from lyzr.data_analyzr.db_connector import (
     DatabaseConnector,
     SQLiteConnector,
 )
+from lyzr.data_analyzr.utils import deterministic_uuid
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
 
 
@@ -68,12 +68,16 @@ def get_db_details(
         if connector is None:
             connector = SQLiteConnector()
             connector.create_database(
-                db_path=config.get("db_path", f"./sqlite/{str(uuid.uuid4())}.db"),
+                db_path=config.get(
+                    "db_path", f"./sqlite/{deterministic_uuid(list(df_dict.keys()))}.db"
+                ),
                 df_dict=df_dict,
             )
         if isinstance(vector_store_config, dict):
             vector_store = ChromaDBVectorStore(
-                path=vector_store_config.get("path", f"./chromadb/{str(uuid.uuid4())}"),
+                path=vector_store_config.get(
+                    "path", f"./chromadb/{deterministic_uuid()}"
+                ),
                 remake_store=vector_store_config.get(
                     "remake_store", vector_store_config.get("remake", True)
                 ),

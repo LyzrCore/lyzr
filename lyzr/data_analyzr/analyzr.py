@@ -1,7 +1,6 @@
 # standard library imports
 import os
 import time
-import uuid
 import warnings
 from typing import Union, Literal, Optional, Any
 
@@ -24,6 +23,7 @@ from lyzr.base.llm import (
 )
 from lyzr.data_analyzr.plot_utils import PlotFactory
 from lyzr.data_analyzr.utils import (
+    deterministic_uuid,
     format_df_with_describe,
     format_df_with_info,
     get_info_dict_from_df_dict,
@@ -291,7 +291,9 @@ class DataAnalyzr:
         plot_path: str = None,
     ):
         if plot_path is None:
-            plot_path = Path(f"generated_plots/{str(uuid.uuid4())}.png").as_posix()
+            plot_path = Path(
+                f"generated_plots/{deterministic_uuid([self.analysis_type, user_input])}.png"
+            ).as_posix()
         else:
             plot_path = Path(plot_path).as_posix()
         self.visualisation_output = None

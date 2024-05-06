@@ -1,7 +1,6 @@
 # standard library imports
 import os
 import json
-import uuid
 import logging
 
 # local imports
@@ -15,6 +14,7 @@ from lyzr.data_analyzr.db_connector import (
     TrainingPlanItem,
     TrainingPlan,
 )
+from lyzr.data_analyzr.utils import deterministic_uuid
 
 
 class ChromaDBVectorStore:
@@ -178,7 +178,7 @@ class ChromaDBVectorStore:
                 "sql": sql,
             }
         )
-        sql_id = str(uuid.uuid4()) + "-sql"
+        sql_id = deterministic_uuid() + "-sql"
         self.sql_collection.add(
             documents=question_sql_json,
             embeddings=self.generate_embedding(question_sql_json),
@@ -187,7 +187,7 @@ class ChromaDBVectorStore:
         return sql_id
 
     def add_ddl(self, ddl: str) -> str:
-        ddl_id = str(uuid.uuid4()) + "-ddl"
+        ddl_id = deterministic_uuid() + "-ddl"
         self.ddl_collection.add(
             documents=ddl,
             embeddings=self.generate_embedding(ddl),
@@ -196,7 +196,7 @@ class ChromaDBVectorStore:
         return ddl_id
 
     def add_documentation(self, documentation: str) -> str:
-        doc_id = str(uuid.uuid4()) + "-doc"
+        doc_id = deterministic_uuid() + "-doc"
         self.documentation_collection.add(
             documents=documentation,
             embeddings=self.generate_embedding(documentation),
