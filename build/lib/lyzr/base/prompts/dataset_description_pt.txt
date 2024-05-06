@@ -1,2 +1,0 @@
-Dataset Sample (with top five row including the column names):
-{df_head} 
