@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 
 # local imports
+from lyzr.base.logger import set_logger
 from lyzr.base.prompt import LyzrPromptFactory
 from lyzr.data_analyzr.file_utils import get_db_details
 from lyzr.data_analyzr.txt_to_sql_utils import TxttoSQLFactory
@@ -27,10 +28,6 @@ from lyzr.data_analyzr.utils import (
     format_df_with_info,
     get_info_dict_from_df_dict,
 )
-
-# imports for logging
-import sys
-import logging
 
 # imports for legacy usage
 from PIL import Image
@@ -73,8 +70,12 @@ class DataAnalyzr:
             )
         self.max_retries = max_retries
         self.user_input = user_input
-        self.log_filename = log_filename
-        self._set_logger(log_level, print_log)
+        self.logger = set_logger(
+            name="data_analyzr",
+            logfilename=log_filename,
+            log_level=log_level,
+            print_log=print_log,
+        )
 
         if df is not None:
             # legacy usage
@@ -192,47 +193,6 @@ class DataAnalyzr:
         else:
             raise ValueError("df must be a path to a file or a pd.DataFrame object.")
         self.df_info_dict = get_info_dict_from_df_dict(self.df_dict)
-
-    def _set_logger(self, log_level, print_log):
-        self.logger = logging.getLogger(__name__)
-        numeric_level = getattr(logging, log_level.upper(), None)
-        if not isinstance(numeric_level, int):
-            raise ValueError("Invalid log level: %s" % log_level)
-        self.logger.setLevel(numeric_level)
-
-        if self.logger.hasHandlers():
-            for handler in self.logger.handlers:
-                try:
-                    handler.close()
-                except Exception:
-                    pass
-            self.logger.handlers.clear()
-
-        if print_log:
-            # output logs to stdout
-            handler = logging.StreamHandler(sys.stdout)
-            handler.setLevel(numeric_level)
-            self.logger.addHandler(handler)
-
-        log_filename = self.log_filename
-        dir_path = os.path.dirname(log_filename)
-        if dir_path.strip() != "":
-            os.makedirs(dir_path, exist_ok=True)
-        file_handler = logging.FileHandler(
-            log_filename, mode="a"
-        )  # Open the log file in append mode
-        file_handler.setLevel(numeric_level)
-
-        # Optionally, you can set a formatter for the file handler if you want a different format for file logs
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s\n%(message)s\n",
-            datefmt="%d-%b-%y %H:%M:%S",
-        )
-        formatter.converter = time.gmtime
-        file_handler.setFormatter(formatter)
-
-        # Add the file handler to the logger
-        self.logger.addHandler(file_handler)
 
     # Function to get datasets
     def get_data(
