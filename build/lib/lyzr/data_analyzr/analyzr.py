@@ -320,8 +320,8 @@ class DataAnalyzr:
             context=analysis_context,
             vector_store=self.vector_store,
         )
-        self.analysis_output = self.analyzer.run_complete_analysis(user_input)
-        self.analysis_guide = self.analyzer.analysis_guide
+        self.analysis_output = self.analyzer.run_analysis(user_input)
+        self.analysis_guide = self.analyzer.sql_query
         return self.analysis_output
 
     def visualisation(

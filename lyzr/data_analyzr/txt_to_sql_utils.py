@@ -21,6 +21,9 @@ class TxttoSQLFactory:
         logger: logging.Logger,
         context: str,
         vector_store: ChromaDBVectorStore,
+        max_tries: int = None,
+        time_limit: int = None,
+        auto_train: bool = None,
         **llm_kwargs,  # model_kwargs: dict
     ):
         self.llm = llm
@@ -34,6 +37,9 @@ class TxttoSQLFactory:
         if self.vector_store is None:
             raise MissingValueError("vector_store")
         self.analysis_output, self.sql_query = None, None
+        self.max_tries = max_tries if max_tries is not None else 3
+        self.time_limit = time_limit if time_limit is not None else 30
+        self.auto_train = auto_train if auto_train is not None else True
 
     def run_analysis(
         self,
@@ -46,7 +52,7 @@ class TxttoSQLFactory:
         for_plotting = kwargs.pop("for_plotting", False)
         messages = self._generate_sql_messages(user_input, for_plotting)
         self.extract_and_run_sql = iterate_llm_calls(
-            max_tries=kwargs.pop("max_tries", 3),
+            max_tries=kwargs.pop("max_tries", self.max_tries),
             llm=self.llm,
             llm_messages=messages,
             logger=self.logger,
@@ -54,7 +60,7 @@ class TxttoSQLFactory:
                 "start": f"Starting SQL analysis for query: {user_input}",
                 "end": f"Ending SQL analysis for query: {user_input}",
             },
-            time_limit=kwargs.pop("time_limit", 30),
+            time_limit=kwargs.pop("time_limit", self.time_limit),
         )(self.extract_and_run_sql)
         self.analysis_output, self.sql_query = self.extract_and_run_sql()
         # Auto-training
