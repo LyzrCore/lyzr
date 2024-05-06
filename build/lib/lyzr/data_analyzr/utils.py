@@ -43,9 +43,13 @@ def remove_punctuation_from_string(value: str) -> str:
 
 
 def flatten_list(lst: list):
+    return_lst = []
     for el in lst:
         if isinstance(el, list):
-            yield from flatten_list(el)
+            return_lst.extend(flatten_list(el))
+        else:
+            return_lst.append(el)
+    return return_lst
 
 
 def _remove_punctuation_from_numeric_string(value) -> str:
@@ -66,11 +70,9 @@ def convert_to_numeric(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     for col in columns:
         try:
             df = df.dropna(subset=[col])
-            df.loc[:, col] = df.loc[:, col].apply(
-                _remove_punctuation_from_numeric_string
-            )
-            df.loc[:, col] = pd.to_numeric(df.loc[:, col])
-            df.loc[:, col] = df.loc[:, col].astype("float")
+            column_values = df.loc[:, col].apply(remove_punctuation_from_string)
+            column_values = pd.to_numeric(column_values)
+            df.loc[:, col] = column_values.astype("float")
         except Exception:
             pass
     return df.infer_objects()
