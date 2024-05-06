@@ -35,3 +35,9 @@ class ValidationError(Exception):
     """Raise for validations"""
 
     pass
+
+
+class AnalysisFailedError(Exception):
+    """Raise for failed analysis"""
+
+    pass

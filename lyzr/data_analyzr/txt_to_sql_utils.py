@@ -1,167 +1,95 @@
 # standard library imports
-import time
 import logging
-import traceback
 
 # local imports
+from lyzr.base.llm import LiteLLM
 from lyzr.base.prompt import LyzrPromptFactory
 from lyzr.base.errors import MissingValueError
-from lyzr.base.llm import LiteLLM
-from lyzr.base.base import ChatMessage, UserMessage, SystemMessage
+from lyzr.data_analyzr.utils import iterate_llm_calls
 from lyzr.data_analyzr.output_handler import extract_sql
 from lyzr.data_analyzr.db_connector import DatabaseConnector
+from lyzr.base.base import ChatMessage, UserMessage, SystemMessage
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
-from lyzr.data_analyzr.utils import run_n_times
 
 
 class TxttoSQLFactory:
 
     def __init__(
         self,
-        model: LiteLLM,
+        llm: LiteLLM,
         db_connector: DatabaseConnector,
         logger: logging.Logger,
         context: str,
         vector_store: ChromaDBVectorStore,
+        **llm_kwargs,  # model_kwargs: dict
     ):
-        self.model = model
-        self.model.set_model_kwargs(
-            model_kwargs=dict(seed=123, temperature=0.1, top_p=0.5)
-        )
+        self.llm = llm
+        model_kwargs = dict(seed=123, temperature=0.1, top_p=0.5)
+        model_kwargs.update(llm_kwargs)
+        self.llm.set_model_kwargs(model_kwargs=model_kwargs)
         self.context = context.strip() + "\n\n" if context.strip() != "" else ""
         self.logger = logger
         self.connector = db_connector
         self.vector_store = vector_store
         if self.vector_store is None:
             raise MissingValueError("vector_store")
-        self.analysis_output, self.analysis_guide = None, None
+        self.analysis_output, self.sql_query = None, None
 
-    def run_complete_analysis(
+    def run_analysis(
         self,
         user_input: str,
-        auto_train: bool = True,
-        **kwargs,
+        **kwargs,  # max_tries=3, time_limit=30, auto_train=True, for_plotting=False
     ):
-        start_time = time.time()
-        question_sql_list = self.vector_store.get_similar_question_sql(
-            user_input, **kwargs
-        )
-        ddl_list = self.vector_store.get_related_ddl(user_input, **kwargs)
-        doc_list = self.vector_store.get_related_documentation(user_input, **kwargs)
-        messages = self._get_sql_prompt(
-            user_input=user_input,
-            question_sql_list=question_sql_list,
-            ddl_list=ddl_list,
-            doc_list=doc_list,
-        )
-        # print(messages)
-        for _ in range(3):
-            try:
-                # SQL Generation
-                self.analysis_guide = extract_sql(
-                    self.model.run(messages=messages, **kwargs).message.content,
-                    self.logger,
-                )
-                self.logger.info(f"Analysis Guide:\n{self.analysis_guide}\n")
-                # SQL Execution
-                self.analysis_output = self.connector.run_sql(self.analysis_guide)
-                self.logger.info(f"Analysis Output:\n{self.analysis_output}\n")
-                break
-            except RecursionError:
-                raise RecursionError(
-                    "The request could not be completed. Please wait a while and try again."
-                )
-            except Exception as e:
-                if time.time() - start_time > 30:
-                    raise TimeoutError(
-                        "The request could not be completed. Please wait a while and try again."
-                    )
-                self.logger.info(f"{e.__class__.__name__}: {e}\n")
-                self.logger.info("Traceback:\n{}\n".format(traceback.format_exc()))
-                messages.append(
-                    SystemMessage(
-                        content=f"Your response resulted in the following error:\n{e.__class__.__name__}: {e}\n{traceback.format_exc()}\n\nPlease correct your response to prevent this error."
-                    )
-                )
+        user_input = user_input.strip()
+        if user_input is None or user_input == "":
+            raise MissingValueError("A user input is required for analysis.")
+        for_plotting = kwargs.pop("for_plotting", False)
+        messages = self._generate_sql_messages(user_input, for_plotting)
+        self.extract_and_run_sql = iterate_llm_calls(
+            max_tries=kwargs.pop("max_tries", 3),
+            llm=self.llm,
+            llm_messages=messages,
+            logger=self.logger,
+            log_messages={
+                "start": f"Starting SQL analysis for query: {user_input}",
+                "end": f"Ending SQL analysis for query: {user_input}",
+            },
+            time_limit=kwargs.pop("time_limit", 30),
+        )(self.extract_and_run_sql)
+        self.analysis_output, self.sql_query = self.extract_and_run_sql()
         # Auto-training
-        if user_input is None or user_input.strip() == "":
-            user_input = self._generate_question(self.analysis_guide)
         if (
-            auto_train
+            kwargs.pop("auto_train", True)
             and self.analysis_output is not None
             and len(self.analysis_output) > 0
-            and self.analysis_guide is not None
-            and self.analysis_guide.strip() != ""
         ):
-            self.logger.info("Saving data for next training round\n")
-            self.vector_store.add_training_plan(
-                question=user_input, sql=self.analysis_guide
-            )
+            self.add_training_data(user_input, self.sql_query)
         return self.analysis_output
 
-    def run_analysis_for_plotting(self, user_input: str, **kwargs):
-        start_time = time.time()
-        question_sql_list = self.vector_store.get_similar_question_sql(
-            user_input, **kwargs
-        )
-        ddl_list = self.vector_store.get_related_ddl(user_input, **kwargs)
-        doc_list = self.vector_store.get_related_documentation(user_input, **kwargs)
+    def extract_and_run_sql(self, llm_response):
+        sql_query = extract_sql(llm_response)
+        analysis_output = self.connector.run_sql(sql_query)
+        return (analysis_output, sql_query)
+
+    def _generate_sql_messages(
+        self, user_input: str, for_plotting: bool = False
+    ) -> list[ChatMessage]:
+        question_sql_list = self.vector_store.get_similar_question_sql(user_input)
+        ddl_list = self.vector_store.get_related_ddl(user_input)
+        doc_list = self.vector_store.get_related_documentation(user_input)
         messages = self._get_sql_prompt(
             user_input=user_input,
             question_sql_list=question_sql_list,
             ddl_list=ddl_list,
             doc_list=doc_list,
-            for_plotting=True,
+            for_plotting=for_plotting,
         )
-        for _ in range(3):
-            try:
-                sql_query = extract_sql(
-                    self.model.run(messages=messages, **kwargs).message.content,
-                    self.logger,
-                )
-                plot_df = self.connector.run_sql(sql_query)
-                return plot_df
-            except RecursionError:
-                raise RecursionError(
-                    "The request could not be completed. Please wait a while and try again."
-                )
-            except Exception as e:
-                if time.time() - start_time > 30:
-                    raise TimeoutError(
-                        "The request could not be completed. Please wait a while and try again."
-                    )
-                self.logger.info(f"{e.__class__.__name__}: {e}\n")
-                self.logger.info("Traceback:\n{}\n".format(traceback.format_exc()))
-                messages.append(
-                    SystemMessage(
-                        content=f"Your response resulted in the following error:\n{e.__class__.__name__}: {e}\n{traceback.format_exc()}\n\nPlease correct your response to prevent this error."
-                    )
-                )
-
-    def _generate_sql(
-        self, user_input: str, for_plotting: bool = False, **kwargs
-    ) -> str:
-        question_sql_list = self.vector_store.get_similar_question_sql(
-            user_input, **kwargs
-        )
-        ddl_list = self.vector_store.get_related_ddl(user_input, **kwargs)
-        doc_list = self.vector_store.get_related_documentation(user_input, **kwargs)
-        # get response from LLM in llm_response
-        llm_response = self.model.run(
-            messages=self._get_sql_prompt(
-                user_input=user_input,
-                question_sql_list=question_sql_list,
-                ddl_list=ddl_list,
-                doc_list=doc_list,
-                for_plotting=for_plotting,
-            ),
-            **kwargs,
-        ).message.content
-        return llm_response
+        # llm_response = self.llm.run(messages, **kwargs).message.content
+        return messages
 
     def _generate_question(self, sql: str, **kwargs) -> str:
         kwargs["max_tokens"] = 500
-        output = self.model.run(
+        output = self.llm.run(
             messages=[
                 LyzrPromptFactory(
                     name="sql_question_gen", prompt_type="system"
@@ -213,3 +141,10 @@ class TxttoSQLFactory:
 
         messages.append(UserMessage(content=user_input))
         return messages
+
+    def add_training_data(self, sql_query: str, user_input: str):
+        if user_input is None or user_input.strip() == "":
+            user_input = self._generate_question(self.sql_query)
+        if sql_query is not None and sql_query.strip() != "":
+            self.logger.info("Saving data for next training round\n")
+            self.vector_store.add_training_plan(question=user_input, sql=self.sql_query)

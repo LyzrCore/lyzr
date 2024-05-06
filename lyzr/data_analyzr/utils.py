@@ -5,11 +5,16 @@ import time
 import string
 import logging
 import hashlib
+import traceback
 from typing import Union
 
 # third-party imports
 import numpy as np
 import pandas as pd
+
+# local imports
+from lyzr.base.errors import AnalysisFailedError
+from lyzr.base import SystemMessage, AssistantMessage, LiteLLM
 
 
 def deterministic_uuid(content: Union[str, bytes, list] = None):
@@ -169,29 +174,78 @@ def _format_date(date: pd.Timestamp):
     return date.strftime("%d %b %Y %H:%M")
 
 
-def run_n_times(max_tries=1, *, logger: logging.Logger, log_messages={}):
-    def dec_wrapper(func):
-        def wrapped_func(*args, **kwargs):
+def iterate_llm_calls(
+    max_tries=1,
+    *,
+    llm: LiteLLM,
+    llm_messages: list,
+    logger: logging.Logger,
+    log_messages={},
+    time_limit: int = 30,
+):
+    def decorator_wrapper(func):
+        def wrapped_func(**kwargs):
             result = None
-            if "start" in log_messages:
-                logger.info(log_messages["start"])
-            for i in range(max_tries):
-                logger.info(f"Try num: {i + 1}")
-                try:
-                    result = func(*args, **kwargs)
-                    if result is not None:
-                        logger.info(f"Result recieved: {result}")
-                        break
-                except Exception as e:
-                    logger.error(
-                        f"Error in try {i + 1}. {e.__class__.__name__}: {e}. Traceback: {e.__traceback__}"
-                    )
+            logger.info(log_messages.get("start", "Starting LLM analysis."))
+            start_time = time.time()
+            result = repeater(
+                max_tries=max_tries,
+                start_time=start_time,
+                time_limit=time_limit,
+                logger=logger,
+                llm=llm,
+                llm_messages=llm_messages,
+                func=func,
+                **kwargs,
+            )
             if result is None:
                 logger.info("Result is None")
-            if "end" in log_messages:
-                logger.info(log_messages["end"])
+            logger.info(log_messages.get("end", "LLM analysis completed."))
             return result
 
         return wrapped_func
 
-    return dec_wrapper
+    return decorator_wrapper
+
+
+def repeater(
+    max_tries: int,
+    start_time: float,
+    time_limit: int,
+    logger: logging.Logger,
+    llm: LiteLLM,
+    llm_messages: list,
+    func: callable,
+    **kwargs,
+):
+    for i in range(max_tries):
+        try:
+            llm_response = llm.run(messages=llm_messages)
+        except Exception as e:
+            logger.error(
+                f"Error with getting response from LLM in try {i + 1}. {e.__class__.__name__}: {e}. Traceback: {traceback.format_exc()}"
+            )
+            continue
+        try:
+            result = func(llm_response=llm_response, **kwargs)
+            if result is not None:
+                logger.info(f"Result recieved: {result}")
+                break
+        except Exception as e:
+            logger.error(
+                f"Error in try {i + 1}. {e.__class__.__name__}: {e}. Traceback: {traceback.format_exc()}"
+            )
+            llm_messages.append(AssistantMessage(content=llm_response))
+            llm_messages.append(
+                SystemMessage(
+                    content="Your response resulted in the following error:\n"
+                    f"{e.__class__.__name__}: {e}\n{traceback.format_exc()}\n\n"
+                    "Please correct your response to prevent this error."
+                )
+            )
+        finally:
+            if time.time() - start_time > time_limit and time_limit > 0:
+                raise AnalysisFailedError(
+                    "The request could not be completed. Please wait a while and try again."
+                )
+    return result
