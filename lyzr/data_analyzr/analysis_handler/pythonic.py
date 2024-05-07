@@ -12,12 +12,12 @@ from lyzr.data_analyzr.utils import (
     format_df_with_info,
     iterate_llm_calls,
 )
-from lyzr.base.base import ChatMessage
 from lyzr.base.errors import DependencyError
 from lyzr.base.prompt import LyzrPromptFactory
 from lyzr.data_analyzr.models import FactoryBaseClass
-from lyzr.data_analyzr.analysis_handler.utils import AnalysisExecutor
+from lyzr.base.base import ChatMessage, UserMessage, SystemMessage
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
+from lyzr.data_analyzr.analysis_handler.utils import AnalysisExecutor
 from lyzr.data_analyzr.analysis_handler.models import PythonicAnalysisModel
 
 
@@ -137,6 +137,17 @@ class PythonicAnalysisFactory(FactoryBaseClass):
                 guide=self._analysis_guide,
             ),
         ]
+        question_examples_list = self.vector_store.get_similar_analysis_steps(
+            user_input
+        )
+        for example in question_examples_list:
+            if (
+                (example is not None)
+                and ("question" in example)
+                and ("steps" in example)
+            ):
+                messages.append(UserMessage(content=example["question"]))
+                messages.append(SystemMessage(content=example["steps"]))
         return messages
 
     def get_analysis_steps(self, llm_response: str) -> PythonicAnalysisModel:

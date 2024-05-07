@@ -24,6 +24,7 @@ from lyzr.data_analyzr.plot_handler.utils import (
     set_analysis_attributes,
 )
 from lyzr.base.prompt import LyzrPromptFactory
+from lyzr.base.base import UserMessage, SystemMessage
 from lyzr.data_analyzr.models import FactoryBaseClass
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
 from testing.python_analysis_utils import PlottingStepsModel, PlotingStepsDetails
@@ -115,7 +116,7 @@ class PlotFactory(FactoryBaseClass):
                 "closing",
             ]
             self.plot_df_dict = self._df_dict
-        return [
+        messages = [
             LyzrPromptFactory(name="plotting_steps", prompt_type="system").get_message(
                 use_sections=system_message_sections,
                 plotting_lib=self.additional_kwargs["plotting_library"],
@@ -127,6 +128,12 @@ class PlotFactory(FactoryBaseClass):
                 guide=plotting_guide,
             ),
         ]
+        question_examples_list = self.vector_store.get_similar_plotting_steps(user_input)
+        for example in question_examples_list:
+            if (example is not None) and ("question" in example) and ("steps" in example):
+                messages.append(UserMessage(content=example["question"]))
+                messages.append(SystemMessage(content=example["steps"]))
+        return messages
 
     def _make_plotting_guide(self, user_input: str) -> str:
         plotting_guide_sections = ["context", "external_context", "task"]

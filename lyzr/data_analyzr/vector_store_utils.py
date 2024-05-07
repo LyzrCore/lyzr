@@ -201,6 +201,20 @@ class ChromaDBVectorStore:
             )
         )
 
+    def get_similar_analysis_steps(self, question: str) -> list:
+        return self._extract_documents(
+            self.analysis_collection.query(
+                query_texts=[question],
+            )
+        )
+
+    def get_similar_plotting_steps(self, question: str) -> list:
+        return self._extract_documents(
+            self.plot_collection.query(
+                query_texts=[question],
+            )
+        )
+
     def generate_embedding(self, data: str) -> list[float]:
         embedding = self.embedding_function([data])
         if len(embedding) == 1:
@@ -241,29 +255,31 @@ class ChromaDBVectorStore:
         return doc_id
 
     def add_analysis_steps(self, question: str, steps: str):
+        question_analysis_steps = json.dumps(
+            {
+                "question": question,
+                "steps": steps,
+            }
+        )
         steps_id = deterministic_uuid() + "-steps"
         self.analysis_collection.add(
-            documents=json.dumps(
-                {
-                    "question": question,
-                    "steps": steps,
-                }
-            ),
-            embeddings=self.generate_embedding(steps),
+            documents=question_analysis_steps,
+            embeddings=self.generate_embedding(question_analysis_steps),
             ids=steps_id,
         )
         return steps_id
 
     def add_plot_steps(self, question: str, steps: str):
+        question_plot_steps = json.dumps(
+            {
+                "question": question,
+                "steps": steps,
+            }
+        )
         steps_id = deterministic_uuid() + "-steps"
         self.plot_collection.add(
-            documents=json.dumps(
-                {
-                    "question": question,
-                    "steps": steps,
-                }
-            ),
-            embeddings=self.generate_embedding(steps),
+            documents=question_plot_steps,
+            embeddings=self.generate_embedding(question_plot_steps),
             ids=steps_id,
         )
         return steps_id
