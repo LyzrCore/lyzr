@@ -27,8 +27,8 @@ from lyzr.base.prompt import LyzrPromptFactory
 from lyzr.base.base import UserMessage, SystemMessage
 from lyzr.data_analyzr.models import FactoryBaseClass
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
-from testing.python_analysis_utils import PlottingStepsModel, PlotingStepsDetails
 from lyzr.data_analyzr.analysis_handler import TxttoSQLFactory, PythonicAnalysisFactory
+from lyzr.data_analyzr.plot_handler.models import PlottingStepsModel, PlotingStepsDetails
 
 
 class PlotFactory(FactoryBaseClass):
@@ -93,12 +93,14 @@ class PlotFactory(FactoryBaseClass):
             time_limit=kwargs.pop("time_limit", self.params.time_limit),
         )(self.get_plotting_steps)
         self.steps = self.get_plotting_steps()
+        if not isinstance(self.steps, PlottingStepsModel):
+            self.steps = PlottingStepsModel(**self.steps)
         self.fig = self.make_plot_figure(self.plot_df_dict[self.steps.df_name])
         if (
             kwargs.pop("auto_train", self.params.auto_train)
             and self.fig is not None
         ):
-            self.add_training_data(user_input, json.dumps(self._steps.model_dump()))
+            self.add_training_data(user_input, json.dumps(self.steps.model_dump()))
         return self.save_plot_image()
 
     def get_prompt_messages(self, user_input: str) -> list:

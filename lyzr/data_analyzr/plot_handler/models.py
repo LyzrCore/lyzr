@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Literal, Union
 from pydantic import BaseModel, Field, model_validator
-from lyzr.data_analyzr.analysis_handler.models import PythonicAnalysisModel
 
 
 class ColumnDataType(str, Enum):
