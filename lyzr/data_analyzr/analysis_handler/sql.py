@@ -6,13 +6,14 @@ from lyzr.base.llm import LiteLLM
 from lyzr.base.prompt import LyzrPromptFactory
 from lyzr.base.errors import MissingValueError
 from lyzr.data_analyzr.utils import iterate_llm_calls
+from lyzr.data_analyzr.models import FactoryBaseClass
 from lyzr.data_analyzr.output_handler import extract_sql
 from lyzr.data_analyzr.db_connector import DatabaseConnector
 from lyzr.base.base import ChatMessage, UserMessage, SystemMessage
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
 
 
-class TxttoSQLFactory:
+class TxttoSQLFactory(FactoryBaseClass):
 
     def __init__(
         self,
@@ -21,25 +22,22 @@ class TxttoSQLFactory:
         logger: logging.Logger,
         context: str,
         vector_store: ChromaDBVectorStore,
-        max_tries: int = None,
+        max_retries: int = None,
         time_limit: int = None,
         auto_train: bool = None,
         **llm_kwargs,  # model_kwargs: dict
     ):
-        self.llm = llm
-        model_kwargs = dict(seed=123, temperature=0.1, top_p=0.5)
-        model_kwargs.update(llm_kwargs)
-        self.llm.set_model_kwargs(model_kwargs=model_kwargs)
-        self.context = context.strip() + "\n\n" if context.strip() != "" else ""
-        self.logger = logger
+        super().__init__(
+            llm=llm,
+            logger=logger,
+            context=context,
+            vector_store=vector_store,
+            max_retries=max_retries,
+            time_limit=time_limit,
+            auto_train=auto_train,
+            llm_kwargs=llm_kwargs,
+        )
         self.connector = db_connector
-        self.vector_store = vector_store
-        if self.vector_store is None:
-            raise MissingValueError("vector_store")
-        self.analysis_output, self.sql_query = None, None
-        self.max_tries = max_tries if max_tries is not None else 3
-        self.time_limit = time_limit if time_limit is not None else 30
-        self.auto_train = auto_train if auto_train is not None else True
 
     def run_analysis(
         self,
@@ -50,9 +48,9 @@ class TxttoSQLFactory:
         if user_input is None or user_input == "":
             raise MissingValueError("A user input is required for analysis.")
         for_plotting = kwargs.pop("for_plotting", False)
-        messages = self._generate_sql_messages(user_input, for_plotting)
+        messages = self.get_prompt_messages(user_input, for_plotting)
         self.extract_and_run_sql = iterate_llm_calls(
-            max_tries=kwargs.pop("max_tries", self.max_tries),
+            max_retries=kwargs.pop("max_retries", self.params.max_retries),
             llm=self.llm,
             llm_messages=messages,
             logger=self.logger,
@@ -60,16 +58,16 @@ class TxttoSQLFactory:
                 "start": f"Starting SQL analysis for query: {user_input}",
                 "end": f"Ending SQL analysis for query: {user_input}",
             },
-            time_limit=kwargs.pop("time_limit", self.time_limit),
+            time_limit=kwargs.pop("time_limit", self.params.time_limit),
         )(self.extract_and_run_sql)
-        self.analysis_output, self.sql_query = self.extract_and_run_sql()
+        self.analysis_output, self.code = self.extract_and_run_sql()
         # Auto-training
         if (
-            kwargs.pop("auto_train", True)
+            kwargs.pop("auto_train", self.params.auto_train)
             and self.analysis_output is not None
             and len(self.analysis_output) > 0
         ):
-            self.add_training_data(user_input, self.sql_query)
+            self.add_training_data(user_input, self.code)
         return self.analysis_output
 
     def extract_and_run_sql(self, llm_response):
@@ -77,7 +75,7 @@ class TxttoSQLFactory:
         analysis_output = self.connector.run_sql(sql_query)
         return (analysis_output, sql_query)
 
-    def _generate_sql_messages(
+    def get_prompt_messages(
         self, user_input: str, for_plotting: bool = False
     ) -> list[ChatMessage]:
         question_sql_list = self.vector_store.get_similar_question_sql(user_input)
@@ -150,7 +148,7 @@ class TxttoSQLFactory:
 
     def add_training_data(self, sql_query: str, user_input: str):
         if user_input is None or user_input.strip() == "":
-            user_input = self._generate_question(self.sql_query)
+            user_input = self._generate_question(self.code)
         if sql_query is not None and sql_query.strip() != "":
             self.logger.info("Saving data for next training round\n")
-            self.vector_store.add_training_plan(question=user_input, sql=self.sql_query)
+            self.vector_store.add_training_plan(question=user_input, sql=self.code)

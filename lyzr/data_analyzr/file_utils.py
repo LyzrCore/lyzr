@@ -1,15 +1,13 @@
 # standard library imports
 import os
 import logging
-from typing import Literal, Union
+from typing import Union
 
 # third-party imports
 import pandas as pd
+from pydantic import BaseModel
 
 # local imports
-from lyzr.base.errors import (
-    MissingValueError,
-)
 from lyzr.base.file_utils import read_file
 from lyzr.data_analyzr.db_connector import (
     DatabaseConnector,
@@ -17,73 +15,67 @@ from lyzr.data_analyzr.db_connector import (
 )
 from lyzr.data_analyzr.utils import deterministic_uuid
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
+from lyzr.data_analyzr.models import (
+    SupportedDBs,
+    VectorStoreConfig,
+    AnalysisTypes,
+)
 
 
 def get_db_details(
-    db_scope: Literal["sql", "ml", "skip"],
-    db_type: Literal[
-        "files",
-        "redshift",
-        "postgres",
-        "sqlite",
-    ],
-    config: dict,
-    vector_store_config: dict,
+    db_scope: AnalysisTypes,
+    db_type: SupportedDBs,
+    db_config: BaseModel,
+    vector_store_config: VectorStoreConfig,
     logger: logging.Logger,
 ):
     df_dict = None
     connector = None
     vector_store = None
-    if db_type == "files":
-        if "datasets" not in config:
-            raise MissingValueError(
-                "`datasets` is a required parameter for db_type='files'."
-            )
-        datasets = config["datasets"]
-        files_kwargs = config.get("files_kwargs", {})
-        if not isinstance(datasets, dict):
-            datasets = {"Dataset": datasets}
+    if db_type is SupportedDBs.files:
         logger.info(
             "Reading the following datasets:\n"
-            + "\n".join([f"{df} from {datasets[df]}" for df in datasets])
+            + "\n".join(
+                [f"{df} from {db_config.datasets[df]}" for df in db_config.datasets]
+            )
             + "\n"
         )
-        df_dict = get_dict_of_files(datasets, files_kwargs)
+        df_dict = get_dict_of_files(db_config.datasets, db_config.files_kwargs)
         logger.info(
             "Datasets read successfully:\n"
             + "\n".join([f"{df} with shape {df_dict[df].shape}" for df in df_dict])
             + "\n"
         )
     else:
-        connector = DatabaseConnector.get_connector(db_type)(**config)
+        connector = DatabaseConnector.get_connector(db_type.value)(
+            **db_config.model_dump()
+        )
 
-    if db_scope == "ml" and df_dict is None:
+    if db_scope is AnalysisTypes.ml and df_dict is None:
         df_dict = connector.fetch_dataframes_dict()
     if df_dict is not None:
         df_keys = list(df_dict.keys())
         for key in df_keys:
             k_new = key.lower().replace(" ", "_")
             df_dict[k_new] = df_dict.pop(key)
-    if db_scope == "sql":
-        if connector is None:
-            connector = SQLiteConnector()
-            connector.create_database(
-                db_path=config.get(
-                    "db_path", f"./sqlite/{deterministic_uuid(list(df_dict.keys()))}.db"
-                ),
-                df_dict=df_dict,
-            )
-        if isinstance(vector_store_config, dict):
-            vector_store = ChromaDBVectorStore(
-                path=vector_store_config.get(
-                    "path", f"./chromadb/{deterministic_uuid()}"
-                ),
-                remake_store=vector_store_config.get(
-                    "remake_store", vector_store_config.get("remake", True)
-                ),
-                connector=connector,
-                logger=logger,
-            )
+    if db_scope is AnalysisTypes.sql and connector is None:
+        connector = SQLiteConnector()
+        connector.create_database(
+            db_path=(
+                db_config.db_path
+                if db_config.db_path is not None
+                else f"./sqlite/{deterministic_uuid()}.db"
+            ),
+            df_dict=df_dict,
+        )
+    if vector_store_config.path is None:
+        vector_store_config.path = f"./vector_store/{deterministic_uuid()}"
+    vector_store = ChromaDBVectorStore(
+        path=vector_store_config.path,
+        remake_store=vector_store_config.remake_store,
+        connector=connector,
+        logger=logger,
+    )
     return connector, df_dict, vector_store
 
 

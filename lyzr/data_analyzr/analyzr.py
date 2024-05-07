@@ -7,27 +7,29 @@ from typing import Union, Literal, Optional, Any
 # third-party imports
 import numpy as np
 import pandas as pd
+from pydantic import TypeAdapter
 
 # local imports
-from lyzr.base.logger import set_logger
-from lyzr.base.prompt import LyzrPromptFactory
-from lyzr.data_analyzr.file_utils import get_db_details
-from lyzr.data_analyzr.txt_to_sql_utils import TxttoSQLFactory
-from lyzr.data_analyzr.ml_analysis_utils import MLAnalysisFactory
-from lyzr.base.errors import (
-    MissingValueError,
-)
-from lyzr.base.llm import (
-    LyzrLLMFactory,
-    LiteLLM,
-)
-from lyzr.data_analyzr.plot_utils import PlotFactory
 from lyzr.data_analyzr.utils import (
+    logging_decorator,
     deterministic_uuid,
-    format_df_with_describe,
-    format_df_with_info,
+    format_df_details,
+    format_df_details,
     get_info_dict_from_df_dict,
 )
+from lyzr.data_analyzr.models import (
+    SupportedDBs,
+    AnalysisTypes,
+    VectorStoreConfig,
+    DataConfig,
+)
+from lyzr.base.logger import set_logger
+from lyzr.base.prompt import LyzrPromptFactory
+from lyzr.base.errors import MissingValueError
+from lyzr.base.llm import LyzrLLMFactory, LiteLLM
+from lyzr.data_analyzr.plot_handler import PlotFactory
+from lyzr.data_analyzr.file_utils import get_db_details
+from lyzr.data_analyzr.analysis_handler import TxttoSQLFactory, PythonicAnalysisFactory
 
 # imports for legacy usage
 from PIL import Image
@@ -44,7 +46,8 @@ class DataAnalyzr:
         self,
         analysis_type: Optional[Literal["sql", "ml", "skip"]] = None,
         api_key: Optional[str] = None,
-        max_retries: Optional[int] = 5,
+        max_retries: Optional[int] = 3,
+        time_limit: Optional[int] = 30,
         generator_model: Optional[LiteLLM] = None,
         analysis_model: Optional[LiteLLM] = None,
         user_input: Optional[str] = None,
@@ -61,14 +64,8 @@ class DataAnalyzr:
         model_name: Optional[str] = None,
         seed: Optional[int] = 0,
     ):
-        api_key = (
-            api_key or os.environ.get("API_KEY") or os.environ.get("OPENAI_API_KEY")
-        )
-        if api_key is None:
-            raise MissingValueError(
-                "Provide a value for `api_key` or set the `OPENAI_API_KEY` environment variable."
-            )
         self.max_retries = max_retries
+        self.time_limit = time_limit
         self.user_input = user_input
         self.logger = set_logger(
             name="data_analyzr",
@@ -106,7 +103,7 @@ class DataAnalyzr:
                 self.analysis_model = analysis_model
             self.analysis_model.additional_kwargs["logger"] = self.logger
 
-            self.analysis_type = analysis_type.lower().strip()
+            self.analysis_type = AnalysisTypes(analysis_type.lower().strip())
             self.context = context or ""
         (
             self.dataset_description_output,
@@ -117,6 +114,13 @@ class DataAnalyzr:
             self.recommendations_output,
             self.tasks_output,
         ) = (None, None, None, None, None, None, None)
+        self.analysis = logging_decorator(logger=self.logger)(self.analysis)
+        self.visualisation = logging_decorator(logger=self.logger)(self.visualisation)
+        self.insights = logging_decorator(logger=self.logger)(self.insights)
+        self.recommendations = logging_decorator(logger=self.logger)(
+            self.recommendations
+        )
+        self.tasks = logging_decorator(logger=self.logger)(self.tasks)
 
     def _legacy_usage(
         self,
@@ -163,7 +167,7 @@ class DataAnalyzr:
             **model_kwargs,
         )
         self.context = ""
-        self.analysis_type = "ml"
+        self.analysis_type = AnalysisTypes("ml")
         self.user_input = user_input
 
         def _clean_df(df: pd.DataFrame):
@@ -178,7 +182,13 @@ class DataAnalyzr:
 
         if isinstance(df, str):
             self.database_connector, self.df_dict, self.vector_store = get_db_details(
-                "ml", "files", {"datasets": {"Dataset": df}}, {}, logger=self.logger
+                db_scope=AnalysisTypes("ml"),
+                db_type=SupportedDBs("files"),
+                db_config=TypeAdapter(DataConfig).validate_python(
+                    {"datasets": {"Dataset": df}}
+                ),
+                vector_store_config=VectorStoreConfig(**{}),
+                logger=self.logger,
             )
             for name, df in self.df_dict.items():
                 if not isinstance(df, pd.DataFrame):
@@ -197,26 +207,19 @@ class DataAnalyzr:
     # Function to get datasets
     def get_data(
         self,
-        db_type: Literal[
-            "files",
-            "redshift",
-            "postgres",
-            "sqlite",
-        ],
-        config: dict,
-        # if db_type == "files", config_keys = datasets, files_kwargs, db_path
-        # if db_type == "redshift" or "postgres" or "snowflake" or "mysql", config_keys = host, port, user, password, database, schema, table
-        # if db_type == "snowflake", config_keys = warehouse, role
-        # if db_type == "sqlite", config_keys = db_path
-        vector_store_config,
+        db_type: Literal["files", "redshift", "postgres", "sqlite"],
+        data_config: dict,
+        vector_store_config: dict = {},
     ) -> Any:
+        if not isinstance(data_config, dict):
+            raise ValueError("data_config must be a dictionary.")
+        data_config["db_type"] = SupportedDBs(db_type.lower().strip())
         self.database_connector, self.df_dict, self.vector_store = get_db_details(
-            self.analysis_type, db_type, config, vector_store_config, self.logger
-        )
-        self.df_info_dict = (
-            get_info_dict_from_df_dict(self.df_dict)
-            if self.df_dict is not None
-            else None
+            db_scope=self.analysis_type,
+            db_type=data_config["db_type"],
+            db_config=TypeAdapter(DataConfig).validate_python(data_config),
+            vector_store_config=VectorStoreConfig(**vector_store_config),
+            logger=self.logger,
         )
 
     def analysis(
@@ -225,7 +228,7 @@ class DataAnalyzr:
         analysis_context: str,
         analysis_steps: dict = None,
     ):
-        if self.analysis_type == "skip" and analysis_steps is None:
+        if self.analysis_type is AnalysisTypes.skip and analysis_steps is None:
             if self.df_dict is None:
                 self.logger.info(
                     "No analysis performed. Fetching dataframes from database."
@@ -236,11 +239,11 @@ class DataAnalyzr:
                 "No analysis performed. Analysis output is the given dataframe."
             )
             return self.analysis_output
-        if self.analysis_type == "sql" and analysis_steps is None:
+        if self.analysis_type is AnalysisTypes.sql and analysis_steps is None:
             return self._txt_to_sql_analysis(
                 self.analysis_model, user_input, analysis_context
             )
-        if self.analysis_type == "ml" or analysis_steps is not None:
+        if self.analysis_type is AnalysisTypes.ml or analysis_steps is not None:
             return self._ml_analysis(
                 self.analysis_model,
                 user_input,
@@ -255,7 +258,7 @@ class DataAnalyzr:
         analysis_context: str = None,
         analysis_steps: dict = None,
     ):
-        self.analyzer = MLAnalysisFactory(
+        self.analyzer = PythonicAnalysisFactory(
             model=analysis_model,
             data_dict=self.df_dict,
             data_info_dict=self.df_info_dict,
@@ -266,7 +269,7 @@ class DataAnalyzr:
             _, data = self.analyzer.get_analysis_from_steps(analysis_steps)
             return data
         else:
-            self.analysis_output = self.analyzer.run_complete_analysis(user_input)
+            self.analysis_output = self.analyzer.run_analysis(user_input)
             self.analysis_guide = self.analyzer.analysis_guide
             return self.analysis_output
 
@@ -280,8 +283,12 @@ class DataAnalyzr:
             context=analysis_context,
             vector_store=self.vector_store,
         )
-        self.analysis_output = self.analyzer.run_complete_analysis(user_input)
-        self.analysis_guide = self.analyzer.analysis_guide
+        self.analysis_output = self.analyzer.run_analysis(
+            user_input,
+            max_retries=self.max_retries,
+            time_limit=self.time_limit,
+        )
+        self.analysis_guide = self.analyzer.code
         return self.analysis_output
 
     def visualisation(
@@ -292,26 +299,25 @@ class DataAnalyzr:
     ):
         if plot_path is None:
             plot_path = Path(
-                f"generated_plots/{deterministic_uuid([self.analysis_type, user_input])}.png"
+                f"generated_plots/{deterministic_uuid([self.analysis_type.value, user_input])}.png"
             ).as_posix()
         else:
             plot_path = Path(plot_path).as_posix()
         self.visualisation_output = None
         # self.start_time = time.time()
 
-        self.logger.info("Generating visualisation\n")
         plotter = PlotFactory(
-            model=self.analysis_model,
+            llm=self.analysis_model,
             logger=self.logger,
-            plot_context=plot_context,
+            context=plot_context,
             plot_path=plot_path,
             df_dict=self.df_dict,
-            database_connector=self.database_connector,
-            analysis_type=self.analysis_type,
             analyzer=self.analyzer,
             analysis_output=self.analysis_output,
         )
-        self.visualisation_output = plotter.get_visualisation(user_input)
+        self.visualisation_output = plotter.get_visualisation(
+            user_input, max_retries=self.max_retries, time_limit=self.time_limit
+        )
         return self.visualisation_output
 
     def insights(
@@ -330,7 +336,7 @@ class DataAnalyzr:
                 LyzrPromptFactory(name="insights", prompt_type="user").get_message(
                     user_input=user_input,
                     analysis_guide=self.analysis_guide,
-                    analysis_output=format_df_with_describe(self.analysis_output),
+                    analysis_output=format_df_details(self.analysis_output),
                     date=time.strftime("%d %b %Y"),
                 ),
             ],
@@ -374,7 +380,7 @@ class DataAnalyzr:
         system_message_dict = {}
         user_message_dict = {
             "user_input": user_input,
-            "analysis_output": f"Analysis output:\n{format_df_with_describe(self.analysis_output)}",
+            "analysis_output": f"Analysis output:\n{format_df_details(self.analysis_output)}",
         }
         if recommendations_context is not None and recommendations_context != "":
             system_message_sections.append("external_context")
@@ -627,7 +633,7 @@ class DataAnalyzr:
                     context=context.strip() + "\n\n"
                 ),
                 LyzrPromptFactory(name="ai_queries", prompt_type="user").get_message(
-                    df_details=format_df_with_describe(self.df_dict)
+                    df_details=format_df_details(self.df_dict)
                 ),
             ],
             temperature=1,
@@ -657,7 +663,7 @@ class DataAnalyzr:
             messages=[
                 LyzrPromptFactory("analysis_recommendations", "system").get_message(
                     number_of_recommendations=number_of_recommendations,
-                    df_details=format_df_with_info(self.df_dict),
+                    df_details=format_df_details(self.df_dict),
                     formatted_user_input=formatted_user_input,
                 ),
             ],

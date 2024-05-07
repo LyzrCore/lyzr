@@ -32,7 +32,7 @@ class ChromaDBVectorStore:
             self.make_chroma_client(path=path)
             if remake_store:
                 logger.info(f"Remaking vector store at {path}.")
-                if self.remake_vector_store():
+                if self.remake_vector_store() and connector is not None:
                     logger.info("Generating and adding training plan.\n")
                     self.add_training_plan(plan=connector.get_default_training_plan())
                 else:
@@ -43,8 +43,9 @@ class ChromaDBVectorStore:
             os.makedirs(path)
             logger.info(f"Creating vector store at {path}.")
             self.make_chroma_client(path=path)
-            logger.info("Generating and adding training plan.\n")
-            self.add_training_plan(plan=connector.get_default_training_plan())
+            if connector is not None:
+                logger.info("Generating and adding training plan.\n")
+                self.add_training_plan(plan=connector.get_default_training_plan())
 
     def make_chroma_client(self, path: str):
         try:
@@ -72,11 +73,26 @@ class ChromaDBVectorStore:
         self.ddl_collection = self.chroma_client.get_or_create_collection(
             name="ddl", embedding_function=self.embedding_function
         )
+        self.analysis_collection = self.chroma_client.get_or_create_collection(
+            name="analysis", embedding_function=self.embedding_function
+        )
+        self.plot_collection = self.chroma_client.get_or_create_collection(
+            name="plot", embedding_function=self.embedding_function
+        )
 
     def remake_vector_store(self):
         remake = True
-        for col in self.chroma_client.list_collections():
+        all_collections = ["sql", "ddl", "documentation", "analysis", "plot"]
+        existing_collections = self.chroma_client.list_collections()
+        for col in existing_collections:
             remake = remake and self.remake_collection(collection_name=col.name)
+        for col in all_collections:
+            if col not in existing_collections:
+                self.__dict__[f"{col}_collection"] = (
+                    self.chroma_client.get_or_create_collection(
+                        name=col, embedding_function=self.embedding_function
+                    )
+                )
         return remake
 
     def add_training_plan(
@@ -84,6 +100,8 @@ class ChromaDBVectorStore:
         question: str = None,
         sql: str = None,
         ddl: str = None,
+        plot_steps: str = None,
+        analysis_steps: str = None,
         documentation: str = None,
         plan: TrainingPlan = None,
     ) -> str:
@@ -98,6 +116,12 @@ class ChromaDBVectorStore:
 
         if ddl:
             return self.add_ddl(ddl)
+
+        if plot_steps:
+            self.add_plot_steps(question=question, steps=plot_steps)
+
+        if analysis_steps:
+            self.add_analysis_steps(question=question, steps=analysis_steps)
 
         if plan:
             for item in plan._plan:
@@ -125,6 +149,18 @@ class ChromaDBVectorStore:
             self.chroma_client.delete_collection(name="documentation")
             self.documentation_collection = self.chroma_client.get_or_create_collection(
                 name="documentation", embedding_function=self.embedding_function
+            )
+            return True
+        elif collection_name == "analysis":
+            self.chroma_client.delete_collection(name="analysis")
+            self.analysis_collection = self.chroma_client.get_or_create_collection(
+                name="analysis", embedding_function=self.embedding_function
+            )
+            return True
+        elif collection_name == "plot":
+            self.chroma_client.delete_collection(name="plot")
+            self.plot_collection = self.chroma_client.get_or_create_collection(
+                name="plot", embedding_function=self.embedding_function
             )
             return True
         else:
@@ -203,3 +239,31 @@ class ChromaDBVectorStore:
             ids=doc_id,
         )
         return doc_id
+
+    def add_analysis_steps(self, question: str, steps: str):
+        steps_id = deterministic_uuid() + "-steps"
+        self.analysis_collection.add(
+            documents=json.dumps(
+                {
+                    "question": question,
+                    "steps": steps,
+                }
+            ),
+            embeddings=self.generate_embedding(steps),
+            ids=steps_id,
+        )
+        return steps_id
+
+    def add_plot_steps(self, question: str, steps: str):
+        steps_id = deterministic_uuid() + "-steps"
+        self.plot_collection.add(
+            documents=json.dumps(
+                {
+                    "question": question,
+                    "steps": steps,
+                }
+            ),
+            embeddings=self.generate_embedding(steps),
+            ids=steps_id,
+        )
+        return steps_id

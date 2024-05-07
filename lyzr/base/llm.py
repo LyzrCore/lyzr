@@ -84,12 +84,11 @@ class LiteLLM(LiteLLM):
         if not messages:
             raise ImproperUsageError("Please provide messages for chat.")
         llama_messages = [
-            LlamaChatMessage(role=msg.role.value, content=msg.content)
+            LlamaChatMessage(role=msg.role.value, content=msg.content.strip())
             for msg in messages
         ]
         if stream:
-            response = self._stream_chat(messages=llama_messages, **kwargs)
-            return response  # TODO: Convert response to ChatMessage
+            return self._stream_chat(messages=llama_messages, **kwargs)
         else:
             response = self._chat(messages=llama_messages, **kwargs)
             return ChatResponse(
