@@ -38,6 +38,8 @@ def _fix_plotpath(plot_path: str, output_format: str) -> str:
 
 
 def set_analysis_attributes(analysis_output, analyzer, df_dict):
+    if analyzer is None:
+        return False, None, None
     if not isinstance(analysis_output, pd.DataFrame) or analysis_output.size < 2:
         return True, analyzer, df_dict
     else:

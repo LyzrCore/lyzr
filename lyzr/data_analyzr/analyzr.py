@@ -226,9 +226,8 @@ class DataAnalyzr:
         self,
         user_input: str,
         analysis_context: str,
-        analysis_steps: dict = None,
     ):
-        if self.analysis_type is AnalysisTypes.skip and analysis_steps is None:
+        if self.analysis_type is AnalysisTypes.skip:
             if self.df_dict is None:
                 self.logger.info(
                     "No analysis performed. Fetching dataframes from database."
@@ -238,17 +237,17 @@ class DataAnalyzr:
             self.analysis_guide = (
                 "No analysis performed. Analysis output is the given dataframe."
             )
+            self.analyzer = None
             return self.analysis_output
-        if self.analysis_type is AnalysisTypes.sql and analysis_steps is None:
+        if self.analysis_type is AnalysisTypes.sql:
             return self._txt_to_sql_analysis(
                 self.analysis_model, user_input, analysis_context
             )
-        if self.analysis_type is AnalysisTypes.ml or analysis_steps is not None:
+        if self.analysis_type is AnalysisTypes.ml:
             return self._ml_analysis(
                 self.analysis_model,
                 user_input,
                 analysis_context,
-                analysis_steps=analysis_steps,
             )
 
     def _ml_analysis(
@@ -256,7 +255,6 @@ class DataAnalyzr:
         analysis_model,
         user_input: str,
         analysis_context: str = None,
-        analysis_steps: dict = None,
     ):
         self.analyzer = PythonicAnalysisFactory(
             model=analysis_model,
@@ -265,13 +263,9 @@ class DataAnalyzr:
             logger=self.logger,
             context=analysis_context,
         )
-        if analysis_steps is not None:
-            _, data = self.analyzer.get_analysis_from_steps(analysis_steps)
-            return data
-        else:
-            self.analysis_output = self.analyzer.run_analysis(user_input)
-            self.analysis_guide = self.analyzer.analysis_guide
-            return self.analysis_output
+        self.analysis_output = self.analyzer.run_analysis(user_input)
+        self.analysis_guide = self.analyzer._analysis_guide
+        return self.analysis_output
 
     def _txt_to_sql_analysis(
         self, analysis_model, user_input: str, analysis_context: str = None
@@ -304,7 +298,6 @@ class DataAnalyzr:
         else:
             plot_path = Path(plot_path).as_posix()
         self.visualisation_output = None
-        # self.start_time = time.time()
 
         plotter = PlotFactory(
             llm=self.analysis_model,
