@@ -40,15 +40,6 @@ class PlotingStepsDetails(BaseModel):
         description="Data type of the y-axis column.",
         examples=ColumnDataType.values(),
     )
-    by: Union[list[str], None] = Field(
-        default=None,
-        description="Column name(s) to be used in histogram plots.",
-    )
-    by_dtype: Union[list[ColumnDataType], None] = Field(
-        default=None,
-        description="Data type(s) of the column(s) to be used in histogram plots.",
-        examples=ColumnDataType.values(),
-    )
     args: Union[dict, None] = Field(
         default_factory=dict,
         description="The arguments required to make the plot.",

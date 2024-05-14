@@ -86,10 +86,10 @@ def format_df_details(output_df, name: str = None) -> str:
     if isinstance(output_df, pd.Series):
         output_df = output_df.to_frame()
     if isinstance(output_df, list):
-        return "\n".join([df_details_with_describe(df) for df in output_df])
+        return "\n".join([format_df_details(df) for df in output_df])
     if isinstance(output_df, dict):
         return "\n".join(
-            [df_details_with_describe(df, name) for name, df in output_df.items()]
+            [format_df_details(df, name) for name, df in output_df.items()]
         )
     if not isinstance(output_df, pd.DataFrame):
         return str(output_df)
@@ -99,12 +99,31 @@ def format_df_details(output_df, name: str = None) -> str:
 
 def df_details_with_describe(output_df, name: str = None) -> str:
     name = name or "Dataframe"
+    if output_df is None:
+        return f"{name}: None"
     if output_df.size > 100:
         df_display = pd.concat([output_df.head(50), output_df.tail(50)], axis=0)
         df_string = f"{name} snapshot:\n{_df_to_string(df_display)}\n\nOutput of `df.describe()`:\n{_df_to_string(output_df.describe())}"
     else:
         df_string = f"{name}:\n{_df_to_string(output_df)}"
     return df_string
+
+
+def get_context_dict(context_str: str, context_dict: dict = None):
+    if context_dict is None:
+        context_dict = {}
+    context_dict["analysis"] = context_dict.get("analysis", context_str).strip()
+    context_dict["visualisation"] = context_dict.get(
+        "visualisation", context_str
+    ).strip()
+    context_dict["insights"] = context_dict.get("insights", context_str).strip()
+    context_dict["recommendations"] = context_dict.get(
+        "recommendations", context_str
+    ).strip()
+    context_dict["tasks"] = context_dict.get("tasks", context_str).strip()
+    for key, value in context_dict.items():
+        context_dict[key] = value + "\n\n" if value != "" else value.strip()
+    return context_dict
 
 
 def _df_to_string(output_df: pd.DataFrame) -> str:
@@ -218,9 +237,12 @@ def repeater(
     llm: LiteLLM,
     llm_messages: list,
     func: callable,
-    llm_kwargs: dict = {},
+    llm_kwargs: dict = None,
     **kwargs,
 ):
+    result = None
+    if llm_kwargs is None:
+        llm_kwargs = {}
     for i in range(max_retries):
         try:
             llm_response = llm.run(messages=llm_messages, **llm_kwargs)
@@ -230,6 +252,8 @@ def repeater(
             )
             continue
         try:
+            if "llm_response" in kwargs:
+                del kwargs["llm_response"]
             result = func(llm_response=llm_response.message.content, **kwargs)
             if result is not None:
                 logger.info(f"Result recieved: {result}")

@@ -1,15 +1,18 @@
 # standart-library imports
 import logging
+import warnings
 from enum import Enum
 from typing import Annotated, Union
 
 # third-party imports
-from pydantic import BaseModel, Field, Discriminator, Tag
+from pydantic import BaseModel, Field, Discriminator, Tag, ConfigDict
 
 # local imports
 from lyzr.base import LiteLLM
 from lyzr.base.errors import MissingValueError
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
+
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 class AnalysisTypes(str, Enum):
@@ -52,14 +55,17 @@ class FactoryBaseClass:
         model_kwargs = dict(seed=123, temperature=0.1, top_p=0.5)
         model_kwargs.update(llm_kwargs)
         self.llm.set_model_kwargs(model_kwargs=model_kwargs)
-        self.context = context.strip() + "\n\n" if context.strip() != "" else ""
+        self.context = context
         self.logger = logger
         self.vector_store = vector_store
-        self.params.max_retries = 3 if max_retries is None else max_retries
-        self.params.time_limit = 30 if time_limit is None else time_limit
-        self.params.auto_train = True if auto_train is None else auto_train
+        self.params = ParamsDict(
+            max_retries=3 if max_retries is None else max_retries,
+            time_limit=30 if time_limit is None else time_limit,
+            auto_train=True if auto_train is None else auto_train,
+        )
         self.code = None
         self.analysis_output = None
+        self.analysis_guide = None
         self.steps = None
         if self.vector_store is None:
             raise MissingValueError("vector_store")
@@ -120,11 +126,21 @@ DataConfig = Annotated[
 
 class VectorStoreConfig(BaseModel):
     path: str = Field(default=None, validation_alias="vector_store_path")
-    remake_store: bool = Field(default=True, validation_alias="remake")
+    remake_store: bool = Field(default=False, validation_alias="remake")
 
 
 class OutputTypes(str, Enum):
     visualisation = "visualisation"
+    visualisations = "visualisation"
+    vizualisation = "visualisation"
+    vizualisations = "visualisation"
+    visualization = "visualisation"
+    visualizations = "visualisation"
+    image = "visualisation"
+    images = "visualisation"
     insights = "insights"
+    insight = "insights"
     recommendations = "recommendations"
+    recommendation = "recommendations"
     tasks = "tasks"
+    task = "tasks"

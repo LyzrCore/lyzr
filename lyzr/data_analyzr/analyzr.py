@@ -1,5 +1,6 @@
 # standard library imports
 import os
+import json
 import time
 import warnings
 from typing import Union, Literal, Optional, Any
@@ -16,12 +17,14 @@ from lyzr.data_analyzr.utils import (
     format_df_details,
     format_df_details,
     get_info_dict_from_df_dict,
+    get_context_dict,
 )
 from lyzr.data_analyzr.models import (
     SupportedDBs,
     AnalysisTypes,
     VectorStoreConfig,
     DataConfig,
+    OutputTypes,
 )
 from lyzr.base.logger import set_logger
 from lyzr.base.prompt import LyzrPromptFactory
@@ -37,8 +40,6 @@ from pathlib import Path
 from lyzr.base.llms import LLM
 from pandas.errors import EmptyDataError
 
-warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
-
 
 class DataAnalyzr:
 
@@ -48,8 +49,8 @@ class DataAnalyzr:
         api_key: Optional[str] = None,
         max_retries: Optional[int] = 3,
         time_limit: Optional[int] = 30,
-        generator_model: Optional[LiteLLM] = None,
-        analysis_model: Optional[LiteLLM] = None,
+        generator_llm: Optional[LiteLLM] = None,
+        analysis_llm: Optional[LiteLLM] = None,
         user_input: Optional[str] = None,
         context: Optional[str] = None,
         log_level: Optional[
@@ -88,26 +89,26 @@ class DataAnalyzr:
         else:
             if analysis_type is None:
                 raise MissingValueError("`analysis_type` is a required parameter.")
-            if generator_model is None:
-                self.generator_model = LyzrLLMFactory.from_defaults(
+            if generator_llm is None:
+                self.generator_llm = LyzrLLMFactory.from_defaults(
                     model="gpt-4-1106-preview", api_key=api_key, seed=seed
                 )
-            elif isinstance(generator_model, LiteLLM):
-                self.generator_model = generator_model
-            self.generator_model.additional_kwargs["logger"] = self.logger
-            if analysis_model is None:
-                self.analysis_model = LyzrLLMFactory.from_defaults(
+            elif isinstance(generator_llm, LiteLLM):
+                self.generator_llm = generator_llm
+            self.generator_llm.additional_kwargs["logger"] = self.logger
+            if analysis_llm is None:
+                self.analysis_llm = LyzrLLMFactory.from_defaults(
                     model="gpt-3.5-turbo", api_key=api_key, seed=seed
                 )
-            elif isinstance(analysis_model, LiteLLM):
-                self.analysis_model = analysis_model
-            self.analysis_model.additional_kwargs["logger"] = self.logger
+            elif isinstance(analysis_llm, LiteLLM):
+                self.analysis_llm = analysis_llm
+            self.analysis_llm.additional_kwargs["logger"] = self.logger
 
             self.analysis_type = AnalysisTypes(analysis_type.lower().strip())
-            self.context = context or ""
+            self.context = "" if context is None else context.strip()
         (
             self.dataset_description_output,
-            self.ai_queries,
+            self.ai_queries_output,
             self.analysis_output,
             self.visualisation_output,
             self.insights_output,
@@ -133,12 +134,14 @@ class DataAnalyzr:
         seed: int,
     ):
         warnings.warn(
-            "The `df` parameter is deprecated and will be removed in a future version. Please use the `get_data` method to load data."
+            "The `df` parameter is deprecated and will be removed in a future version. Please use the `get_data` method to load data.",
+            category=DeprecationWarning,
         )
         for param in ["model", "model_type", "model_name", "seed"]:
             if locals()[param] is not None:
                 warnings.warn(
-                    f"The `{param}` parameter is deprecated and will be removed in a future version. Please use the `analysis_model` parameter to set the analysis model, and the `generator_model` parameter to set the generation model."
+                    f"The `{param}` parameter is deprecated and will be removed in a future version. Please use the `analysis_model` parameter to set the analysis model, and the `generator_model` parameter to set the generation model.",
+                    category=DeprecationWarning,
                 )
         if isinstance(model, LLM):
             api_key = model.api_key
@@ -152,14 +155,14 @@ class DataAnalyzr:
             model_kwargs = {}
             model_type = model_type or os.environ.get("MODEL_TYPE", None)
             model_name = model_name or os.environ.get("MODEL_NAME", None)
-        self.generator_model = LyzrLLMFactory.from_defaults(
+        self.generator_llm = LyzrLLMFactory.from_defaults(
             api_key=api_key,
             api_type=model_type,
             model=model_name or "gpt-4-1106-preview",
             seed=seed,
             **model_kwargs,
         )
-        self.analysis_model = LyzrLLMFactory.from_defaults(
+        self.analysis_llm = LyzrLLMFactory.from_defaults(
             api_key=api_key,
             api_type=model_type,
             model=model_name or "gpt-3.5-turbo",
@@ -241,37 +244,37 @@ class DataAnalyzr:
             return self.analysis_output
         if self.analysis_type is AnalysisTypes.sql:
             return self._txt_to_sql_analysis(
-                self.analysis_model, user_input, analysis_context
+                self.analysis_llm, user_input, analysis_context
             )
         if self.analysis_type is AnalysisTypes.ml:
             return self._ml_analysis(
-                self.analysis_model,
+                self.analysis_llm,
                 user_input,
                 analysis_context,
             )
 
     def _ml_analysis(
         self,
-        analysis_model,
+        analysis_llm,
         user_input: str,
         analysis_context: str = None,
     ):
         self.analyzer = PythonicAnalysisFactory(
-            model=analysis_model,
-            data_dict=self.df_dict,
-            data_info_dict=self.df_info_dict,
+            llm=analysis_llm,
+            df_dict=self.df_dict,
             logger=self.logger,
             context=analysis_context,
+            vector_store=self.vector_store,
         )
         self.analysis_output = self.analyzer.run_analysis(user_input)
-        self.analysis_guide = self.analyzer._analysis_guide
+        self.analysis_guide = self.analyzer.analysis_guide
         return self.analysis_output
 
     def _txt_to_sql_analysis(
-        self, analysis_model, user_input: str, analysis_context: str = None
+        self, analysis_llm, user_input: str, analysis_context: str = None
     ):
         self.analyzer = TxttoSQLFactory(
-            model=analysis_model,
+            llm=analysis_llm,
             db_connector=self.database_connector,
             logger=self.logger,
             context=analysis_context,
@@ -299,16 +302,17 @@ class DataAnalyzr:
             plot_path = Path(plot_path).as_posix()
         self.visualisation_output = None
 
-        plotter = PlotFactory(
-            llm=self.analysis_model,
+        self.plotter = PlotFactory(
+            llm=self.analysis_llm,
             logger=self.logger,
             context=plot_context,
             plot_path=plot_path,
-            df_dict=self.df_dict,
+            df_dict={**self.df_dict, "analysis_output": self.analysis_output},
             analyzer=self.analyzer,
             analysis_output=self.analysis_output,
+            vector_store=self.vector_store,
         )
-        self.visualisation_output = plotter.get_visualisation(
+        self.visualisation_output = self.plotter.get_visualisation(
             user_input, max_retries=self.max_retries, time_limit=self.time_limit
         )
         return self.visualisation_output
@@ -321,15 +325,21 @@ class DataAnalyzr:
     ) -> str:
         if "analysis_guide" not in self.__dict__:
             self.analysis_guide = ""
-        self.insights_output = self.generator_model.run(
+        self.insights_output = self.generator_llm.run(
             messages=[
                 LyzrPromptFactory(name="insights", prompt_type="system").get_message(
-                    context=insights_context.strip() + "\n\n", n_insights=n_insights
+                    context=insights_context.strip(), n_insights=n_insights
                 ),
                 LyzrPromptFactory(name="insights", prompt_type="user").get_message(
                     user_input=user_input,
                     analysis_guide=self.analysis_guide,
-                    analysis_output=format_df_details(self.analysis_output),
+                    analysis_output=format_df_details(
+                        output_df=(
+                            self.analysis_output
+                            if self.analysis_output is not None
+                            else self.df_dict
+                        )
+                    ),
                     date=time.strftime("%d %b %Y"),
                 ),
             ],
@@ -337,6 +347,7 @@ class DataAnalyzr:
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0,
+            logger=self.logger,
         ).message.content.strip()
         return self.insights_output
 
@@ -357,12 +368,14 @@ class DataAnalyzr:
             output_type = "json"
         if insights is not None:
             warnings.warn(
-                "The `insights` parameter is deprecated and will be removed in a future version. Please use the `insights_output` attribute to set the insights."
+                "The `insights` parameter is deprecated and will be removed in a future version. Please use the `insights_output` attribute to set the insights.",
+                category=DeprecationWarning,
             )
             self.insights_output = insights
         if schema is not None:
             warnings.warn(
-                "The `schema` parameter is deprecated and will be removed in a future version. Please use the `recs_format` parameter to set the recommendations format as a dictionary."
+                "The `schema` parameter is deprecated and will be removed in a future version. Please use the `recs_format` parameter to set the recommendations format as a dictionary.",
+                category=DeprecationWarning,
             )
             for elem in schema:
                 if isinstance(elem, dict):
@@ -371,9 +384,16 @@ class DataAnalyzr:
 
         system_message_sections = ["context"]
         system_message_dict = {}
+        df_details = format_df_details(
+            output_df=(
+                self.analysis_output
+                if self.analysis_output is not None
+                else self.df_dict
+            )
+        )
         user_message_dict = {
             "user_input": user_input,
-            "analysis_output": f"Analysis output:\n{format_df_details(self.analysis_output)}",
+            "analysis_output": f"Analysis output:\n{df_details}",
         }
         if recommendations_context is not None and recommendations_context != "":
             system_message_sections.append("external_context")
@@ -405,7 +425,7 @@ class DataAnalyzr:
         system_message_dict["n_recommendations"] = n_recommendations
 
         system_message_sections.append("closing")
-        self.recommendations_output = self.generator_model.run(
+        self.recommendations_output = self.generator_llm.run(
             messages=[
                 LyzrPromptFactory(
                     name="recommendations", prompt_type="system"
@@ -423,6 +443,7 @@ class DataAnalyzr:
             response_format=(
                 {"type": "json_object"} if output_type == "json" else {"type": "text"}
             ),
+            logger=self.logger,
         ).message.content
         return self.recommendations_output
 
@@ -437,18 +458,20 @@ class DataAnalyzr:
     ) -> str:
         if insights is not None:
             warnings.warn(
-                "The `insights` parameter is deprecated and will be removed in a future version. Please use the `insights_output` attribute to set the insights."
+                "The `insights` parameter is deprecated and will be removed in a future version. Please use the `insights_output` attribute to set the insights.",
+                category=DeprecationWarning,
             )
             self.insights_output = insights
         if recommendations is not None:
             warnings.warn(
-                "The `recommendations` parameter is deprecated and will be removed in a future version. Please use the `recommendations_output` attribute to set the recommendations."
+                "The `recommendations` parameter is deprecated and will be removed in a future version. Please use the `recommendations_output` attribute to set the recommendations.",
+                category=DeprecationWarning,
             )
             self.recommendations_output = recommendations
-        self.tasks_output = self.generator_model.run(
+        self.tasks_output = self.generator_llm.run(
             messages=[
                 LyzrPromptFactory(name="tasks", prompt_type="system").get_message(
-                    context=tasks_context.strip() + "\n\n", n_tasks=n_tasks
+                    context=tasks_context, n_tasks=n_tasks
                 ),
                 LyzrPromptFactory(name="tasks", prompt_type="user").get_message(
                     user_input=user_input,
@@ -460,14 +483,50 @@ class DataAnalyzr:
             top_p=0.3,
             frequency_penalty=0.7,
             presence_penalty=0.3,
+            logger=self.logger,
         ).message.content.strip()
         return self.tasks_output
+
+    def ai_queries(
+        self,
+        context: Optional[str] = None,
+    ) -> str:
+        context = self.context if context is None else context
+        context = context.strip() + "\n\n" if context.strip() != "" else ""
+        schema = {
+            "query1": "string",
+            "query2": "string",
+            "query3": "string",
+        }
+        messages = [
+            LyzrPromptFactory(name="ai_queries", prompt_type="system").get_message(
+                context=context,
+                schema=schema,
+            ),
+            LyzrPromptFactory(name="ai_queries", prompt_type="user").get_message(
+                df_details=format_df_details(self.df_dict)
+            ),
+        ]
+        ai_queries_output = self.generator_llm.run(
+            messages=messages,
+            temperature=1,
+            top_p=0.3,
+            frequency_penalty=0.7,
+            presence_penalty=0.3,
+            response_format={"type": "json_object"},
+        ).message.content
+        self.ai_queries_output = json.loads(ai_queries_output)
+
+        return self.ai_queries_output
 
     def ask(
         self,
         user_input: str = None,
         outputs: list[
-            Literal["visualisation", "insights", "recommendations", "tasks"]
+            OutputTypes.visualisation.value,
+            OutputTypes.insights.value,
+            OutputTypes.recommendations.value,
+            OutputTypes.tasks.value,
         ] = None,
         plot_path: str = None,
         rerun_analysis: bool = True,
@@ -481,61 +540,68 @@ class DataAnalyzr:
             use_insights = True
         if rerun_analysis is None:
             rerun_analysis = True
-        if outputs is None:
-            outputs = ["visualisation", "insights", "recommendations", "tasks"]
+        if outputs is None or len(outputs) == 0:
+            outputs = [
+                OutputTypes.visualisation,
+                OutputTypes.insights,
+                OutputTypes.recommendations,
+                OutputTypes.tasks,
+            ]
+        else:
+            outputs = [OutputTypes._member_map_[output] for output in outputs]
         if user_input is None and self.user_input is None:
             raise MissingValueError(
                 "`user_input` is a required parameter to generate outputs."
             )
         if user_input is None:
             user_input = self.user_input
-        context = context or {}
+        context = get_context_dict(context_str=self.context, context_dict=context)
         counts = counts or {}
 
         if self.analysis_output is None or rerun_analysis:
             self.analysis_output = self.analysis(
                 user_input=user_input,
-                analysis_context=context.get("analysis", self.context),
+                analysis_context=context.get("analysis"),
             )
 
-        if "visualisation" in outputs:
+        if OutputTypes.visualisation in outputs:
             self.visualisation_output = self.visualisation(
                 user_input=user_input,
-                plot_context=context.get("visualisation", self.context),
+                plot_context=context.get("visualisation"),
                 plot_path=plot_path,
             )
         else:
             self.visualisation_output = ""
 
         if (
-            "insights" in outputs
-            or "tasks" in outputs
-            or ("recommendations" in outputs and use_insights)
+            OutputTypes.insights in outputs
+            or OutputTypes.tasks in outputs
+            or (OutputTypes.recommendations in outputs and use_insights)
         ):
             self.insights_output = self.insights(
                 user_input=user_input,
-                insights_context=context.get("insights", self.context),
+                insights_context=context.get("insights"),
                 n_insights=counts.get("insights", 3),
             )
         else:
             self.insights_output = ""
 
-        if "recommendations" in outputs or "tasks" in outputs:
+        if OutputTypes.recommendations in outputs or OutputTypes.tasks in outputs:
             self.recommendations_output = self.recommendations(
                 user_input=user_input,
                 use_insights=use_insights,
                 recs_format=recs_format,
-                recommendations_context=context.get("recommendations", self.context),
+                recommendations_context=context.get("recommendations"),
                 n_recommendations=counts.get("recommendations", 3),
                 output_type=recs_output_type or "text",
             )
         else:
             self.recommendations_output = ""
 
-        if "tasks" in outputs:
+        if OutputTypes.tasks in outputs:
             self.tasks_output = self.tasks(
                 user_input=user_input,
-                tasks_context=context.get("tasks", self.context),
+                tasks_context=context.get("tasks"),
                 n_tasks=counts.get("tasks", 5),
             )
         else:
@@ -553,7 +619,8 @@ class DataAnalyzr:
 
     def analysis_insights(self, user_input: str) -> str:
         warnings.warn(
-            "The `analysis_insights` method is deprecated and will be removed in a future version. Use the `insights` method instead."
+            "The `analysis_insights` method is deprecated and will be removed in a future version. Use the `insights` method instead.",
+            category=DeprecationWarning,
         )
         self.analysis_output = self.analysis(
             user_input=user_input,
@@ -565,7 +632,8 @@ class DataAnalyzr:
         self, user_input: str, dir_path: Path = None
     ) -> list[Image.Image]:
         warnings.warn(
-            "The `visualizations` method is deprecated and will be removed in a future version. Use the `visualisation` method instead."
+            "The `visualizations` method is deprecated and will be removed in a future version. Use the `visualisation` method instead.",
+            category=DeprecationWarning,
         )
         return [
             Image.open(
@@ -580,12 +648,13 @@ class DataAnalyzr:
 
     def dataset_description(self, context: str = None) -> str:
         warnings.warn(
-            "The `dataset_description` method is deprecated and will be removed in a future version."
+            "The `dataset_description` method is deprecated and will be removed in a future version.",
+            category=DeprecationWarning,
         )
         context = context or self.context
         df_desc_dict = {}
         for name, df in self.df_dict.items():
-            df_desc_dict[name] = self.generator_model.run(
+            df_desc_dict[name] = self.generator_llm.run(
                 messages=[
                     LyzrPromptFactory(
                         name="dataset_description", prompt_type="system"
@@ -611,7 +680,8 @@ class DataAnalyzr:
         self, dataset_description: Optional[str] = None, context: Optional[str] = None
     ) -> str:
         warnings.warn(
-            "The `ai_queries_df` method is deprecated and will be removed in a future version."
+            "The `ai_queries_df` method is deprecated and will be removed in a future version. Use the `ai_queries` method instead.",
+            category=DeprecationWarning,
         )
         context = context or self.context
         self.dataset_description_output = (
@@ -620,10 +690,11 @@ class DataAnalyzr:
         if self.dataset_description_output is None:
             self.dataset_description_output = self.dataset_description(context)
 
-        self.ai_queries = self.generator_model.run(
+        self.ai_queries_output = self.generator_llm.run(
             messages=[
                 LyzrPromptFactory(name="ai_queries", prompt_type="system").get_message(
-                    context=context.strip() + "\n\n"
+                    use_sections=["context", "external_context", "task"],
+                    context=context.strip() + "\n\n",
                 ),
                 LyzrPromptFactory(name="ai_queries", prompt_type="user").get_message(
                     df_details=format_df_details(self.df_dict)
@@ -635,7 +706,7 @@ class DataAnalyzr:
             presence_penalty=0.3,
         ).message.content.strip()
 
-        return self.ai_queries
+        return self.ai_queries_output
 
     def analysis_recommendation(
         self,
@@ -643,7 +714,8 @@ class DataAnalyzr:
         number_of_recommendations: Optional[int] = 4,
     ):
         warnings.warn(
-            "The `analysis_recommendation` method is deprecated and will be removed in a future version."
+            "The `analysis_recommendation` method is deprecated and will be removed in a future version.",
+            category=DeprecationWarning,
         )
         formatted_user_input: str = (
             LyzrPromptFactory("format_user_input", "system")
@@ -652,7 +724,7 @@ class DataAnalyzr:
             if user_input is not None
             else ""
         )
-        recommendations = self.generator_model.run(
+        recommendations = self.generator_llm.run(
             messages=[
                 LyzrPromptFactory("analysis_recommendations", "system").get_message(
                     number_of_recommendations=number_of_recommendations,

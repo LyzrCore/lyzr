@@ -37,13 +37,13 @@ def _fix_plotpath(plot_path: str, output_format: str) -> str:
     return plot_path
 
 
-def set_analysis_attributes(analysis_output, analyzer, df_dict):
+def set_analysis_attribute(analysis_output, analyzer):
     if analyzer is None:
-        return False, None, None
-    if not isinstance(analysis_output, pd.DataFrame) or analysis_output.size < 2:
-        return True, analyzer, df_dict
+        return False
+    if (not isinstance(analysis_output, pd.DataFrame)) or (analysis_output.size < 2):
+        return True
     else:
-        return False, None, None
+        return False
 
 
 def flatten_list(lst: list):

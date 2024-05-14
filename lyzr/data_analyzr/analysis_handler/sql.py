@@ -60,7 +60,13 @@ class TxttoSQLFactory(FactoryBaseClass):
             },
             time_limit=kwargs.pop("time_limit", self.params.time_limit),
         )(self.extract_and_run_sql)
-        self.analysis_output, self.code = self.extract_and_run_sql()
+        analysis_response = self.extract_and_run_sql()
+        if isinstance(analysis_response, tuple) and len(analysis_response) == 2:
+            self.analysis_output, self.code = analysis_response
+        if analysis_response is None:
+            self.analysis_output = None
+            self.code = None
+        self.analysis_guide = self.code
         # Auto-training
         if (
             kwargs.pop("auto_train", self.params.auto_train)

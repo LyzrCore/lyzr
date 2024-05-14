@@ -8,6 +8,8 @@ class ConversionArgs(BaseModel):
         "convert_to_numeric",
         "convert_to_categorical",
         "convert_to_bool",
+        "standard_scaler",
+        "remove_nulls",
     ]
     columns: list[str] = Field(..., description="List of column names to be used.")
 
@@ -46,30 +48,51 @@ class MathOperationArgs(BaseModel):
         "subtract",
         "multiply",
         "divide",
-        "mean",
-        "median",
-        "mode",
-        "sum",
-        "cumsum",
-        "cumprod",
     ]
     columns: list[str] = Field(
-        ..., description="List of column names to perform the math operation on."
+        ..., description="List of column names to perform the operation on."
     )
-    result: str = Field(
-        default=None, description="Name of the column to store the result in."
-    )
+    result: str = Field(..., description="Name of the column to store the result in.")
 
 
-class GroupyArgs(BaseModel):
+class RowStatsArgs(BaseModel):
+    task: Literal[
+        "row_wise_mean",
+        "row_wise_median",
+        "row_wise_mode",
+        "row_wise_standard_deviation",
+        "row_wise_sum",
+        "row_wise_cumsum",
+        "row_wise_cumprod",
+    ]
+    columns: list[str] = Field(
+        ..., description="List of column names to perform the operation on."
+    )
+    result: str = Field(..., description="Name of the column to store the result in.")
+
+
+class ColumnStatsArgs(BaseModel):
+    task: Literal[
+        "column_wise_mean",
+        "column_wise_median",
+        "column_wise_mode",
+        "column_wise_standard_deviation",
+        "column_wise_sum",
+        "column_wise_cumsum",
+        "column_wise_cumprod",
+    ]
+    column: str = Field(
+        ..., description="Name of column on which to perform the operation."
+    )
+    result: str = Field(..., description="Name of the column to store the result in.")
+
+
+class GroupbyArgs(BaseModel):
     task: Literal["groupby"]
     columns: list[str] = Field(..., description="List of column names to group by.")
     agg: Union[str, list] = Field(..., description="Aggregate function to apply.")
     agg_columns: list[str] = Field(
-        default=None, description="Column names to apply the aggregate function on."
-    )
-    result: str = Field(
-        default=None, description="Name of the column to store the result in."
+        ..., description="Column names to apply the aggregate function on."
     )
 
 
@@ -150,7 +173,8 @@ ValidArgs = Annotated[
         TimePeriodArgs,
         SelectValuesArgs,
         MathOperationArgs,
-        GroupyArgs,
+        ColumnStatsArgs,
+        GroupbyArgs,
         SortValuesArgs,
         FilterArgs,
         CorrelationArgs,
@@ -167,10 +191,10 @@ class PythonicAnalysisStepDetails(BaseModel):
         ...,
         description="Arguments for the task.",
         examples=[
-            {"task": "name_of_task", "columns": ["col1"]},
-            {"task": "name_of_task", "columns": ["col1", "col2"], "result": "col3"},
+            {"task": "standard_scaler", "columns": ["col1"]},
+            {"task": "add", "columns": ["col1", "col2"], "result": "col3"},
             {
-                "task": "name_of_task",
+                "task": "groupby",
                 "columns": ["col1"],
                 "agg": "mean",
                 "agg_col": ["col2"],

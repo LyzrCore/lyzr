@@ -69,7 +69,14 @@ def get_db_details(
             df_dict=df_dict,
         )
     if vector_store_config.path is None:
-        vector_store_config.path = f"./vector_store/{deterministic_uuid()}"
+        uuid = deterministic_uuid(
+            [
+                db_scope.value,
+                db_type.value,
+                " ".join([f"{k}: {v}" for k, v in db_config.model_dump().items()]),
+            ]
+        )
+        vector_store_config.path = f"./vector_store/{uuid}"
     vector_store = ChromaDBVectorStore(
         path=vector_store_config.path,
         remake_store=vector_store_config.remake_store,

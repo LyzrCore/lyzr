@@ -11,6 +11,7 @@ PROMPT_TEXTS = {
             "context": "You are an expert python programmer with good working knowledge on Pandas, Scikit Learn libraries.\nYour task is to come up with 20 Natural Language Queries to analyse the provided dataset(s) which could be executed using pandas and/or scikit learn libraries.\n\n",
             "external_context": "{context}",
             "task": "You will be provided the dataset sample including the dataset sample and dataset description for you to understand the context.\n\nThe natural language queries should not explicitly mention the statistical model or chart type.\n\nYour queries fall in below categories:\nExploratory Analysis\nRegression Analysis\nCorrelation Analysis\nClustering Analysis\nTime Series Analysis",
+            "json_type": "You should provide 4 queries for each category. The queries should be simple and easy to understand. The queries should be in natural language and should not contain any code or technical jargon.\n\nYou should provide the queries in the following JSON format: {schema}",
         },
         "user": {"inputs": "{df_details}"},
     },

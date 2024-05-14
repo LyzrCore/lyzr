@@ -10,6 +10,8 @@ import pandas as pd
 from lyzr.base.errors import DependencyError
 from lyzr.data_analyzr.utils import get_columns_names
 
+pd.options.mode.chained_assignment = None
+
 
 class AnalysisExecutor:
     def __init__(self, df: pd.DataFrame, task: str, logger: logging.Logger):
@@ -17,14 +19,13 @@ class AnalysisExecutor:
         self.logger = logger
         self.func = getattr(self, task.lower())
 
-    def remove_nulls(
-        self, df: Union[pd.DataFrame, pd.Series], columns: list
-    ) -> Union[pd.DataFrame, pd.Series]:
-        return df.dropna(subset=columns, inplace=True)
+    def remove_nulls(self, columns: list) -> Union[pd.DataFrame, pd.Series]:
+        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
+        self.df = self.df.dropna(subset=columns).reset_index(drop=True)
 
     def convert_to_datetime(self, columns: list):
         columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df = self.remove_nulls(df=self.df, columns=columns)
+        self.remove_nulls(columns=columns)
         self.df.loc[:, columns] = self.df.loc[:, columns].apply(
             pd.to_datetime, errors="coerce"
         )
@@ -32,15 +33,21 @@ class AnalysisExecutor:
 
     def convert_to_numeric(self, columns: list):
         columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df = self.remove_nulls(df=self.df, columns=columns)
+        self.remove_nulls(columns=columns)
         self.df = self._remove_punctuation(columns=columns, df=self.df)
         self.df.loc[:, columns] = self.df.loc[:, columns].apply(pd.to_numeric)
         self.df = self.df.infer_objects()
 
     def convert_to_categorical(self, columns: list):
         columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df = self.remove_nulls(df=self.df, columns=columns)
+        self.remove_nulls(columns=columns)
         self.df.loc[:, columns] = self.df.loc[:, columns].astype("category")
+        self.df = self.df.infer_objects()
+
+    def convert_to_bool(self, columns: list):
+        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
+        self.remove_nulls(columns=columns)
+        self.df.loc[:, columns] = self.df.loc[:, columns].astype("bool")
         self.df = self.df.infer_objects()
 
     def _remove_punctuation(
@@ -76,7 +83,7 @@ class AnalysisExecutor:
 
     def ordinal_encode(self, columns: list):
         try:
-            from sklearn.preprocessing import OrdinalEncoder
+            from sklearn.preprocessing import OrdinalEncoder  # type: ignore
         except ImportError:
             raise DependencyError({"scikit-learn": "scikit-learn==1.4.0"})
 
@@ -91,9 +98,9 @@ class AnalysisExecutor:
             categories[col] = self.df[col].astype("category").cat.categories.to_list()
         self.df = encoded_df
 
-    def scale(self, columns):
+    def standard_scaler(self, columns):
         try:
-            from sklearn.preprocessing import StandardScaler
+            from sklearn.preprocessing import StandardScaler  # type: ignore
         except ImportError:
             raise DependencyError({"scikit-learn": "scikit-learn==1.4.0"})
 
@@ -103,46 +110,46 @@ class AnalysisExecutor:
         scaled_df.loc[:, columns] = scaler.fit_transform(self.df.loc[:, columns].values)
         self.df = scaled_df
 
-    def extract_time_period(
+    def extract_time_features(
         self,
         time_col: str,
-        period_to_extract: Literal[
+        feature_to_extract: Literal[
             "week", "month", "year", "day", "hour", "minute", "second", "weekday"
         ],
     ):
         time_col = get_columns_names(df_columns=self.df.columns, columns=[time_col])
         self.df.loc[:, time_col] = pd.to_datetime(self.df.loc[:, time_col])
-        if period_to_extract == "week":
+        if feature_to_extract == "week":
             self.df.loc[:, ["week"]] = (
                 pd.to_datetime(self.df.loc[:, time_col], errors="coerce")
                 .dt.isocalendar()
                 .week
             )
-        elif period_to_extract == "month":
+        elif feature_to_extract == "month":
             self.df.loc[:, ["month"]] = pd.to_datetime(
                 self.df.loc[:, time_col], errors="coerce"
             ).dt.month
-        elif period_to_extract == "year":
+        elif feature_to_extract == "year":
             self.df.loc[:, ["year"]] = pd.to_datetime(
                 self.df.loc[:, time_col], errors="coerce"
             ).dt.year
-        elif period_to_extract == "day":
+        elif feature_to_extract == "day":
             self.df.loc[:, ["day"]] = pd.to_datetime(
                 self.df.loc[:, time_col], errors="coerce"
             ).dt.day
-        elif period_to_extract == "hour":
+        elif feature_to_extract == "hour":
             self.df.loc[:, ["hour"]] = pd.to_datetime(
                 self.df.loc[:, time_col], errors="coerce"
             ).dt.hour
-        elif period_to_extract == "minute":
+        elif feature_to_extract == "minute":
             self.df.loc[:, ["minute"]] = pd.to_datetime(
                 self.df.loc[:, time_col], errors="coerce"
             ).dt.minute
-        elif period_to_extract == "second":
+        elif feature_to_extract == "second":
             self.df.loc[:, ["second"]] = pd.to_datetime(
                 self.df.loc[:, time_col], errors="coerce"
             ).dt.second
-        elif period_to_extract == "weekday":
+        elif feature_to_extract == "weekday":
             self.df.loc[:, ["weekday"]] = pd.to_datetime(
                 self.df.loc[:, time_col], errors="coerce"
             ).dt.weekday
@@ -262,48 +269,83 @@ class AnalysisExecutor:
                     extra={"function": "AnalysisUtil.filter"},
                 )
 
-    def mean(self, columns: list, result: Optional[str] = None):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        if result is not None:
-            self.df.loc[:, result] = self.df.loc[:, columns].mean()
-        else:
-            self.df.loc[:, columns].mean()
+    def column_wise_mean(self, column: str, result: str):
+        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
+        self.df.loc[:, result] = self.df.loc[:, column].mean(axis=0)
 
-    def sum(self, columns: list, result: Optional[str] = None):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        if result is not None:
-            self.df.loc[:, result] = self.df.loc[:, columns].sum(axis=1)
-        else:
-            self.df = self.df.loc[:, columns].sum()
+    def column_wise_median(self, column: str, result: str):
+        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
+        self.df.loc[:, result] = self.df.loc[:, column].median(axis=0)
 
-    def cumsum(self, columns: list, result: Optional[str] = None):
+    def column_wise_mode(self, column: str, result: str):
+        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
+        self.df.loc[:, result] = self.df.loc[:, column].mode(axis=0)
+
+    def column_wise_standard_deviation(self, column: str, result: str):
+        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
+        self.df.loc[:, result] = self.df.loc[:, column].std(axis=0)
+
+    def column_wise_sum(self, column: str, result: str):
+        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
+        self.df.loc[:, result] = self.df.loc[:, column].sum(axis=0)
+
+    def column_wise_cumsum(self, column: str, result: str):
+        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
+        self.df.loc[:, result] = self.df.loc[:, column].cumsum(axis=0)
+
+    def column_wise_cumprod(self, column: str, result: str):
+        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
+        self.df.loc[:, result] = self.df.loc[:, column].cumprod(axis=0)
+
+    def row_wise_mean(self, columns: list, result: str):
         columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        if result is not None:
-            self.df.loc[:, result] = self.df.loc[:, columns].cumsum()
-        else:
-            self.df = self.df.loc[:, columns].cumsum()
+        self.df.loc[:, result] = self.df.loc[:, columns].mean(axis=1)
+
+    def row_wise_median(self, columns: list, result: str):
+        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
+        self.df.loc[:, result] = self.df.loc[:, columns].median(axis=1)
+
+    def row_wise_mode(self, columns: list, result: str):
+        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
+        self.df.loc[:, result] = self.df.loc[:, columns].mode(axis=1)
+
+    def row_wise_standard_deviation(self, columns: list, result: str):
+        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
+        self.df.loc[:, result] = self.df.loc[:, columns].std(axis=1)
+
+    def row_wise_sum(self, columns: list, result: str):  # NOSONAR
+        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
+        self.df.loc[:, result] = self.df.loc[:, columns].sum(axis=1)
+
+    def row_wise_cumsum(self, columns: list, result: str):
+        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
+        self.df.loc[:, result] = self.df.loc[:, columns].cumsum(axis=1)
+
+    def row_wise_cumprod(self, columns: list, result: str):
+        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
+        self.df.loc[:, result] = self.df.loc[:, columns].cumprod(axis=1)
 
     def groupby(
         self,
         columns: list,
         agg: Union[str, list],
-        result: Optional[str] = None,
         agg_columns: Optional[list] = None,
     ):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        if len(columns) == 0:
+        if (columns is None and agg_columns is None) or (
+            len(columns) == 0 and len(agg_columns) == 0
+        ):
             self.logger.warning(
                 "No valid columns provided. Returning original dataframe.",
                 extra={"function": "AnalysisUtil.groupby"},
             )
-            self.df
-        if agg_columns is None:
-            agg_columns = self.df.columns.to_list()
+            return
+        if (columns is None) or (len(columns) == 0):
+            columns = agg_columns
+        elif (agg_columns is None) or (len(agg_columns) == 0):
+            agg_columns = columns
+        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
         agg_columns = get_columns_names(df_columns=self.df.columns, columns=agg_columns)
-        if result is not None:
-            self.df.loc[:, result] = self.df.groupby(columns)[agg_columns].agg(agg)
-        else:
-            self.df = self.df.groupby(columns)[agg_columns].agg(agg).reset_index()
+        self.df = self.df.groupby(columns)[agg_columns].agg(agg).reset_index()
 
     def correlation(
         self,
@@ -313,13 +355,13 @@ class AnalysisExecutor:
     ):
         columns = get_columns_names(df_columns=self.df.columns, columns=columns)
         if result is not None:
-            self.df.loc[:, result] = self.df.loc[:, columns].corr(method=method)
+            self.df.loc[:, [result]] = self.df.loc[:, columns].corr(method=method)
         else:
             self.df = self.df.loc[:, columns].corr(method=method)
 
     def regression(self, x: list, y: list):
         try:
-            from sklearn.linear_model import LinearRegression
+            from sklearn.linear_model import LinearRegression  # type: ignore
         except ImportError:
             raise DependencyError({"scikit-learn": "scikit-learn==1.4.0"})
 
@@ -336,7 +378,7 @@ class AnalysisExecutor:
         steps: Optional[int] = None,
     ):
         try:
-            import pmdarima as pm
+            import pmdarima as pm  # type: ignore
         except ImportError:
             raise DependencyError({"pmdarima": "pmdarima==2.0.4"})
 

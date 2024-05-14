@@ -91,6 +91,19 @@ class LiteLLM(LiteLLM):
             return self._stream_chat(messages=llama_messages, **kwargs)
         else:
             response = self._chat(messages=llama_messages, **kwargs)
+            logger.info(
+                f"LLM chat response received: {response.message.content}",
+                extra={
+                    "function": "chat_complete",
+                    "input_kwargs": {
+                        "messages": f"""{messages}""",
+                        "stream": stream,
+                        **kwargs,
+                    },
+                    "response": response.message.content,
+                },
+            )
+            self.additional_kwargs["logger"] = logger
             return ChatResponse(
                 message=ChatMessage(
                     role=response.message.role, content=response.message.content

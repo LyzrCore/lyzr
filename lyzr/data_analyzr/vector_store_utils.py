@@ -105,8 +105,12 @@ class ChromaDBVectorStore:
         documentation: str = None,
         plan: TrainingPlan = None,
     ) -> str:
-        if question and not sql:
-            raise ValidationError("Please also provide a SQL query")
+        if (
+            (question and not sql)
+            and (question and not plot_steps)
+            and (question and not analysis_steps)
+        ):
+            raise ValidationError("Please also provide an answer to the question.")
 
         if documentation:
             return self.add_documentation(documentation)
