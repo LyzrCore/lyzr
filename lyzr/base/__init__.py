@@ -1,4 +1,3 @@
-from lyzr.base.file_utils import read_file, describe_dataset
 from lyzr.base.llm import LyzrLLMFactory, LiteLLM
 from lyzr.base.llms import LLM, get_model
 from lyzr.base.service import LyzrService
@@ -13,8 +12,6 @@ __all__ = [
     "LyzrVectorStoreIndex",
     "LLM",
     "get_model",
-    "read_file",
-    "describe_dataset",
     "LyzrRetriever",
     "LiteLLM",
     "LyzrPromptFactory",

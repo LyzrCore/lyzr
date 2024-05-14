@@ -7,8 +7,8 @@ from lyzr.base.prompt import LyzrPromptFactory
 from lyzr.base.errors import MissingValueError
 from lyzr.data_analyzr.utils import iterate_llm_calls
 from lyzr.data_analyzr.models import FactoryBaseClass
-from lyzr.data_analyzr.output_handler import extract_sql
 from lyzr.data_analyzr.db_connector import DatabaseConnector
+from lyzr.data_analyzr.analysis_handler.utils import extract_sql
 from lyzr.base.base import ChatMessage, UserMessage, SystemMessage
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
 
@@ -77,7 +77,7 @@ class TxttoSQLFactory(FactoryBaseClass):
         return self.analysis_output
 
     def extract_and_run_sql(self, llm_response):
-        sql_query = extract_sql(llm_response)
+        sql_query = extract_sql(llm_response, logger=self.logger)
         analysis_output = self.connector.run_sql(sql_query)
         return (analysis_output, sql_query)
 

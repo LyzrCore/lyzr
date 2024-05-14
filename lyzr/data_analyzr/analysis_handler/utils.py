@@ -405,3 +405,18 @@ class AnalysisExecutor:
         for datetime in y_pred.index:
             data.loc[datetime, y_column] = y_pred[datetime]
         self.df = data
+
+
+def extract_sql(llm_response: str, logger: logging.Logger) -> str:
+    # If the llm_response contains a markdown code block, with or without the sql tag, extract the sql from it
+    sql = re.search(r"```sql\n(.*)```", llm_response, re.DOTALL)
+    if sql:
+        logger.info(f"Output from LLM: {llm_response} \nExtracted SQL: {sql.group(1)}")
+        return sql.group(1)
+
+    sql = re.search(r"```(.*)```", llm_response, re.DOTALL)
+    if sql:
+        logger.info(f"Output from LLM: {llm_response} \nExtracted SQL: {sql.group(1)}")
+        return sql.group(1)
+
+    return llm_response

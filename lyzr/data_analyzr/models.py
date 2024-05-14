@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Annotated, Union
 
 # third-party imports
-from pydantic import BaseModel, Field, Discriminator, Tag, ConfigDict
+from pydantic import BaseModel, Field, Discriminator, Tag
 
 # local imports
 from lyzr.base import LiteLLM

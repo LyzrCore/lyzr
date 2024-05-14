@@ -1,14 +1,14 @@
 # standard library imports
 import os
+import pickle
 import logging
-from typing import Union
+from typing import Union, Optional
 
 # third-party imports
 import pandas as pd
 from pydantic import BaseModel
 
 # local imports
-from lyzr.base.file_utils import read_file
 from lyzr.data_analyzr.db_connector import (
     DatabaseConnector,
     SQLiteConnector,
@@ -136,3 +136,41 @@ def get_list_of_kwargs(datasets: dict, kwargs: Union[dict, list]) -> list[dict]:
             for i in range(len(datasets)):
                 kwargs_list[i][key] = value
     return kwargs_list
+
+
+def read_file(
+    filepath: str, encoding: Optional[str] = "utf-8", **kwargs
+) -> pd.DataFrame:
+    if not os.path.exists(filepath):
+        raise ValueError(
+            f"File '{filepath}' not found. Please provide a valid filepath."
+        )
+    file_extension = filepath.split(".")[-1]
+    try:
+        if file_extension == "csv":
+            return pd.read_csv(filepath, encoding=encoding, **kwargs)
+        elif file_extension == "tsv":
+            return pd.read_csv(filepath, sep="\t", encoding=encoding, **kwargs)
+        elif file_extension == "txt":
+            with open(filepath, "r") as f:
+                return f.read(encoding=encoding, **kwargs)
+        elif file_extension == "json":
+            return pd.read_json(filepath, encoding=encoding, **kwargs)
+        elif file_extension in ["xlsx", "xls"]:
+            return pd.read_excel(filepath, encoding=encoding, **kwargs)
+        elif file_extension == "pkl":
+            with open(filepath, "rb") as f:
+                return pickle.load(f, encoding=encoding, **kwargs)
+        else:
+            raise ValueError(
+                f"File extension '{file_extension}' not supported. Please provide a csv or pkl file."
+            )
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            f"File '{filepath}' not found. Please provide a valid filepath."
+        )
+    except UnicodeDecodeError:
+        raise UnicodeDecodeError(
+            f"File '{filepath}' could not be decoded. Please provide a file with utf-8 encoding."
+            "If the file is not encoded in utf-8, please provide the encoding as a parameter: file_kwargs={'encoding': 'utf-8'}"
+        )

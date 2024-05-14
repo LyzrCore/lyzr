@@ -25,6 +25,7 @@ from lyzr.data_analyzr.models import (
     VectorStoreConfig,
     DataConfig,
     OutputTypes,
+    ParamsDict,
 )
 from lyzr.base.logger import set_logger
 from lyzr.base.prompt import LyzrPromptFactory
@@ -47,8 +48,8 @@ class DataAnalyzr:
         self,
         analysis_type: Optional[Literal["sql", "ml", "skip"]] = None,
         api_key: Optional[str] = None,
-        max_retries: Optional[int] = 3,
-        time_limit: Optional[int] = 30,
+        max_retries: Optional[int] = None,
+        time_limit: Optional[int] = None,
         generator_llm: Optional[LiteLLM] = None,
         analysis_llm: Optional[LiteLLM] = None,
         user_input: Optional[str] = None,
@@ -65,9 +66,11 @@ class DataAnalyzr:
         model_name: Optional[str] = None,
         seed: Optional[int] = 0,
     ):
-        self.max_retries = max_retries
-        self.time_limit = time_limit
-        self.user_input = user_input
+        self.params = ParamsDict(
+            max_retries=3 if max_retries is None else max_retries,
+            time_limit=30 if time_limit is None else time_limit,
+            auto_train=True,
+        )
         self.logger = set_logger(
             name="data_analyzr",
             logfilename=log_filename,
@@ -107,14 +110,19 @@ class DataAnalyzr:
             self.analysis_type = AnalysisTypes(analysis_type.lower().strip())
             self.context = "" if context is None else context.strip()
         (
+            self.steps,
+            self.code,
+            self.analysis_guide,
+            self.analysis_output,
+            self.vector_store,
             self.dataset_description_output,
             self.ai_queries_output,
-            self.analysis_output,
             self.visualisation_output,
             self.insights_output,
             self.recommendations_output,
             self.tasks_output,
-        ) = (None, None, None, None, None, None, None)
+        ) = (None,) * 11
+
         self.analysis = logging_decorator(logger=self.logger)(self.analysis)
         self.visualisation = logging_decorator(logger=self.logger)(self.visualisation)
         self.insights = logging_decorator(logger=self.logger)(self.insights)
@@ -266,7 +274,11 @@ class DataAnalyzr:
             context=analysis_context,
             vector_store=self.vector_store,
         )
-        self.analysis_output = self.analyzer.run_analysis(user_input)
+        self.analysis_output = self.analyzer.run_analysis(
+            user_input,
+            max_retries=self.params.max_retries,
+            time_limit=self.params.time_limit,
+        )
         self.analysis_guide = self.analyzer.analysis_guide
         return self.analysis_output
 
@@ -282,8 +294,8 @@ class DataAnalyzr:
         )
         self.analysis_output = self.analyzer.run_analysis(
             user_input,
-            max_retries=self.max_retries,
-            time_limit=self.time_limit,
+            max_retries=self.params.max_retries,
+            time_limit=self.params.time_limit,
         )
         self.analysis_guide = self.analyzer.code
         return self.analysis_output
@@ -313,7 +325,9 @@ class DataAnalyzr:
             vector_store=self.vector_store,
         )
         self.visualisation_output = self.plotter.get_visualisation(
-            user_input, max_retries=self.max_retries, time_limit=self.time_limit
+            user_input,
+            max_retries=self.params.max_retries,
+            time_limit=self.params.time_limit,
         )
         return self.visualisation_output
 
