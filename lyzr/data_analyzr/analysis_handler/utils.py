@@ -1,422 +1,159 @@
 # standard library imports
 import re
+import os
+import string
 import logging
-from typing import Any, Optional, Union, Literal
+from typing import Any, Sequence, Union
 
 # third-party imports
+import numpy as np
 import pandas as pd
 
 # local imports
-from lyzr.base.errors import DependencyError
-from lyzr.data_analyzr.utils import get_columns_names
-
-pd.options.mode.chained_assignment = None
+from lyzr.data_analyzr.utils import deterministic_uuid
 
 
-class AnalysisExecutor:
-    def __init__(self, df: pd.DataFrame, task: str, logger: logging.Logger):
-        self.df = df
-        self.logger = logger
-        self.func = getattr(self, task.lower())
+def extract_python_code(llm_response: str, logger: logging.Logger) -> str:
+    py_code = re.search(r"```python\n(.*?)```", llm_response, re.DOTALL)
+    if py_code:
+        logger.info(f"Extracted Python code:\n{py_code.group(1)}")
+        return py_code.group(1)
 
-    def remove_nulls(self, columns: list) -> Union[pd.DataFrame, pd.Series]:
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df = self.df.dropna(subset=columns).reset_index(drop=True)
+    py_code = re.search(r"```(.*?)```", llm_response, re.DOTALL)
+    if py_code:
+        logger.info(f"Extracted Python code:\n{py_code.group(1)}")
+        return py_code.group(1)
 
-    def convert_to_datetime(self, columns: list):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.remove_nulls(columns=columns)
-        self.df.loc[:, columns] = self.df.loc[:, columns].apply(
-            pd.to_datetime, errors="coerce"
-        )
-        self.df = self.df.infer_objects()
+    return llm_response
 
-    def convert_to_numeric(self, columns: list):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.remove_nulls(columns=columns)
-        self.df = self._remove_punctuation(columns=columns, df=self.df)
-        self.df.loc[:, columns] = self.df.loc[:, columns].apply(pd.to_numeric)
-        self.df = self.df.infer_objects()
 
-    def convert_to_categorical(self, columns: list):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.remove_nulls(columns=columns)
-        self.df.loc[:, columns] = self.df.loc[:, columns].astype("category")
-        self.df = self.df.infer_objects()
+def extract_df_names(code: str, df_names: list[str]) -> list[str]:
+    extracted_names = []
+    for name in df_names:
+        if name in code:
+            extracted_names.append(name)
+    return extracted_names
 
-    def convert_to_bool(self, columns: list):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.remove_nulls(columns=columns)
-        self.df.loc[:, columns] = self.df.loc[:, columns].astype("bool")
-        self.df = self.df.infer_objects()
 
-    def _remove_punctuation(
-        self, columns: list, df: Union[pd.DataFrame, pd.Series]
-    ) -> pd.DataFrame:
-        if isinstance(df, pd.Series):
-            df = df.to_frame()
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        for col in columns:
-            df.loc[:, col] = df.loc[:, col].apply(
-                AnalysisExecutor._remove_punctuation_from_string
+def remove_punctuation_from_string(value: str) -> str:
+    value = str(value).strip()
+    value = value.translate(str.maketrans("", "", string.punctuation))
+    value = value.replace(" ", "").lower()
+    return value
+
+
+def extract_column_names(code: str, df_columns: list[str]) -> list[str]:
+    cols_dict = {remove_punctuation_from_string(col): col for col in df_columns}
+    regex = [r"\"(.*?)\"", r"'(.*?)'"]
+    cols = []
+    for reg in regex:
+        for x in re.finditer(reg, code):
+            for a in x.groups():
+                if remove_punctuation_from_string(a).strip() != "":
+                    cols.append(remove_punctuation_from_string(a))
+    return list(set(cols_dict[c] for c in cols if c in cols_dict))
+
+
+def remove_print_and_plt_show(code: str) -> str:
+    codelines = code.split("\n")
+    return "\n".join(
+        [
+            line
+            for line in codelines
+            if not (
+                (line.strip().startswith("print("))
+                or (line.strip().startswith("plt.show()"))
+                or (line.strip().startswith("plt.savefig("))
             )
-        return df
-
-    @staticmethod
-    def _remove_punctuation_from_string(value):
-        if not isinstance(value, str):
-            return value
-        value = value.strip()
-        cleaned = re.sub(r"[^\d.]", "", str(value))
-        if cleaned.replace(".", "").isdigit():
-            return "-" + cleaned if value[0] == "-" else cleaned
-        else:
-            return value
-
-    def one_hot_encode(self, columns: list):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        encoded_df = pd.get_dummies(self.df, columns=columns, dtype=float)
-        categories = {}
-        for col in columns:
-            categories[col] = self.df[col].astype("category").cat.categories.to_list()
-        self.df = encoded_df
-
-    def ordinal_encode(self, columns: list):
-        try:
-            from sklearn.preprocessing import OrdinalEncoder  # type: ignore
-        except ImportError:
-            raise DependencyError({"scikit-learn": "scikit-learn==1.4.0"})
-
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        encoder = OrdinalEncoder()
-        encoded_df = self.df
-        encoded_df.loc[:, columns] = encoder.fit_transform(
-            self.df.loc[:, columns].values
-        )
-        categories = {}
-        for col in columns:
-            categories[col] = self.df[col].astype("category").cat.categories.to_list()
-        self.df = encoded_df
-
-    def standard_scaler(self, columns):
-        try:
-            from sklearn.preprocessing import StandardScaler  # type: ignore
-        except ImportError:
-            raise DependencyError({"scikit-learn": "scikit-learn==1.4.0"})
-
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        scaler = StandardScaler()
-        scaled_df = self.df
-        scaled_df.loc[:, columns] = scaler.fit_transform(self.df.loc[:, columns].values)
-        self.df = scaled_df
-
-    def extract_time_features(
-        self,
-        time_col: str,
-        feature_to_extract: Literal[
-            "week", "month", "year", "day", "hour", "minute", "second", "weekday"
-        ],
-    ):
-        time_col = get_columns_names(df_columns=self.df.columns, columns=[time_col])
-        self.df.loc[:, time_col] = pd.to_datetime(self.df.loc[:, time_col])
-        if feature_to_extract == "week":
-            self.df.loc[:, ["week"]] = (
-                pd.to_datetime(self.df.loc[:, time_col], errors="coerce")
-                .dt.isocalendar()
-                .week
-            )
-        elif feature_to_extract == "month":
-            self.df.loc[:, ["month"]] = pd.to_datetime(
-                self.df.loc[:, time_col], errors="coerce"
-            ).dt.month
-        elif feature_to_extract == "year":
-            self.df.loc[:, ["year"]] = pd.to_datetime(
-                self.df.loc[:, time_col], errors="coerce"
-            ).dt.year
-        elif feature_to_extract == "day":
-            self.df.loc[:, ["day"]] = pd.to_datetime(
-                self.df.loc[:, time_col], errors="coerce"
-            ).dt.day
-        elif feature_to_extract == "hour":
-            self.df.loc[:, ["hour"]] = pd.to_datetime(
-                self.df.loc[:, time_col], errors="coerce"
-            ).dt.hour
-        elif feature_to_extract == "minute":
-            self.df.loc[:, ["minute"]] = pd.to_datetime(
-                self.df.loc[:, time_col], errors="coerce"
-            ).dt.minute
-        elif feature_to_extract == "second":
-            self.df.loc[:, ["second"]] = pd.to_datetime(
-                self.df.loc[:, time_col], errors="coerce"
-            ).dt.second
-        elif feature_to_extract == "weekday":
-            self.df.loc[:, ["weekday"]] = pd.to_datetime(
-                self.df.loc[:, time_col], errors="coerce"
-            ).dt.weekday
-
-    def select_values(self, columns: list, indices: list):
-        if indices is not None:
-            self.df = self.df.loc[indices]
-        if columns is not None:
-            columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-            self.df = self.df.loc[:, columns]
-
-    def add(self, columns: list, result: str):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df.loc[:, result] = self.df.loc[:, columns].sum(axis=1)
-
-    def subtract(self, columns: list, result: str):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df.loc[:, result] = self.df[columns[0]] - self.df[columns[1]]
-
-    def multiply(self, columns: list, result: str):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df.loc[:, result] = self.df.loc[:, columns].prod(axis=1)
-
-    def divide(self, columns: list, result: str):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df = self.df[self.df[columns[1]] != 0]
-        self.df.loc[:, result] = self.df[columns[0]] / self.df[columns[1]]
-
-    def sortvalues(self, columns: list, ascending: Optional[Any] = True):
-        if isinstance(ascending, list) and len(ascending) == len(columns):
-            for col, asc in zip(columns, ascending):
-                self.df = self._sorter([col], asc)
-        elif isinstance(ascending, str) or isinstance(ascending, bool):
-            self.df = self._sorter(columns, ascending)
-        else:
-            self.logger.warning(
-                "Invalid value provided for ascending. Defaulting to True.",
-                extra={"function": "AnalysisUtil.sortvalues"},
-            )
-            self.df = self._sorter(columns, True)
-
-    def _sorter(self, columns: list, ascending: Any):
-        if isinstance(ascending, str):
-            if ascending.lower() == "true":
-                ascending = True
-            elif ascending.lower() == "false":
-                ascending = False
-            else:
-                self.logger.warning(
-                    f"Invalid value provided for ascending: {ascending}. Defaulting to True.",
-                    extra={"function": "AnalysisUtil._sorter"},
-                )
-                ascending = True
-        if not isinstance(ascending, bool):
-            self.logger.warning(
-                f"Invalid value type provided for ascending: {type(ascending)}. Defaulting to True.",
-                extra={"function": "AnalysisUtil._sorter"},
-            )
-            ascending = True
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df = self.df.sort_values(columns, ascending=ascending)
-
-    def filter(
-        self,
-        columns: list[str],
-        values: list[Any],
-        relations: list[
-            Literal[
-                "lessthan",
-                "greaterthan",
-                "lessthanorequalto",
-                "greaterthanorequalto",
-                "equalto",
-                "notequalto",
-                "startswith",
-                "endswith",
-                "contains",
-            ]
-        ],
-    ):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-
-        if len(columns) != len(values) and len(values) == 1:
-            values = values * len(columns)
-        if len(columns) != len(relations) and len(relations) == 1:
-            relations = relations * len(columns)
-        if len(columns) != len(values) or len(columns) != len(relations):
-            self.logger.warning(
-                "Invalid number of columns, values or relations provided. Returning original dataframe.",
-                extra={"function": "AnalysisUtil.filter"},
-            )
-            return
-
-        for i in range(len(columns)):
-            col, val, rel = columns[i], values[i], relations[i]
-            if rel == "startswith":
-                self.df = self.df[self.df[col].str.startswith(str(val))]
-            elif rel == "endswith":
-                self.df = self.df[self.df[col].str.endswith(str(val))]
-            elif rel == "contains":
-                self.df = self.df[self.df[col].str.contains(str(val))]
-            elif rel == "lessthan":
-                self.df = self.df[self.df[col] < val]
-            elif rel == "greaterthan":
-                self.df = self.df[self.df[col] > val]
-            elif rel == "lessthanorequalto":
-                self.df = self.df[self.df[col] <= val]
-            elif rel == "greaterthanorequalto":
-                self.df = self.df[self.df[col] >= val]
-            elif rel == "equalto":
-                self.df = self.df[self.df[col] == val]
-            elif rel == "notequalto":
-                self.df = self.df[self.df[col] != val]
-            else:
-                self.logger.warning(
-                    f"Invalid relation provided: {rel}. Skipping.",
-                    extra={"function": "AnalysisUtil.filter"},
-                )
-
-    def column_wise_mean(self, column: str, result: str):
-        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
-        self.df.loc[:, result] = self.df.loc[:, column].mean(axis=0)
-
-    def column_wise_median(self, column: str, result: str):
-        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
-        self.df.loc[:, result] = self.df.loc[:, column].median(axis=0)
-
-    def column_wise_mode(self, column: str, result: str):
-        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
-        self.df.loc[:, result] = self.df.loc[:, column].mode(axis=0)
-
-    def column_wise_standard_deviation(self, column: str, result: str):
-        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
-        self.df.loc[:, result] = self.df.loc[:, column].std(axis=0)
-
-    def column_wise_sum(self, column: str, result: str):
-        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
-        self.df.loc[:, result] = self.df.loc[:, column].sum(axis=0)
-
-    def column_wise_cumsum(self, column: str, result: str):
-        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
-        self.df.loc[:, result] = self.df.loc[:, column].cumsum(axis=0)
-
-    def column_wise_cumprod(self, column: str, result: str):
-        column = get_columns_names(df_columns=self.df.columns, columns=[column])[0]
-        self.df.loc[:, result] = self.df.loc[:, column].cumprod(axis=0)
-
-    def row_wise_mean(self, columns: list, result: str):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df.loc[:, result] = self.df.loc[:, columns].mean(axis=1)
-
-    def row_wise_median(self, columns: list, result: str):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df.loc[:, result] = self.df.loc[:, columns].median(axis=1)
-
-    def row_wise_mode(self, columns: list, result: str):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df.loc[:, result] = self.df.loc[:, columns].mode(axis=1)
-
-    def row_wise_standard_deviation(self, columns: list, result: str):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df.loc[:, result] = self.df.loc[:, columns].std(axis=1)
-
-    def row_wise_sum(self, columns: list, result: str):  # NOSONAR
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df.loc[:, result] = self.df.loc[:, columns].sum(axis=1)
-
-    def row_wise_cumsum(self, columns: list, result: str):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df.loc[:, result] = self.df.loc[:, columns].cumsum(axis=1)
-
-    def row_wise_cumprod(self, columns: list, result: str):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        self.df.loc[:, result] = self.df.loc[:, columns].cumprod(axis=1)
-
-    def groupby(
-        self,
-        columns: list,
-        agg: Union[str, list],
-        agg_columns: Optional[list] = None,
-    ):
-        if (columns is None and agg_columns is None) or (
-            len(columns) == 0 and len(agg_columns) == 0
-        ):
-            self.logger.warning(
-                "No valid columns provided. Returning original dataframe.",
-                extra={"function": "AnalysisUtil.groupby"},
-            )
-            return
-        if (columns is None) or (len(columns) == 0):
-            columns = agg_columns
-        elif (agg_columns is None) or (len(agg_columns) == 0):
-            agg_columns = columns
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        agg_columns = get_columns_names(df_columns=self.df.columns, columns=agg_columns)
-        self.df = self.df.groupby(columns)[agg_columns].agg(agg).reset_index()
-
-    def correlation(
-        self,
-        columns: list,
-        method: Optional[str] = "pearson",
-        result: Optional[str] = None,
-    ):
-        columns = get_columns_names(df_columns=self.df.columns, columns=columns)
-        if result is not None:
-            self.df.loc[:, [result]] = self.df.loc[:, columns].corr(method=method)
-        else:
-            self.df = self.df.loc[:, columns].corr(method=method)
-
-    def regression(self, x: list, y: list):
-        try:
-            from sklearn.linear_model import LinearRegression  # type: ignore
-        except ImportError:
-            raise DependencyError({"scikit-learn": "scikit-learn==1.4.0"})
-
-        x = get_columns_names(df_columns=self.df.columns, columns=x)
-        y = get_columns_names(df_columns=self.df.columns, columns=y)
-        model = LinearRegression()
-        self.df = model.fit(self.df.loc[:, x], self.df.loc[:, y])
-
-    def forecast(
-        self,
-        time_column: str,
-        y_column: str,
-        end: Optional[str] = None,
-        steps: Optional[int] = None,
-    ):
-        try:
-            import pmdarima as pm  # type: ignore
-        except ImportError:
-            raise DependencyError({"pmdarima": "pmdarima==2.0.4"})
-
-        time_column = get_columns_names(
-            df_columns=self.df.columns, columns=[time_column]
-        )[0]
-        y_column = get_columns_names(df_columns=self.df.columns, columns=[y_column])[0]
-        data = self.df.loc[
-            self.df[time_column].drop_duplicates().sort_values().index,
-            [time_column, y_column],
         ]
-        data = data.set_index([time_column])
-        data.index = pd.DatetimeIndex(pd.to_datetime(data.index))
-        model = pm.auto_arima(data[y_column])
-        if end is not None:
-            steps = len(
-                pd.date_range(
-                    start=data.index[-1],
-                    end=pd.to_datetime(end),
-                    freq=data.index.inferred_freq,
-                )
-            )
-        y_pred = model.predict(n_periods=steps)
-        for datetime in y_pred.index:
-            data.loc[datetime, y_column] = y_pred[datetime]
-        self.df = data
+    )
+
+
+def handle_analysis_output(
+    analysis_output: Any,
+) -> Union[str, pd.DataFrame, dict[str, pd.DataFrame], None]:
+    if analysis_output is None:
+        return None
+    if isinstance(analysis_output, pd.DataFrame):
+        return analysis_output
+    if isinstance(analysis_output, pd.Series):
+        return analysis_output.to_frame()
+    if isinstance(analysis_output, (np.number, int, float, str, bool, complex)):
+        return str(analysis_output)
+    if isinstance(analysis_output, (Sequence, set)):
+        return ", ".join([str(i) for i in analysis_output])
+    if isinstance(analysis_output, np.ndarray):
+        if analysis_output.ndim == 1:
+            return ", ".join([str(i) for i in analysis_output])
+        return pd.DataFrame(analysis_output)
+    if isinstance(analysis_output, dict):
+        try:
+            return pd.DataFrame(analysis_output)
+        except ValueError:
+            return handle_dict_output(analysis_output)[0]
+    return str(analysis_output)
+
+
+def handle_dict_output(
+    analysis_output: dict,
+) -> tuple[dict[str, Union[str, pd.DataFrame]], bool]:
+    only_string_values = True
+    output = {}
+    for key, value in analysis_output.items():
+        output_value = handle_analysis_output(value)
+        if isinstance(output_value, pd.DataFrame):
+            only_string_values = False
+        elif isinstance(output_value, dict):
+            output_value, output_string_values = handle_dict_output(output_value)
+            only_string_values = output_string_values and only_string_values
+        else:
+            output_value = str(output_value)
+        output[str(key)] = output_value
+    if only_string_values:
+        return (
+            ", ".join([f"{k}: {v}" for k, v in analysis_output.items()]),
+            only_string_values,
+        )
+    return output, only_string_values
 
 
 def extract_sql(llm_response: str, logger: logging.Logger) -> str:
     # If the llm_response contains a markdown code block, with or without the sql tag, extract the sql from it
-    sql = re.search(r"```sql\n(.*)```", llm_response, re.DOTALL)
+    sql = re.search(r"```sql\n(.*?)```", llm_response, re.DOTALL)
     if sql:
-        logger.info(f"Output from LLM: {llm_response} \nExtracted SQL: {sql.group(1)}")
+        logger.info(f"Extracted SQL:\n{sql.group(1)}")
         return sql.group(1)
 
-    sql = re.search(r"```(.*)```", llm_response, re.DOTALL)
+    sql = re.search(r"```(.*?)```", llm_response, re.DOTALL)
     if sql:
-        logger.info(f"Output from LLM: {llm_response} \nExtracted SQL: {sql.group(1)}")
+        logger.info(f"Extracted SQL:\n{sql.group(1)}")
         return sql.group(1)
 
     return llm_response
+
+
+def handle_plotpath(plot_path: str, output_format: str, logger: logging.Logger) -> str:
+    fixed_path = _fix_plotpath(plot_path, output_format)
+    try:
+        open(fixed_path, "w").close()
+        return fixed_path
+    except Exception:
+        random_path = os.path.join(
+            "generated_plots", f"{deterministic_uuid()}.{output_format}"
+        )
+        logger.warning(
+            f"Incorrect path for plot image provided: {plot_path}. Using {random_path} instead.",
+            extras={"function": "handle_plotpath"},
+        )
+        return handle_plotpath(random_path, output_format, logger)
+
+
+def _fix_plotpath(plot_path: str, output_format: str) -> str:
+    if os.path.isdir(plot_path):
+        plot_path = os.path.join(plot_path, f"plot.{output_format}")
+    if os.path.splitext(plot_path)[1] != f".{output_format}":
+        plot_path = os.path.splitext(plot_path)[0] + f".{output_format}"
+    dir_path = os.path.dirname(plot_path)
+    if dir_path.strip() != "":
+        os.makedirs(dir_path, exist_ok=True)
+    return plot_path

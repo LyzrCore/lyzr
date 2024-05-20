@@ -1,5 +1,6 @@
 from typing import Literal
-from lyzr.base.prompt_texts import PROMPT_TEXTS
+from lyzr.base.errors import PromptError
+from lyzr.base.prompt_texts import DATA_ANALYZR_PROMPTS
 from lyzr.base.base import ChatMessage, UserMessage, SystemMessage, MessageRole
 
 
@@ -12,7 +13,7 @@ class PromptRole:
 
     def __set__(self, instance, value):
         if value not in self.allowed_names:
-            raise ValueError(f"Prompt type must be one of {self.allowed_names}")
+            raise PromptError(f"Prompt type must be one of {self.allowed_names}")
         instance._name = MessageRole(value)
 
 
@@ -30,9 +31,9 @@ class LyzrPromptFactory:
         use_sections: list = None,
     ) -> None:
         self.prompt_type = prompt_type
-        if name.lower() not in PROMPT_TEXTS:
-            raise ValueError(f"Prompt name {name} not found.")
-        self.sections = PROMPT_TEXTS[name.lower()][self.prompt_type.value]
+        if name.lower() not in DATA_ANALYZR_PROMPTS:
+            raise PromptError(f"Prompt name {name} not found.")
+        self.sections = DATA_ANALYZR_PROMPTS[name.lower()][self.prompt_type.value]
         self.sections_to_use = use_sections or []
 
     def select_sections(self, use_sections: list = None) -> None:
@@ -56,4 +57,5 @@ class LyzrPromptFactory:
         message.content = ""
         for section in self.sections_to_use:
             message.content += self.sections[section].format(**kwargs)
+        message.content = message.content.strip()
         return message

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="lyzr",
-    version="0.1.38",
+    version="0.1.38",  # TODO
     author="lyzr",
     description="",
     long_description=open("README.md").read(),
@@ -28,10 +28,10 @@ setup(
         "pandas==2.0.2",
         "weaviate-client==3.25.3",
         "llmsherpa",
-        "matplotlib==3.8.2",
     ],
     extras_require={
         "data-analyzr": [
+            "matplotlib==3.8.2",
             "scikit-learn==1.4.0",
             "statsmodels==0.14.1",
             "chromadb==0.4.22",

@@ -41,3 +41,9 @@ class AnalysisFailedError(Exception):
     """Raise for failed analysis"""
 
     pass
+
+
+class PromptError(ValueError):
+    """Raise for prompt errors"""
+
+    pass

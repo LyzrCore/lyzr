@@ -1,5 +1,4 @@
 # standart-library imports
-import io
 import time
 import string
 import logging
@@ -13,8 +12,8 @@ import numpy as np
 import pandas as pd
 
 # local imports
-from lyzr.base import SystemMessage, AssistantMessage, LiteLLM
 from lyzr.base.errors import AnalysisFailedError
+from lyzr.base import SystemMessage, AssistantMessage, LiteLLM
 
 
 def deterministic_uuid(content: Union[str, bytes, list] = None):
@@ -28,58 +27,13 @@ def deterministic_uuid(content: Union[str, bytes, list] = None):
     return hash_object.hexdigest()
 
 
-def get_columns_names(
-    df_columns: pd.DataFrame.columns,
-    arguments: dict = {},
-    columns: list = None,
-) -> list:
-    if isinstance(df_columns, pd.MultiIndex):
-        df_columns = df_columns.levels[0]
-    if columns is None:
-        if "columns" not in arguments or not isinstance(arguments.get("columns"), list):
-            return df_columns.to_list()
-        columns = arguments.get("columns", [])
-    if len(columns) == 0:
-        return df_columns.to_list()
-    columns_dict = {remove_punctuation_from_string(col): col for col in df_columns}
-    column_names = []
-    for col in columns:
-        clean_col = remove_punctuation_from_string(col)
-        if clean_col in columns_dict:
-            column_names.append(columns_dict[clean_col])
-    return column_names
-
-
-def remove_punctuation_from_string(value: str) -> str:
-    value = str(value).strip()
-    value = value.translate(str.maketrans("", "", string.punctuation))
-    value = value.replace(" ", "").lower()
-    return value
-
-
-def get_info_dict_from_df_dict(df_dict: dict[pd.DataFrame]) -> dict[str]:
-    df_info_dict = {}
-    for name, df in df_dict.items():
-        if not isinstance(df, pd.DataFrame):
-            continue
-        buffer = io.StringIO()
-        df.info(buf=buffer)
-        df_info_dict[name] = buffer.getvalue()
-    return df_info_dict
-
-
-def format_df_with_info(df_dict: dict[pd.DataFrame]) -> str:
-    df_info_dict = get_info_dict_from_df_dict(df_dict)
-    str_output = []
-    for name, df in df_dict.items():
-        var_name = name.lower().replace(" ", "_")
-        if name in df_info_dict and isinstance(df, pd.DataFrame):
-            str_output.append(
-                f"Dataframe: `{var_name}`\nOutput of `{var_name}.head()`:\n{df.head()}\n\nOutput of `{var_name}.info()`:\n{df_info_dict[name]}\n"
-            )
-        else:
-            str_output.append(f"{name}:\n{df}\n")
-    return "\n".join(str_output)
+def translate_df_name(name: str) -> str:
+    return (
+        name.lower()
+        .strip()
+        .translate(str.maketrans(string.punctuation, "_" * len(string.punctuation)))
+        .strip("_")
+    )
 
 
 def format_df_details(output_df, name: str = None) -> str:
@@ -103,27 +57,10 @@ def df_details_with_describe(output_df, name: str = None) -> str:
         return f"{name}: None"
     if output_df.size > 100:
         df_display = pd.concat([output_df.head(50), output_df.tail(50)], axis=0)
-        df_string = f"{name} snapshot:\n{_df_to_string(df_display)}\n\nOutput of `df.describe()`:\n{_df_to_string(output_df.describe())}"
+        df_string = f"DataFrame name: {name}\nDataFrame snapshot:\n{_df_to_string(df_display)}\n\nDataFrame column details:\n{_df_to_string(output_df.describe())}"
     else:
         df_string = f"{name}:\n{_df_to_string(output_df)}"
     return df_string
-
-
-def get_context_dict(context_str: str, context_dict: dict = None):
-    if context_dict is None:
-        context_dict = {}
-    context_dict["analysis"] = context_dict.get("analysis", context_str).strip()
-    context_dict["visualisation"] = context_dict.get(
-        "visualisation", context_str
-    ).strip()
-    context_dict["insights"] = context_dict.get("insights", context_str).strip()
-    context_dict["recommendations"] = context_dict.get(
-        "recommendations", context_str
-    ).strip()
-    context_dict["tasks"] = context_dict.get("tasks", context_str).strip()
-    for key, value in context_dict.items():
-        context_dict[key] = value + "\n\n" if value != "" else value.strip()
-    return context_dict
 
 
 def _df_to_string(output_df: pd.DataFrame) -> str:
@@ -154,6 +91,23 @@ def _format_date(date: pd.Timestamp):
     return date.strftime("%d %b %Y %H:%M")
 
 
+def get_context_dict(context_str: str, context_dict: dict = None):
+    if context_dict is None:
+        context_dict = {}
+    context_dict["analysis"] = context_dict.get("analysis", context_str).strip()
+    context_dict["visualisation"] = context_dict.get(
+        "visualisation", context_str
+    ).strip()
+    context_dict["insights"] = context_dict.get("insights", context_str).strip()
+    context_dict["recommendations"] = context_dict.get(
+        "recommendations", context_str
+    ).strip()
+    context_dict["tasks"] = context_dict.get("tasks", context_str).strip()
+    for key, value in context_dict.items():
+        context_dict[key] = value + "\n\n" if value != "" else value.strip()
+    return context_dict
+
+
 def logging_decorator(logger: logging.Logger):
     def decorator_wrapper(func):
         @wraps(func)
@@ -162,7 +116,7 @@ def logging_decorator(logger: logging.Logger):
                 f"Starting {func.__name__}",
                 extra={
                     "function": func.__name__,
-                    "input_args": args,
+                    "input_args": None if len(args) == 0 else args,
                     "input_kwargs": kwargs,
                 },
             )
@@ -172,9 +126,9 @@ def logging_decorator(logger: logging.Logger):
                     f"Completed {func.__name__}",
                     extra={
                         "function": func.__name__,
-                        "input_args": args,
+                        "input_args": None if len(args) == 0 else args,
                         "input_kwargs": kwargs,
-                        "output": result,
+                        "response": result,
                     },
                 )
             except Exception as e:
@@ -194,20 +148,34 @@ def logging_decorator(logger: logging.Logger):
 
 
 def iterate_llm_calls(
-    max_retries=1,
+    max_retries: int,
     *,
     llm: LiteLLM,
     llm_messages: list,
     logger: logging.Logger,
     log_messages: dict = {},
-    time_limit: int = 30,
+    time_limit: int = None,
     llm_kwargs: dict = {},
 ):
     def decorator_wrapper(func):
         def wrapped_func(**kwargs):
             result = None
-            logger.info(log_messages.get("start", "Starting LLM analysis."))
             start_time = time.time()
+            logger.info(
+                log_messages.get("start", "Starting LLM analysis."),
+                extra={
+                    "function": func.__name__,
+                    "input_kwargs": {
+                        "max_retries": max_retries,
+                        "start_time": start_time,
+                        "time_limit": time_limit,
+                        "llm": llm,
+                        "llm_messages": llm_messages,
+                        "llm_kwargs": llm_kwargs,
+                        "kwargs": kwargs,
+                    },
+                },
+            )
             result = repeater(
                 max_retries=max_retries,
                 start_time=start_time,
@@ -220,7 +188,14 @@ def iterate_llm_calls(
                 **kwargs,
             )
             if result is None:
-                logger.info("Result is None")
+                logger.error(
+                    f"Result for {func.__name__} is None",
+                    extra={
+                        "function": func.__name__,
+                        "input_kwargs": kwargs,
+                        "response": result,
+                    },
+                )
             logger.info(log_messages.get("end", "LLM analysis completed."))
             return result
 
@@ -241,38 +216,71 @@ def repeater(
     **kwargs,
 ):
     result = None
-    if llm_kwargs is None:
-        llm_kwargs = {}
+    llm_kwargs = {} if llm_kwargs is None else llm_kwargs
+    max_retries = 1 if max_retries is None else max_retries
+    time_limit = 0 if time_limit is None else time_limit
     for i in range(max_retries):
-        try:
-            llm_response = llm.run(messages=llm_messages, **llm_kwargs)
-        except Exception as e:
-            logger.error(
-                f"Error with getting response from LLM in try {i + 1}. {e.__class__.__name__}: {e}. Traceback: {traceback.format_exc()}"
-            )
+        llm_response = llm.run(messages=llm_messages, **llm_kwargs)
+        if llm_response is None:
             continue
         try:
             if "llm_response" in kwargs:
                 del kwargs["llm_response"]
             result = func(llm_response=llm_response.message.content, **kwargs)
-            if result is not None:
-                logger.info(f"Result recieved: {result}")
-                break
+            if result is None:
+                logger.error(
+                    f"Result is None in iteration number {i + 1} of function {func.__name__}."
+                )
+                continue
+            logger.info(
+                f"LLM result recieved: {result}",
+                extra={
+                    "function": func.__name__,
+                    "input_kwargs": {
+                        "llm_response": llm_response.message.content,
+                        **kwargs,
+                    },
+                    "response": {
+                        "llm_response": llm_response.message.content,
+                        "result": result,
+                    },
+                },
+            )
+            break
         except Exception as e:
             logger.error(
-                f"Error in try {i + 1}. {e.__class__.__name__}: {e}. Traceback: {traceback.format_exc()}"
+                f"Error in iteration number {i + 1} of function {func.__name__}. {e.__class__.__name__}: {e}.",
+                extra={
+                    "function": func.__name__,
+                    "input_kwargs": {
+                        "llm_response": llm_response.message.content,
+                        **kwargs,
+                    },
+                    "response": result,
+                    "traceback": traceback.format_exc().splitlines(),
+                },
             )
             llm_messages.append(AssistantMessage(content=llm_response.message.content))
             llm_messages.append(
                 SystemMessage(
-                    content="Your response resulted in the following error:\n"
-                    f"{e.__class__.__name__}: {e}\n{traceback.format_exc()}\n\n"
-                    "Please correct your response to prevent this error."
+                    content=f"Your response resulted in the following error:\n{traceback.format_exc()}\n\n"
+                    "Read and understand the error CAREFULLY.\nUNDERSTAND how to FIX the error.\nCHANGE your code accordingly."
                 )
             )
         finally:
             if time.time() - start_time > time_limit and time_limit > 0:
+                logger.error(
+                    f"Timeout in iteration number {i + 1} of function {func.__name__} with time limit of {time_limit} seconds.",
+                    extra={
+                        "function": func.__name__,
+                        "input_kwargs": {
+                            "llm_response": llm_response.message.content,
+                            **kwargs,
+                        },
+                        "response": result,
+                    },
+                )
                 raise AnalysisFailedError(
-                    "The request could not be completed. Please wait a while and try again."
+                    f"Timeout in iteration number {i + 1} of function {func.__name__} with time limit of {time_limit} seconds."
                 )
     return result

@@ -1,5 +1,9 @@
 # standard library imports
 import logging
+from typing import Union
+
+# third-party imports
+import pandas as pd
 
 # local imports
 from lyzr.base.llm import LiteLLM
@@ -8,9 +12,9 @@ from lyzr.base.errors import MissingValueError
 from lyzr.data_analyzr.utils import iterate_llm_calls
 from lyzr.data_analyzr.models import FactoryBaseClass
 from lyzr.data_analyzr.db_connector import DatabaseConnector
-from lyzr.data_analyzr.analysis_handler.utils import extract_sql
 from lyzr.base.base import ChatMessage, UserMessage, SystemMessage
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
+from lyzr.data_analyzr.analysis_handler.utils import extract_sql, handle_analysis_output
 
 
 class TxttoSQLFactory(FactoryBaseClass):
@@ -32,8 +36,8 @@ class TxttoSQLFactory(FactoryBaseClass):
             logger=logger,
             context=context,
             vector_store=vector_store,
-            max_retries=max_retries,
-            time_limit=time_limit,
+            max_retries=3 if max_retries is None else max_retries,
+            time_limit=30 if time_limit is None else time_limit,
             auto_train=auto_train,
             llm_kwargs=llm_kwargs,
         )
@@ -43,7 +47,7 @@ class TxttoSQLFactory(FactoryBaseClass):
         self,
         user_input: str,
         **kwargs,  # max_tries=3, time_limit=30, auto_train=True, for_plotting=False
-    ):
+    ) -> Union[str, pd.DataFrame, dict[str, pd.DataFrame], None]:
         user_input = user_input.strip()
         if user_input is None or user_input == "":
             raise MissingValueError("A user input is required for analysis.")
@@ -60,23 +64,20 @@ class TxttoSQLFactory(FactoryBaseClass):
             },
             time_limit=kwargs.pop("time_limit", self.params.time_limit),
         )(self.extract_and_run_sql)
-        analysis_response = self.extract_and_run_sql()
-        if isinstance(analysis_response, tuple) and len(analysis_response) == 2:
-            self.analysis_output, self.code = analysis_response
-        if analysis_response is None:
-            self.analysis_output = None
-            self.code = None
-        self.analysis_guide = self.code
+        analysis_output, self.code = self.extract_and_run_sql()
+        self.output = handle_analysis_output(analysis_output)
+        self.guide = self.code
         # Auto-training
         if (
             kwargs.pop("auto_train", self.params.auto_train)
-            and self.analysis_output is not None
-            and len(self.analysis_output) > 0
+            and self.output is not None
+            and len(self.output) > 0
         ):
             self.add_training_data(user_input, self.code)
-        return self.analysis_output
+        return self.output
 
     def extract_and_run_sql(self, llm_response):
+        sql_query, analysis_output = None, None
         sql_query = extract_sql(llm_response, logger=self.logger)
         analysis_output = self.connector.run_sql(sql_query)
         return (analysis_output, sql_query)
@@ -133,8 +134,8 @@ class TxttoSQLFactory(FactoryBaseClass):
             system_message_dict["doc"] = ""
             for doc_item in doc_list:
                 system_message_dict["doc"] += f"{doc_item}\n"
-
-        system_message_sections.append("closing")
+        if len(question_sql_list) > 0:
+            system_message_sections.append("history")
         messages = [
             LyzrPromptFactory(
                 name="txt_to_sql",

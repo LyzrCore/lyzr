@@ -1,5 +1,6 @@
 # standard library imports
 import logging
+import traceback
 from typing import Union, Literal, Sequence
 
 # third-party imports
@@ -90,28 +91,44 @@ class LiteLLM(LiteLLM):
         if stream:
             return self._stream_chat(messages=llama_messages, **kwargs)
         else:
-            response = self._chat(messages=llama_messages, **kwargs)
-            logger.info(
-                f"LLM chat response received: {response.message.content}",
-                extra={
-                    "function": "chat_complete",
-                    "input_kwargs": {
-                        "messages": f"""{messages}""",
-                        "stream": stream,
-                        **kwargs,
+            try:
+                response = self._chat(messages=llama_messages, **kwargs)
+                logger.info(
+                    f"LLM chat response received: {response.message.content}",
+                    extra={
+                        "function": "chat_complete",
+                        "input_kwargs": {
+                            "messages": messages,
+                            "stream": stream,
+                            **kwargs,
+                        },
+                        "response": response.message.content,
                     },
-                    "response": response.message.content,
-                },
-            )
-            self.additional_kwargs["logger"] = logger
-            return ChatResponse(
-                message=ChatMessage(
-                    role=response.message.role, content=response.message.content
-                ),
-                raw=response.raw,
-                delta=response.delta,
-                additional_kwargs=response.additional_kwargs,
-            )
+                )
+                return ChatResponse(
+                    message=ChatMessage(
+                        role=response.message.role, content=response.message.content
+                    ),
+                    raw=response.raw,
+                    delta=response.delta,
+                    additional_kwargs=response.additional_kwargs,
+                )
+            except Exception as e:
+                logger.error(
+                    f"Error with getting response from LLM. {e.__class__.__name__}: {e}.",
+                    extra={
+                        "function": "chat_complete",
+                        "traceback": traceback.format_exc().splitlines(),
+                        "input_kwargs": {
+                            "messages": messages,
+                            "stream": stream,
+                            **kwargs,
+                        },
+                    },
+                )
+                return None
+            finally:
+                self.additional_kwargs["logger"] = logger
 
     def tts(
         self,

@@ -5,7 +5,6 @@ from lyzr.base.service import LyzrService
 from lyzr.base.vector_store import LyzrVectorStoreIndex
 from lyzr.formula_generator import FormulaGen
 from lyzr.data_analyzr import DataAnalyzr
-from lyzr.data_analyzr import DataConnector
 from lyzr.voicebot import VoiceBot
 from lyzr.qa.search_agent import SearchAgent
 from lyzr.summarizer import Summarizer
@@ -19,7 +18,6 @@ __all__ = [
     "ChatBot",
     "FormulaGen",
     "DataAnalyzr",
-    "DataConnector",
     "VoiceBot",
     "SearchAgent",
     "Summarizer",

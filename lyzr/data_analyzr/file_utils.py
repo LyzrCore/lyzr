@@ -1,5 +1,6 @@
 # standard library imports
 import os
+import io
 import pickle
 import logging
 from typing import Union, Optional
@@ -9,21 +10,27 @@ import pandas as pd
 from pydantic import BaseModel
 
 # local imports
+from lyzr.data_analyzr.db_models import (
+    SupportedDBs,
+    FilesConfig,
+    RedshiftConfig,
+    PostgresConfig,
+    SQLiteConfig,
+    VectorStoreConfig,
+)
 from lyzr.data_analyzr.db_connector import (
     DatabaseConnector,
     SQLiteConnector,
+    TrainingPlan,
+    TrainingPlanItem,
 )
-from lyzr.data_analyzr.utils import deterministic_uuid
+from lyzr.data_analyzr.models import AnalysisTypes
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
-from lyzr.data_analyzr.models import (
-    SupportedDBs,
-    VectorStoreConfig,
-    AnalysisTypes,
-)
+from lyzr.data_analyzr.utils import deterministic_uuid, translate_df_name
 
 
 def get_db_details(
-    db_scope: AnalysisTypes,
+    analysis_type: AnalysisTypes,
     db_type: SupportedDBs,
     db_config: BaseModel,
     vector_store_config: VectorStoreConfig,
@@ -32,33 +39,30 @@ def get_db_details(
     df_dict = None
     connector = None
     vector_store = None
+    training_plan = None
+    # Read given datasets
     if db_type is SupportedDBs.files:
-        logger.info(
-            "Reading the following datasets:\n"
-            + "\n".join(
-                [f"{df} from {db_config.datasets[df]}" for df in db_config.datasets]
-            )
-            + "\n"
-        )
+        assert isinstance(
+            db_config, FilesConfig
+        ), f"Expected FilesConfig, got {type(db_config)}"
         df_dict = get_dict_of_files(db_config.datasets, db_config.files_kwargs)
         logger.info(
-            "Datasets read successfully:\n"
+            "Following datasets read successfully:\n"
             + "\n".join([f"{df} with shape {df_dict[df].shape}" for df in df_dict])
             + "\n"
         )
     else:
-        connector = DatabaseConnector.get_connector(db_type.value)(
-            **db_config.model_dump()
-        )
-
-    if db_scope is AnalysisTypes.ml and df_dict is None:
+        assert isinstance(
+            db_config, (RedshiftConfig, PostgresConfig, SQLiteConfig)
+        ), f"Expected RedshiftConfig, PostgresConfig or SQLiteConfig, got {type(db_config)}"
+        connector = DatabaseConnector.get_connector(db_type)(**db_config.model_dump())
+    # Ensure correct format of data (pandas DataFrame or sql connector) depending on analysis_type
+    if analysis_type is AnalysisTypes.ml and df_dict is None:
         df_dict = connector.fetch_dataframes_dict()
+        connector = None
     if df_dict is not None:
-        df_keys = list(df_dict.keys())
-        for key in df_keys:
-            k_new = key.lower().replace(" ", "_")
-            df_dict[k_new] = df_dict.pop(key)
-    if db_scope is AnalysisTypes.sql and connector is None:
+        df_dict = {translate_df_name(k): v for k, v in df_dict.items()}
+    if analysis_type is AnalysisTypes.sql and connector is None:
         connector = SQLiteConnector()
         connector.create_database(
             db_path=(
@@ -68,10 +72,13 @@ def get_db_details(
             ),
             df_dict=df_dict,
         )
+        df_dict = None
+    # Create training plan and vector store
+    training_plan = make_training_plan(analysis_type, db_type, df_dict, connector)
     if vector_store_config.path is None:
         uuid = deterministic_uuid(
             [
-                db_scope.value,
+                analysis_type.value,
                 db_type.value,
                 " ".join([f"{k}: {v}" for k, v in db_config.model_dump().items()]),
             ]
@@ -80,27 +87,72 @@ def get_db_details(
     vector_store = ChromaDBVectorStore(
         path=vector_store_config.path,
         remake_store=vector_store_config.remake_store,
-        connector=connector,
+        training_plan=training_plan,
         logger=logger,
     )
     return connector, df_dict, vector_store
 
 
-def get_dict_of_files(datasets: dict, kwargs) -> dict[pd.DataFrame]:
+def make_training_plan(
+    db_scope: AnalysisTypes,
+    db_type: SupportedDBs,
+    df_dict: dict,
+    connector: DatabaseConnector,
+) -> TrainingPlan:
+    training_plan = None
+    if db_scope is AnalysisTypes.ml or (
+        (db_scope is AnalysisTypes.skip) and (db_type is SupportedDBs.files)
+    ):
+        training_plan = TrainingPlan([])
+        for name, df in df_dict.items():
+            assert isinstance(df, pd.DataFrame), f"Expected DataFrame, got {type(df)}"
+            doc = f"The following columns are in the {name} dataframe:\n\n"
+            buffer = io.StringIO()
+            df.info(buf=buffer)
+            doc += buffer.getvalue()
+            training_plan._plan.append(
+                TrainingPlanItem(
+                    item_type=TrainingPlanItem.ITEM_TYPE_IS,
+                    item_group=name,
+                    item_name=name,
+                    item_value=doc,
+                )
+            )
+            doc = f"Following are the first five rows of the {name} dataframe:\n\n"
+            doc += df.head().to_markdown()
+            training_plan._plan.append(
+                TrainingPlanItem(
+                    item_type=TrainingPlanItem.ITEM_TYPE_IS,
+                    item_group=name,
+                    item_name=name,
+                    item_value=doc,
+                )
+            )
+    elif db_scope is AnalysisTypes.sql or (
+        (db_scope is AnalysisTypes.skip) and (db_type is not SupportedDBs.files)
+    ):
+        training_plan = connector.get_default_training_plan()
+    assert isinstance(
+        training_plan, TrainingPlan
+    ), "Unable to create training plan from given data."
+    return training_plan
+
+
+def get_dict_of_files(datasets: dict, kwargs) -> dict[str, pd.DataFrame]:
     # kwargs = {"encoding": "utf-8", "sep": ["\t", ","]}
     kwargs_list = get_list_of_kwargs(datasets, kwargs)
     datasets_dict = {}
     for idx, (name, data) in enumerate(datasets.items()):
-        datas = read_file_or_folder(name, data, kwargs_list[idx])
+        read_datasets = read_file_or_folder(name, data, kwargs_list[idx])
         # print(type(datas), len(datas), datas.keys())
-        for d in datas:
-            datasets_dict.update({d: datas[d]})
+        for df_name in read_datasets:
+            datasets_dict.update({df_name: read_datasets[df_name]})
     return datasets_dict
 
 
 def read_file_or_folder(
     name: str, filepath: Union[str, pd.DataFrame], kwargs
-) -> dict[pd.DataFrame]:
+) -> dict[str, pd.DataFrame]:
     if isinstance(filepath, pd.DataFrame):
         return {name: filepath}
     if os.path.isfile(filepath):

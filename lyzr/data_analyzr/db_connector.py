@@ -16,7 +16,7 @@ from lyzr.base.errors import (
     ValidationError,
     DependencyError,
 )
-
+from lyzr.data_analyzr.db_models import SupportedDBs
 
 required_modules = {
     "redshift_connector": "redshift_connector==2.0.918",
@@ -44,6 +44,8 @@ class TrainingPlanItem:
     ITEM_TYPE_SQL = "sql"
     ITEM_TYPE_DDL = "ddl"
     ITEM_TYPE_IS = "is"
+    ITEM_TYPE_PY = "py"
+    ITEM_TYPE_PLOT = "plot"
 
 
 class TrainingPlan:
@@ -86,9 +88,6 @@ class DatabaseConnector:
     def fetch_dataframes_dict(self, **kwargs):
         raise NotImplementedError("You need to connect to a database first.")
 
-    def fetch_dataframes_info_dict(self, **kwargs):
-        raise NotImplementedError("You need to connect to a database first.")
-
     def run_sql(self, **kwargs):
         raise NotImplementedError("You need to connect to a database first.")
 
@@ -99,12 +98,12 @@ class DatabaseConnector:
         raise NotImplementedError("You need to connect to a database first.")
 
     @staticmethod
-    def get_connector(db_type):
-        if db_type == "redshift":
+    def get_connector(db_type: SupportedDBs):
+        if db_type is SupportedDBs.redshift:
             return RedshiftConnector
-        elif db_type == "postgres":
+        elif db_type is SupportedDBs.postgres:
             return PostgresConnector
-        elif db_type == "sqlite":
+        elif db_type is SupportedDBs.sqlite:
             return SQLiteConnector
         else:
             raise ValueError(f"Unsupported database type: {db_type}")
@@ -442,10 +441,13 @@ class SQLiteConnector(DatabaseConnector):
     def __init__(self, db_path: str = None):
         self.db_path = db_path or os.getenv("SQLITE_DB_PATH")
         self.db_path = SQLiteConnector._download_db(self.db_path)
+        if self.db_path is None:
+            raise ImproperlyConfigured(
+                "Please provide a valid path to the SQLite database file."
+            )
         self.conn = None
         try:
-            if self.db_path is not None:
-                self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
+            self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
         except sqlite3.Error as e:
             raise ValidationError(
                 f"Error occurred while connecting to SQLite database: {e}"
