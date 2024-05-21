@@ -70,7 +70,7 @@ def _df_to_string(output_df: pd.DataFrame) -> str:
         col
         for col in output_df.columns.tolist()
         if ("date" in col.lower() or "time" in col.lower())
-        and output_df[col].dtype != np.number
+        and isinstance(output_df[col].dtype, np.number)
     ]
     if "timestamp" in output_df.columns and "timestamp" not in datetimecols:
         datetimecols.append("timestamp")

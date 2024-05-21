@@ -64,7 +64,12 @@ class TxttoSQLFactory(FactoryBaseClass):
             },
             time_limit=kwargs.pop("time_limit", self.params.time_limit),
         )(self.extract_and_run_sql)
-        analysis_output, self.code = self.extract_and_run_sql()
+        output = self.extract_and_run_sql()
+        if output is None:
+            analysis_output = None
+            self.code = None
+        else:
+            analysis_output, self.code = output
         self.output = handle_analysis_output(analysis_output)
         self.guide = self.code
         # Auto-training
@@ -153,9 +158,9 @@ class TxttoSQLFactory(FactoryBaseClass):
         messages.append(UserMessage(content=user_input))
         return messages
 
-    def add_training_data(self, sql_query: str, user_input: str):
+    def add_training_data(self, user_input: str, sql_query: str):
         if user_input is None or user_input.strip() == "":
-            user_input = self._generate_question(self.code)
+            user_input = self._generate_question(sql_query)
         if sql_query is not None and sql_query.strip() != "":
             self.logger.info("Saving data for next training round\n")
-            self.vector_store.add_training_plan(question=user_input, sql=self.code)
+            self.vector_store.add_training_plan(question=user_input, sql=sql_query)

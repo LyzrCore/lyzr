@@ -157,3 +157,23 @@ def _fix_plotpath(plot_path: str, output_format: str) -> str:
     if dir_path.strip() != "":
         os.makedirs(dir_path, exist_ok=True)
     return plot_path
+
+
+def make_locals_string(locals_: dict) -> str:
+    locals_str = "{\n"
+    for name, value in locals_.items():
+        if isinstance(value, pd.DataFrame):
+            locals_str += f"{name} (DataFrame):\n{value.head(5).to_markdown()},\n"
+        elif isinstance(value, dict):
+            locals_str += f"{name} (dict): " + "{\n"
+            for df_name, df in value.items():
+                if isinstance(df, pd.DataFrame):
+                    locals_str += (
+                        f"{df_name} (DataFrame):\n{df.head(5).to_markdown()},\n"
+                    )
+                else:
+                    locals_str += f"{df_name} ({type(df).__name__}): {df},\n"
+            locals_str += "},\n"
+        else:
+            locals_str += f"{name} ({type(value).__name__}): {value},\n"
+    return locals_str + "}"

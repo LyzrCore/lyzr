@@ -16,6 +16,7 @@ from lyzr.base.base import UserMessage, SystemMessage
 from lyzr.data_analyzr.models import FactoryBaseClass
 from lyzr.data_analyzr.analysis_handler.utils import (
     extract_df_names,
+    make_locals_string,
     extract_python_code,
     extract_column_names,
     handle_analysis_output,
@@ -139,7 +140,7 @@ class PythonicAnalysisFactory(FactoryBaseClass):
         for name, df in self.df_dict.items():
             if name in df_names:
                 self.locals_[name] = df
-        system_message_dict["locals"] = self.locals_
+        system_message_dict["locals"] = make_locals_string(self.locals_)
         return system_message_sections, system_message_dict
 
     def execute_analysis_code(self, llm_response: str):

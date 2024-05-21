@@ -74,16 +74,18 @@ class DataAnalyzr:
             self.df_dict,
             self.database_connector,
             self.vector_store,
+            self.analyser,
             self.analysis_code,
             self.analysis_guide,
             self.analysis_output,
+            self.plotter,
             self.plot_code,
             self.plot_output,
             self.insights_output,
             self.recommendations_output,
             self.tasks_output,
             self.ai_queries_output,
-        ) = (None,) * 12
+        ) = (None,) * 14
 
         from lyzr.data_analyzr.utils import logging_decorator
 
@@ -204,6 +206,7 @@ class DataAnalyzr:
             auto_train=auto_train,
         )
         self.plot_output = self.plotter.get_visualisation(user_input=user_input)
+        self.plot_code = self.plotter.code
         return self.plot_output
 
     def insights(

@@ -21,11 +21,14 @@ from lyzr.data_analyzr.analysis_handler.utils import (
     extract_python_code,
     extract_sql,
     extract_df_names,
+    make_locals_string,
     extract_column_names,
     remove_print_and_plt_show,
 )
 from lyzr.data_analyzr.db_connector import DatabaseConnector
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
+
+default_plot_path = "generated_plots/plot.png"
 
 
 class PlotFactory(FactoryBaseClass):
@@ -58,6 +61,20 @@ class PlotFactory(FactoryBaseClass):
         self.connector = data_kwargs.get("connector", None)
         self.df_dict = data_kwargs.get("df_dict", None)
         self.analysis_output = data_kwargs.get("analysis_output", None)
+        if self.connector is None and self.df_dict is None:
+            raise ValueError(
+                "Either connector or df_dict must be provided to make a plot."
+            )
+        if self.connector is not None and self.df_dict is not None:
+            raise ValueError(
+                "Both connector and df_dict cannot be provided to make a plot."
+            )
+        if not isinstance(self.connector, DatabaseConnector) and not isinstance(
+            self.df_dict, dict
+        ):
+            raise ValueError(
+                "Either connector or df_dict must be a DatabaseConnector or a dictionary of pandas DataFrames."
+            )
 
     def get_visualisation(self, user_input: str, **kwargs) -> str:
         messages = self.get_prompt_messages(user_input)
@@ -78,27 +95,18 @@ class PlotFactory(FactoryBaseClass):
         )(self.execute_plotting_code)
         self.fig = self.execute_plotting_code()
         if self.fig is None:
+            plt.close("all")
             return ""
         if kwargs.pop("auto_train", self.params.auto_train):
             self.add_training_data(user_input, self.code)
         return self.save_plot_image()
 
     def get_prompt_messages(self, user_input: str) -> list:
-        system_message_sections = [
-            "context",
-            "external_context",
-            "task",
-            "closing",
-        ]
-        system_message_dict = {"context": self.context}
-        # add locals and docs
         assert isinstance(
             self.vector_store, ChromaDBVectorStore
         ), "Vector store must be a ChromaDBVectorStore object."
-        system_message_sections, system_message_dict = self.get_locals_and_docs(
-            system_message_sections=system_message_sections,
-            system_message_dict=system_message_dict,
-            user_input=user_input,
+        system_message_sections, system_message_dict = (
+            self._get_message_sections_and_dict(user_input=user_input)
         )
         # add question examples
         question_examples_list = self.vector_store.get_similar_plotting_code(user_input)
@@ -121,35 +129,71 @@ class PlotFactory(FactoryBaseClass):
         messages.append(UserMessage(content=user_input))
         return messages
 
-    def get_locals_and_docs(
-        self, system_message_sections: list, system_message_dict: dict, user_input: str
-    ) -> tuple[list, dict]:
-        self.locals_ = {
-            "pd": pd,
-            "np": np,
-            "plt": plt,
-            "sns": sns,
-        }
-        system_message_sections.append("locals")
+    def _get_message_sections_and_dict(self, user_input: str) -> tuple[list, dict]:
+        system_message_sections = ["context", "external_context"]
+        system_message_dict = {"context": self.context}
+        doc_str, df_names = self._get_message_docs(user_input)
+        self.locals_ = self._get_locals()
+        if self.connector is not None:
+            system_message_sections.append("sql_plot")
+            system_message_sections.append("locals")
+            self.locals_["conn"] = self.connector
+            if doc_str is not None:
+                system_message_sections.append("doc_addition_text")
+                system_message_dict["doc"] = doc_str
+                system_message_dict["db_type"] = "sql database"
+            system_message_sections, system_message_dict = self._add_sql_examples(
+                user_input=user_input,
+                system_message_sections=system_message_sections,
+                system_message_dict=system_message_dict,
+            )
+        else:
+            system_message_sections.append("python_plot")
+            system_message_sections.append("locals")
+            self.locals_.update(
+                {name: df for name, df in self.df_dict.items() if name in df_names}
+            )
+            if doc_str is not None:
+                system_message_sections.append("doc_addition_text")
+                system_message_dict["doc"] = doc_str
+                system_message_dict["db_type"] = "dataframe(s)"
+        system_message_dict["locals"] = make_locals_string(self.locals_)
+        return system_message_sections, system_message_dict
+
+    def _get_message_docs(self, user_input: str) -> tuple[str, set]:
         doc_list = self.vector_store.get_related_documentation(user_input)
         df_names = set()
         if len(doc_list) > 0:
-            system_message_sections.append("doc_addition_text")
             doc_str = ""
             for doc_item in doc_list:
                 doc_str += f"{doc_item}\n"
             for name in re.finditer(r"(\w+) dataframe", doc_str, re.IGNORECASE):
                 df_names.update(name.groups())
-            system_message_dict["doc"] = doc_str
-        if isinstance(self.df_dict, dict):
-            self.locals_.update(
-                {name: df for name, df in self.df_dict.items() if name in df_names}
+            return doc_str, df_names
+        return None, None
+
+    def _get_locals(self):
+        locals_ = {
+            "pd": pd,
+            "np": np,
+            "plt": plt,
+            "sns": sns,
+        }
+        if isinstance(self.analysis_output, pd.DataFrame):
+            locals_["analysis_output"] = self.analysis_output
+        elif isinstance(self.analysis_output, dict):
+            locals_.update(
+                {
+                    name: df
+                    for name, df in self.analysis_output.items()
+                    if isinstance(df, pd.DataFrame)
+                }
             )
-        else:
-            self.locals_["conn"] = self.connector
-        if self.analysis_output is not None:
-            self.locals_["analysis_output"] = self.analysis_output
-        system_message_dict["locals"] = self.locals_
+        return locals_
+
+    def _add_sql_examples(
+        self, user_input: str, system_message_sections: list, system_message_dict: dict
+    ):
         sql_examples = (
             self.vector_store.get_similar_question_sql(user_input)
             if isinstance(self.connector, DatabaseConnector)
@@ -157,12 +201,12 @@ class PlotFactory(FactoryBaseClass):
         )
         if len(sql_examples) > 0:
             system_message_sections.append("sql_examples_text")
-            sql_examples = ""
+            sql_examples_str = ""
             for example in sql_examples:
                 if example is not None:
                     if "question" in example and "sql" in example:
-                        sql_examples += f"Question: {example['question']}\nSQL: {example['sql']}\n\n"
-            system_message_dict["sql_examples"] = sql_examples
+                        sql_examples_str += f"Question: {example['question']}\nSQL:\n{example['sql']}\n\n"
+            system_message_dict["sql_examples"] = sql_examples_str
         return system_message_sections, system_message_dict
 
     def execute_plotting_code(self, llm_response: str):
@@ -194,7 +238,7 @@ class PlotFactory(FactoryBaseClass):
 
     def save_plot_image(self) -> str:
         plt.tight_layout()
-        if not PlotFactory._savefig(self.fig, self.plot_path):
+        if not PlotFactory._savefig(self.plot_path):
             self.logger.error(
                 f"Error saving plot at: {self.plot_path}. Plot not saved. Displaying plot instead. Access the plot using `.fig` attribute.",
                 extra={
@@ -212,15 +256,17 @@ class PlotFactory(FactoryBaseClass):
         return self.plot_path
 
     @staticmethod
-    def _savefig(fig: plt.Figure, path: str):
+    def _savefig(path: str):
         try:
             dir_path = os.path.dirname(path)
             if dir_path.strip() != "":
                 os.makedirs(dir_path, exist_ok=True)
-            fig.savefig(path)
+            plt.savefig(path)
             return True
         except Exception:
-            PlotFactory._savefig(fig, "generated_plots/plot.png")
+            if path == default_plot_path:
+                return False
+            PlotFactory._savefig(default_plot_path)
         return False
 
     def add_training_data(self, user_input: str, code: str):
