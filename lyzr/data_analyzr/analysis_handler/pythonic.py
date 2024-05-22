@@ -24,6 +24,8 @@ from lyzr.data_analyzr.analysis_handler.utils import (
 )
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
 
+pd.options.mode.chained_assignment = None
+
 
 class PythonicAnalysisFactory(FactoryBaseClass):
 

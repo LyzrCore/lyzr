@@ -28,6 +28,7 @@ from lyzr.data_analyzr.analysis_handler.utils import (
 from lyzr.data_analyzr.db_connector import DatabaseConnector
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
 
+pd.options.mode.chained_assignment = None
 default_plot_path = "generated_plots/plot.png"
 
 
