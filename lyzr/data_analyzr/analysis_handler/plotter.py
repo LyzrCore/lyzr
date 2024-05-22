@@ -2,6 +2,7 @@
 import os
 import re
 import logging
+import warnings
 import traceback
 
 # third-party imports
@@ -28,7 +29,6 @@ from lyzr.data_analyzr.analysis_handler.utils import (
 from lyzr.data_analyzr.db_connector import DatabaseConnector
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
 
-pd.options.mode.chained_assignment = None
 default_plot_path = "generated_plots/plot.png"
 
 
@@ -224,18 +224,11 @@ class PlotFactory(FactoryBaseClass):
                 ), "df_dict must must only contain pandas DataFrames"
                 columns = extract_column_names(code, self.df_dict[name])
                 self.locals_[name] = df.dropna(subset=columns)
+        pd.options.mode.chained_assignment = None
+        warnings.filterwarnings("ignore")
         exec(code, globals(), self.locals_)
         self.code = code
         return self.locals_["fig"]
-
-    def extract_and_run_sql(self, llm_response: str):
-        assert isinstance(
-            self.connector, DatabaseConnector
-        ), "Connector must be a DatabaseConnector object."
-        sql_query = None
-        sql_query = extract_sql(llm_response, logger=self.logger)
-        self.locals_["df"] = self.connector.run_sql(sql_query)
-        return sql_query
 
     def save_plot_image(self) -> str:
         plt.tight_layout()

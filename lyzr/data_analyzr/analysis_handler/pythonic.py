@@ -1,6 +1,7 @@
 # standard library imports
 import re
 import logging
+import warnings
 from typing import Union
 
 # third-party imports
@@ -25,6 +26,7 @@ from lyzr.data_analyzr.analysis_handler.utils import (
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
 
 pd.options.mode.chained_assignment = None
+warnings.filterwarnings("ignore")
 
 
 class PythonicAnalysisFactory(FactoryBaseClass):
@@ -95,7 +97,7 @@ class PythonicAnalysisFactory(FactoryBaseClass):
             system_message_sections.append("guide")
             system_message_dict["guide"] = self.guide
         # add locals and docs
-        system_message_sections, system_message_dict = self.get_locals_and_docs(
+        system_message_sections, system_message_dict = self._get_locals_and_docs(
             system_message_sections=system_message_sections,
             system_message_dict=system_message_dict,
             user_input=user_input,
@@ -121,7 +123,7 @@ class PythonicAnalysisFactory(FactoryBaseClass):
         messages.append(UserMessage(content=user_input))
         return messages
 
-    def get_locals_and_docs(
+    def _get_locals_and_docs(
         self, system_message_sections: list, system_message_dict: dict, user_input: str
     ) -> tuple[list, dict]:
         self.locals_ = {
@@ -146,7 +148,6 @@ class PythonicAnalysisFactory(FactoryBaseClass):
         return system_message_sections, system_message_dict
 
     def execute_analysis_code(self, llm_response: str):
-        assert isinstance(llm_response, str), "llm_response must be a string"
         code = remove_print_and_plt_show(
             extract_python_code(llm_response, logger=self.logger)
         )
@@ -158,8 +159,10 @@ class PythonicAnalysisFactory(FactoryBaseClass):
             ), "df_dict must must only contain pandas DataFrames"
             columns = extract_column_names(code, self.df_dict[name])
             self.locals_[name] = df.dropna(subset=columns)
-        self.code = code
+        pd.options.mode.chained_assignment = None
+        warnings.filterwarnings("ignore")
         exec(code, globals(), self.locals_)
+        self.code = code
         return self.locals_["result"]
 
     def add_training_data(self, user_input: str, code: str):
