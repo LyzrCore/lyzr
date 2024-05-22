@@ -9,6 +9,9 @@ import traceback
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import pmdarima as pm
+from scipy import stats
+import statsmodels.api as sm
 import matplotlib.pyplot as plt
 
 # local imports
@@ -20,7 +23,6 @@ from lyzr.data_analyzr.models import FactoryBaseClass
 from lyzr.data_analyzr.analysis_handler.utils import (
     handle_plotpath,
     extract_python_code,
-    extract_sql,
     extract_df_names,
     make_locals_string,
     extract_column_names,
@@ -52,7 +54,7 @@ class PlotFactory(FactoryBaseClass):
             logger=logger,
             context=context,
             vector_store=vector_store,
-            max_retries=3 if max_retries is None else max_retries,
+            max_retries=5 if max_retries is None else max_retries,
             time_limit=60 if time_limit is None else time_limit,
             auto_train=auto_train,
             llm_kwargs=llm_kwargs,
@@ -88,7 +90,7 @@ class PlotFactory(FactoryBaseClass):
                 "start": f"Generating plot for query: {user_input}",
                 "end": f"Finished generating plot for query: {user_input}",
             },
-            time_limit=60,
+            time_limit=kwargs.pop("time_limit", self.params.time_limit),
             llm_kwargs=dict(
                 max_tokens=2000,
                 top_p=1,
@@ -177,6 +179,9 @@ class PlotFactory(FactoryBaseClass):
         locals_ = {
             "pd": pd,
             "np": np,
+            "pm": pm,
+            "sm": sm,
+            "stats": stats,
             "plt": plt,
             "sns": sns,
         }

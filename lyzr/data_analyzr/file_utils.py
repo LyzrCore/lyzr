@@ -26,7 +26,7 @@ from lyzr.data_analyzr.db_connector import (
 )
 from lyzr.data_analyzr.models import AnalysisTypes
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
-from lyzr.data_analyzr.utils import deterministic_uuid, translate_df_name
+from lyzr.data_analyzr.utils import deterministic_uuid, translate_string_name
 
 
 def get_db_details(
@@ -61,7 +61,7 @@ def get_db_details(
         df_dict = connector.fetch_dataframes_dict()
         connector = None
     if df_dict is not None:
-        df_dict = {translate_df_name(k): v for k, v in df_dict.items()}
+        df_dict = {translate_string_name(k): v for k, v in df_dict.items()}
     if analysis_type is AnalysisTypes.sql and connector is None:
         connector = SQLiteConnector()
         connector.create_database(
@@ -139,14 +139,14 @@ def make_training_plan(
 
 
 def get_dict_of_files(datasets: dict, kwargs) -> dict[str, pd.DataFrame]:
-    # kwargs = {"encoding": "utf-8", "sep": ["\t", ","]}
     kwargs_list = get_list_of_kwargs(datasets, kwargs)
     datasets_dict = {}
     for idx, (name, data) in enumerate(datasets.items()):
         read_datasets = read_file_or_folder(name, data, kwargs_list[idx])
-        # print(type(datas), len(datas), datas.keys())
         for df_name in read_datasets:
-            datasets_dict.update({df_name: read_datasets[df_name]})
+            datasets_dict.update(
+                {translate_string_name(df_name): read_datasets[df_name]}
+            )
     return datasets_dict
 
 

@@ -27,7 +27,7 @@ def deterministic_uuid(content: Union[str, bytes, list] = None):
     return hash_object.hexdigest()
 
 
-def translate_df_name(name: str) -> str:
+def translate_string_name(name: str) -> str:
     return (
         name.lower()
         .strip()

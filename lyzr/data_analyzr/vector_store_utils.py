@@ -11,6 +11,7 @@ from lyzr.base.errors import (
 )
 
 vector_store_collections = ["sql", "ddl", "documentation", "python", "plot"]
+logging.getLogger("chromadb").setLevel(logging.CRITICAL)
 
 
 class ChromaDBVectorStore:

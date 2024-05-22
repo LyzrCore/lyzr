@@ -7,6 +7,9 @@ from typing import Union
 # third-party imports
 import numpy as np
 import pandas as pd
+import pmdarima as pm
+from scipy import stats
+import statsmodels.api as sm
 
 # local imports
 from lyzr.base.llm import LiteLLM
@@ -129,6 +132,9 @@ class PythonicAnalysisFactory(FactoryBaseClass):
         self.locals_ = {
             "pd": pd,
             "np": np,
+            "pm": pm,
+            "sm": sm,
+            "stats": stats,
         }
         system_message_sections.append("locals")
         doc_list = self.vector_store.get_related_documentation(user_input)

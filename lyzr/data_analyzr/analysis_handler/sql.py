@@ -1,5 +1,7 @@
 # standard library imports
+import re
 import logging
+import traceback
 from typing import Union
 
 # third-party imports
@@ -81,12 +83,6 @@ class TxttoSQLFactory(FactoryBaseClass):
             self.add_training_data(user_input, self.code)
         return self.output
 
-    def extract_and_run_sql(self, llm_response):
-        sql_query, analysis_output = None, None
-        sql_query = extract_sql(llm_response, logger=self.logger)
-        analysis_output = self.connector.run_sql(sql_query)
-        return (analysis_output, sql_query)
-
     def get_prompt_messages(
         self, user_input: str, for_plotting: bool = False
     ) -> list[ChatMessage]:
@@ -102,19 +98,6 @@ class TxttoSQLFactory(FactoryBaseClass):
         )
         # llm_response = self.llm.run(messages, **kwargs).message.content
         return messages
-
-    def _generate_question(self, sql: str, **kwargs) -> str:
-        kwargs["max_tokens"] = 500
-        output = self.llm.run(
-            messages=[
-                LyzrPromptFactory(
-                    name="sql_question_gen", prompt_type="system"
-                ).get_message(),
-                UserMessage(content=sql),
-            ],
-            **kwargs,
-        )
-        return output.message.content
 
     def _get_sql_prompt(
         self,
@@ -158,9 +141,52 @@ class TxttoSQLFactory(FactoryBaseClass):
         messages.append(UserMessage(content=user_input))
         return messages
 
+    def extract_and_run_sql(self, llm_response):
+        sql_query, analysis_output = None, None
+        sql_query = extract_sql(llm_response, logger=self.logger)
+        if "CREATE TABLE" in sql_query:
+            analysis_output = self._handle_create_table_sql(sql_query)
+        else:
+            analysis_output = self.connector.run_sql(sql_query)
+        return (analysis_output, sql_query)
+
+    def _handle_create_table_sql(self, sql_query: str):
+        match = re.search("SELECT", sql_query, re.IGNORECASE)
+        if match is not None:
+            sub_query = sql_query[match.start() :]
+        else:
+            sub_query = sql_query
+        try:
+            return self.connector.run_sql(sub_query)
+        except Exception as e:
+            self.logger.error(
+                f"Error running SQL sub-query.{e.__class__.__name__}: {e}",
+                extra={
+                    "input_kwargs": {
+                        "sql_query": sql_query,
+                        "sub_query": sub_query,
+                    },
+                    "traceback": traceback.format_exc().splitlines(),
+                },
+            )
+            return self.connector.run_sql(sql_query)
+
     def add_training_data(self, user_input: str, sql_query: str):
         if user_input is None or user_input.strip() == "":
             user_input = self._generate_question(sql_query)
         if sql_query is not None and sql_query.strip() != "":
             self.logger.info("Saving data for next training round\n")
             self.vector_store.add_training_plan(question=user_input, sql=sql_query)
+
+    def _generate_question(self, sql: str, **kwargs) -> str:
+        kwargs["max_tokens"] = 500
+        output = self.llm.run(
+            messages=[
+                LyzrPromptFactory(
+                    name="sql_question_gen", prompt_type="system"
+                ).get_message(),
+                UserMessage(content=sql),
+            ],
+            **kwargs,
+        )
+        return output.message.content
