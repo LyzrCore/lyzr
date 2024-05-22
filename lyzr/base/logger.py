@@ -75,9 +75,17 @@ class CustomFormatter(logging.Formatter):
         for field in arg_names:
             if field not in record.__dict__:
                 record.__dict__[field] = None
-            if field == "traceback" and isinstance(record.__dict__[field], str):
-                record.__dict__[field] = record.__dict__[field].splitlines()
-            record.__dict__[field] = str(record.__dict__[field]).replace("\n", "\\n")
+            record_value = record.__dict__[field]
+            if (
+                field == "traceback"
+                and isinstance(record_value, str)
+                and (
+                    (record_value.strip()[0] != "[")
+                    and (record_value.strip()[-1] != "]")
+                )
+            ):
+                record.__dict__[field] = record_value.splitlines()
+            record.__dict__[field] = str(record_value).replace("\n", "\\n")
         record.msg = record.getMessage().strip()
         record.msg = record.getMessage().replace("\n", "\\n")
         return super().format(record)
