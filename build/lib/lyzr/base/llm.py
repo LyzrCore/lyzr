@@ -4,6 +4,7 @@ import traceback
 from typing import Union, Literal, Sequence
 
 # third-party imports
+import litellm
 from llama_index.llms import LiteLLM
 from llama_index.llms.base import LLM
 from llama_index.llms.base import ChatMessage as LlamaChatMessage
@@ -13,6 +14,7 @@ from lyzr.base.base import ChatMessage, ChatResponse
 from lyzr.base.errors import ImproperUsageError
 
 DEFAULT_LLM = "gpt-4-0125-preview"
+litellm.drop_params = True
 
 
 class LyzrLLMFactory:

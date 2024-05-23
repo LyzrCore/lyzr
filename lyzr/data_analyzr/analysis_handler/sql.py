@@ -38,8 +38,8 @@ class TxttoSQLFactory(FactoryBaseClass):
             logger=logger,
             context=context,
             vector_store=vector_store,
-            max_retries=3 if max_retries is None else max_retries,
-            time_limit=30 if time_limit is None else time_limit,
+            max_retries=10 if max_retries is None else max_retries,
+            time_limit=45 if time_limit is None else time_limit,
             auto_train=auto_train,
             llm_kwargs=llm_kwargs,
         )

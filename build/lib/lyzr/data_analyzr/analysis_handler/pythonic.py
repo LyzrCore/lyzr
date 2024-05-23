@@ -51,7 +51,7 @@ class PythonicAnalysisFactory(FactoryBaseClass):
             logger=logger,
             context=context,
             vector_store=vector_store,
-            max_retries=3 if max_retries is None else max_retries,
+            max_retries=10 if max_retries is None else max_retries,
             time_limit=45 if time_limit is None else time_limit,
             auto_train=auto_train,
             llm_kwargs=llm_kwargs,
@@ -154,9 +154,8 @@ class PythonicAnalysisFactory(FactoryBaseClass):
         return system_message_sections, system_message_dict
 
     def execute_analysis_code(self, llm_response: str):
-        code = remove_print_and_plt_show(
-            extract_python_code(llm_response, logger=self.logger)
-        )
+        code = remove_print_and_plt_show(extract_python_code(llm_response))
+        self.logger.info(f"Extracted Python code:\n{code}")
         df_names = extract_df_names(code, list(self.df_dict.keys()))
         for name in df_names:
             df = self.df_dict[name]
@@ -167,7 +166,8 @@ class PythonicAnalysisFactory(FactoryBaseClass):
             self.locals_[name] = df.dropna(subset=columns)
         pd.options.mode.chained_assignment = None
         warnings.filterwarnings("ignore")
-        exec(code, globals(), self.locals_)
+        globals_ = self.locals_
+        exec(code, globals_, self.locals_)
         self.code = code
         return self.locals_["result"]
 

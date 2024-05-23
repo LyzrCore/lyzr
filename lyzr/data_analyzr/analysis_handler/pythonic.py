@@ -51,7 +51,7 @@ class PythonicAnalysisFactory(FactoryBaseClass):
             logger=logger,
             context=context,
             vector_store=vector_store,
-            max_retries=3 if max_retries is None else max_retries,
+            max_retries=10 if max_retries is None else max_retries,
             time_limit=45 if time_limit is None else time_limit,
             auto_train=auto_train,
             llm_kwargs=llm_kwargs,
@@ -166,7 +166,7 @@ class PythonicAnalysisFactory(FactoryBaseClass):
             self.locals_[name] = df.dropna(subset=columns)
         pd.options.mode.chained_assignment = None
         warnings.filterwarnings("ignore")
-        globals_ = self.locals_.copy()
+        globals_ = self.locals_
         exec(code, globals_, self.locals_)
         self.code = code
         return self.locals_["result"]

@@ -57,7 +57,7 @@ class DataAnalyzr:
             self.generator_llm = generator_llm
         else:
             self.generator_llm = LyzrLLMFactory.from_defaults(
-                model="gpt-4-1106-preview", api_key=api_key, seed=0
+                model="gpt-4o", api_key=api_key, seed=0
             )
 
         self.generator_llm.additional_kwargs["logger"] = self.logger
@@ -65,7 +65,7 @@ class DataAnalyzr:
             self.analysis_llm = analysis_llm
         else:
             self.analysis_llm = LyzrLLMFactory.from_defaults(
-                model="gpt-3.5-turbo", api_key=api_key, seed=0
+                model="gpt-4o", api_key=api_key, seed=0
             )
         self.analysis_llm.additional_kwargs["logger"] = self.logger
 

@@ -38,8 +38,8 @@ class TxttoSQLFactory(FactoryBaseClass):
             logger=logger,
             context=context,
             vector_store=vector_store,
-            max_retries=3 if max_retries is None else max_retries,
-            time_limit=30 if time_limit is None else time_limit,
+            max_retries=10 if max_retries is None else max_retries,
+            time_limit=45 if time_limit is None else time_limit,
             auto_train=auto_train,
             llm_kwargs=llm_kwargs,
         )
@@ -143,7 +143,8 @@ class TxttoSQLFactory(FactoryBaseClass):
 
     def extract_and_run_sql(self, llm_response):
         sql_query, analysis_output = None, None
-        sql_query = extract_sql(llm_response, logger=self.logger)
+        sql_query = extract_sql(llm_response)
+        self.logger.info(f"Extracted SQL query:\n{sql_query}")
         if "CREATE TABLE" in sql_query:
             analysis_output = self._handle_create_table_sql(sql_query)
         else:
