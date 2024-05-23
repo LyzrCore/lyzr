@@ -28,11 +28,9 @@ def deterministic_uuid(content: Union[str, bytes, list] = None):
 
 
 def translate_string_name(name: str) -> str:
+    punc = string.punctuation + " "
     return (
-        name.lower()
-        .strip()
-        .translate(str.maketrans(string.punctuation, "_" * len(string.punctuation)))
-        .strip("_")
+        name.lower().strip().translate(str.maketrans(punc, "_" * len(punc))).strip("_")
     )
 
 
@@ -233,7 +231,7 @@ def repeater(
                 )
                 continue
             logger.info(
-                f"LLM result recieved: {result}",
+                f"Result from {func.__name__} recieved: {result}",
                 extra={
                     "function": func.__name__,
                     "input_kwargs": {
@@ -268,7 +266,11 @@ def repeater(
                 )
             )
         finally:
-            if time.time() - start_time > time_limit and time_limit > 0:
+            if (
+                result is None
+                and time.time() - start_time > time_limit
+                and time_limit > 0
+            ):
                 logger.error(
                     f"Timeout in iteration number {i + 1} of function {func.__name__} with time limit of {time_limit} seconds.",
                     extra={

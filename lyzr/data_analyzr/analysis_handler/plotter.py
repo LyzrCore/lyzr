@@ -216,9 +216,8 @@ class PlotFactory(FactoryBaseClass):
         return system_message_sections, system_message_dict
 
     def execute_plotting_code(self, llm_response: str):
-        code = remove_print_and_plt_show(
-            extract_python_code(llm_response, logger=self.logger)
-        )
+        code = remove_print_and_plt_show(extract_python_code(llm_response))
+        self.logger.info(f"Extracted Python code:\n{code}")
         if not isinstance(self.connector, DatabaseConnector):
             assert isinstance(self.df_dict, dict), "df_dict must be a dictionary."
             df_names = extract_df_names(code, list(self.df_dict.keys()))

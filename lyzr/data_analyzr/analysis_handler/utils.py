@@ -13,17 +13,13 @@ import pandas as pd
 from lyzr.data_analyzr.utils import deterministic_uuid
 
 
-def extract_python_code(llm_response: str, logger: logging.Logger) -> str:
+def extract_python_code(llm_response: str) -> str:
     py_code = re.search(r"```python\n(.*?)```", llm_response, re.DOTALL)
     if py_code:
-        logger.info(f"Extracted Python code:\n{py_code.group(1)}")
         return py_code.group(1)
-
     py_code = re.search(r"```(.*?)```", llm_response, re.DOTALL)
     if py_code:
-        logger.info(f"Extracted Python code:\n{py_code.group(1)}")
         return py_code.group(1)
-
     return llm_response
 
 
@@ -64,9 +60,10 @@ def remove_print_and_plt_show(code: str) -> str:
                 (line.strip().startswith("print("))
                 or (line.strip().startswith("plt.show()"))
                 or (line.strip().startswith("plt.savefig("))
+                or (line.strip().startswith("fig.savefig("))
             )
         ]
-    )
+    ).strip()
 
 
 def handle_analysis_output(
@@ -117,18 +114,14 @@ def handle_dict_output(
     return output, only_string_values
 
 
-def extract_sql(llm_response: str, logger: logging.Logger) -> str:
+def extract_sql(llm_response: str) -> str:
     # If the llm_response contains a markdown code block, with or without the sql tag, extract the sql from it
     sql = re.search(r"```sql\n(.*?)```", llm_response, re.DOTALL)
     if sql:
-        logger.info(f"Extracted SQL:\n{sql.group(1)}")
         return sql.group(1)
-
     sql = re.search(r"```(.*?)```", llm_response, re.DOTALL)
     if sql:
-        logger.info(f"Extracted SQL:\n{sql.group(1)}")
         return sql.group(1)
-
     return llm_response
 
 

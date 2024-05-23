@@ -376,8 +376,10 @@ class DataAnalyzr:
         else:
             outputs = [OutputTypes._member_map_[output] for output in outputs]
         assert (
-            user_input is not None and user_input.strip() != ""
-        ), "user_input is a required parameter to generate outputs."
+            user_input is not None
+            and isinstance(user_input, str)
+            and user_input.strip() != ""
+        ), "user_input is a required string parameter to generate outputs."
         user_input = user_input.strip()
         from lyzr.data_analyzr.utils import get_context_dict
 
@@ -462,9 +464,9 @@ class DataAnalyzr:
         context = self.context if context is None else context
         context = context.strip() + "\n\n" if context.strip() != "" else ""
         schema = {
-            "query1": "string",
-            "query2": "string",
-            "query3": "string",
+            "type_of_analysis1": ["query1", "query2", "query3", "query4"],
+            "type_of_analysis2": ["query1", "query2", "query3", "query4"],
+            "type_of_analysis3": ["query1", "query2", "query3", "query4"],
         }
         messages = [
             LyzrPromptFactory(name="ai_queries", prompt_type="system").get_message(

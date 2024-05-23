@@ -143,7 +143,8 @@ class TxttoSQLFactory(FactoryBaseClass):
 
     def extract_and_run_sql(self, llm_response):
         sql_query, analysis_output = None, None
-        sql_query = extract_sql(llm_response, logger=self.logger)
+        sql_query = extract_sql(llm_response)
+        self.logger.info(f"Extracted SQL query:\n{sql_query}")
         if "CREATE TABLE" in sql_query:
             analysis_output = self._handle_create_table_sql(sql_query)
         else:

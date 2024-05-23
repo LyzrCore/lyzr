@@ -474,16 +474,13 @@ class SQLiteConnector(DatabaseConnector):
         parent = Path(self.db_path).parent
         os.makedirs(parent, exist_ok=True)
 
+        from lyzr.data_analyzr.utils import translate_string_name
+
         try:
             self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
             for name, df in df_dict.items():
                 df = df.rename(
-                    columns=dict(
-                        zip(
-                            df.columns,
-                            [col.replace(" ", "_").lower() for col in df.columns],
-                        )
-                    )
+                    columns={col: translate_string_name(col) for col in df.columns}
                 )
                 df.to_sql(name, con=self.conn, index=False, if_exists="replace")
             return self.conn

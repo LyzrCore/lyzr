@@ -56,23 +56,12 @@ def get_db_details(
             db_config, (RedshiftConfig, PostgresConfig, SQLiteConfig)
         ), f"Expected RedshiftConfig, PostgresConfig or SQLiteConfig, got {type(db_config)}"
         connector = DatabaseConnector.get_connector(db_type)(**db_config.model_dump())
-    # Ensure correct format of data (pandas DataFrame or sql connector) depending on analysis_type
-    if analysis_type is AnalysisTypes.ml and df_dict is None:
-        df_dict = connector.fetch_dataframes_dict()
-        connector = None
-    if df_dict is not None:
-        df_dict = {translate_string_name(k): v for k, v in df_dict.items()}
-    if analysis_type is AnalysisTypes.sql and connector is None:
-        connector = SQLiteConnector()
-        connector.create_database(
-            db_path=(
-                db_config.db_path
-                if db_config.db_path is not None
-                else f"./sqlite/{deterministic_uuid()}.db"
-            ),
-            df_dict=df_dict,
-        )
-        df_dict = None
+    df_dict, connector = ensure_correct_data_format(
+        analysis_type=analysis_type,
+        db_config=db_config,
+        df_dict=df_dict,
+        connector=connector,
+    )
     # Create training plan and vector store
     training_plan = make_training_plan(analysis_type, db_type, df_dict, connector)
     if vector_store_config.path is None:
@@ -91,6 +80,32 @@ def get_db_details(
         logger=logger,
     )
     return connector, df_dict, vector_store
+
+
+def ensure_correct_data_format(
+    analysis_type: AnalysisTypes,
+    db_config: Union[FilesConfig, RedshiftConfig, PostgresConfig, SQLiteConfig],
+    df_dict: Optional[dict[str, pd.DataFrame]] = None,
+    connector: Optional[DatabaseConnector] = None,
+):
+    # Ensure correct format of data (pandas DataFrame or sql connector) depending on analysis_type
+    if analysis_type is AnalysisTypes.ml and df_dict is None:
+        df_dict = connector.fetch_dataframes_dict()
+        connector = None
+    if df_dict is not None:
+        df_dict = {translate_string_name(k): v for k, v in df_dict.items()}
+    if analysis_type is AnalysisTypes.sql and connector is None:
+        connector = SQLiteConnector()
+        connector.create_database(
+            db_path=(
+                db_config.db_path
+                if db_config.db_path is not None
+                else f"./sqlite/{deterministic_uuid()}.db"
+            ),
+            df_dict=df_dict,
+        )
+        df_dict = None
+    return df_dict, connector
 
 
 def make_training_plan(
