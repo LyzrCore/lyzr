@@ -1,3 +1,7 @@
+"""
+Vector store for storing and querying database information, past queries and their associated code.
+"""
+
 # standard library imports
 import os
 import json
@@ -15,6 +19,69 @@ logging.getLogger("chromadb").setLevel(logging.CRITICAL)
 
 
 class ChromaDBVectorStore:
+    """
+    A class to manage a vector store using ChromaDB for storing and querying database
+    information, DDL statements, past queries and their associated code - SQL, pythonic and plotting code.
+
+    Attributes:
+        path (str): Path to the directory where the ChromaDB data is stored.
+        remake_store (bool): If True, the store will be recreated.
+        training_plan (TrainingPlan): Training plan to be added to the vector store.
+        logger (logging.Logger): Logger instance for logging information and errors.
+
+    Methods:
+        __init__(path, remake_store, training_plan, logger):
+            Initializes a ChromaDBVectorStore instance.
+
+        make_chroma_client(path):
+            Initializes the ChromaDB client and sets up collections for various data types.
+
+        remake_vector_store():
+            Remakes the vector store by iterating through existing collections and recreating them if necessary.
+
+        add_training_plan(question, sql, ddl, plot_code, python_code, documentation, plan):
+            Adds a training plan or individual components to the ChromaDBVectorStore.
+
+        remake_collection(collection_name):
+            Remakes a specified collection in the vector store.
+
+        _extract_documents(query_results):
+            Extracts and processes documents from the query results.
+
+        get_related_ddl(question):
+            Retrieves related DDL queries based on the question.
+
+        get_related_documentation(question):
+            Retrieves related documentation based on the question.
+
+        get_similar_question_sql(user_input):
+            Retrieves similar question-SQL query pairs based on user input.
+
+        get_similar_python_code(question):
+            Retrieves similar question-Python code pairs based on the question.
+
+        get_similar_plotting_code(question):
+            Retrieves similar question-plotting code pairs based on the question.
+
+        generate_embedding(data):
+            Generates an embedding for the given data.
+
+        add_question_sql(question, sql):
+            Adds a question and its corresponding SQL query to the collection.
+
+        add_ddl(ddl):
+            Adds a DDL statement to the collection.
+
+        add_documentation(documentation):
+            Adds documentation to the collection.
+
+        add_python_code(question, python_code):
+            Adds a question and its corresponding Python code to the collection.
+
+        add_plot_code(question, plot_code):
+            Adds a question and its corresponding plotting code to the collection.
+    """
+
     from lyzr.data_analyzr.utils import deterministic_uuid
     from lyzr.data_analyzr.db_connector import (
         TrainingPlanItem,
@@ -33,6 +100,41 @@ class ChromaDBVectorStore:
         training_plan: TrainingPlan = None,  # Training plan
         logger: logging.Logger = None,
     ):
+        """
+        Initialize a ChromaDBVectorStore at the specified path.
+
+        Args:
+            path (str, optional): Path to the directory where the ChromaDB data is stored. If not provided,
+                a MissingValueError is raised.
+            remake_store (bool, optional): If True, the store will be recreated. Defaults to False.
+            training_plan (TrainingPlan, optional): Training plan to be added to the vector store. Defaults to None.
+            logger (logging.Logger, optional): Logger instance for logging information and errors. Defaults to None.
+
+        Raises:
+            MissingValueError: If the 'path' argument is not provided.
+
+        Procedure:
+        - If the specified path exists:
+            - Initializes the ChromaDB client with the given path.
+            - If remake_store is True, attempts to recreate the vector store and logs the process.
+            - If a training_plan is provided, it is added to the vector store.
+        - If the specified path does not exist:
+            - Creates the directory at the specified path.
+            - Initializes the ChromaDB client with the given path.
+            - If a training_plan is provided, it is added to the vector store.
+
+        Example:
+            vector_store = ChromaDBVectorStore(
+                path="path/to/vector_store",
+                remake_store=False,
+                training_plan=training_plan,
+                logger=logger,
+            )
+            docs = vector_store.get_related_documentation(question)
+            example_sql = vector_store.get_similar_question_sql(question)
+            example_python_code = vector_store.get_similar_python_code(question)
+            example_plot_code = vector_store.get_similar_plotting_code(question)
+        """
         if path is None:
             raise MissingValueError("path")
 
@@ -54,6 +156,15 @@ class ChromaDBVectorStore:
                 self.add_training_plan(plan=training_plan)
 
     def make_chroma_client(self, path: str):
+        """
+        Initializes the ChromaDB client and sets up collections for various data types.
+
+        Args:
+            path (str): The file path where the ChromaDB client will store its data.
+
+        Raises:
+            DependencyError: If the required ChromaDB module is not installed.
+        """
         try:
             import chromadb
             from chromadb.config import Settings
@@ -87,6 +198,14 @@ class ChromaDBVectorStore:
         )
 
     def remake_vector_store(self):
+        """
+        Remakes the vector store by iterating through existing collections and
+        recreating them if necessary. Also ensures that all required collections
+        are present in the vector store.
+
+        Returns:
+            bool: True if all collections were successfully remade, False otherwise.
+        """
         remake = True
         all_collections = vector_store_collections
         existing_collections = self.chroma_client.list_collections()
@@ -112,6 +231,24 @@ class ChromaDBVectorStore:
         documentation: str = None,
         plan: TrainingPlan = None,
     ) -> str:
+        """
+        Add a training plan or individual components to the ChromaDBVectorStore.
+
+        Args:
+            question (str, optional): The question to be added.
+            sql (str, optional): The SQL query associated with the question.
+            ddl (str, optional): The Data Definition Language (DDL) statement to be added.
+            plot_code (str, optional): The code for generating a plot associated with the question.
+            python_code (str, optional): The Python code associated with the question.
+            documentation (str, optional): The documentation to be added.
+            plan (TrainingPlan, optional): A TrainingPlan object containing multiple items to be added.
+
+        Returns:
+            str: A confirmation message or the result of adding the documentation.
+
+        Raises:
+            ValidationError: If a question is provided without an associated answer (SQL, plot code, or Python code).
+        """
         if (
             (question and not sql)
             and (question and not plot_code)
@@ -161,6 +298,19 @@ class ChromaDBVectorStore:
                     )
 
     def remake_collection(self, collection_name: str) -> bool:
+        """
+        Remakes a specified collection in the vector store.
+
+        Args:
+            collection_name (str): The name of the collection to be remade.
+
+        Returns:
+            bool: True if the collection was found and remade, False otherwise.
+
+        Procedure:
+            - Deletes the existing collection with the given name.
+            - Recreates it using the embedding function.
+        """
         for collection in vector_store_collections:
             if collection_name == collection:
                 self.chroma_client.delete_collection(name=collection)
@@ -173,6 +323,17 @@ class ChromaDBVectorStore:
         return False
 
     def _extract_documents(self, query_results) -> list:
+        """
+        Extracts and processes documents from the query results.
+
+        Args:
+            query_results (dict): The results obtained from a query, which may contain a "documents" key.
+
+        Returns:
+            list: A list of documents extracted from the query results.
+                - If the "documents" key is not present or the query results are None, an empty list is returned.
+                - If the documents are in JSON format, they are parsed and returned as a list of dictionaries.
+        """
         if query_results is None:
             return []
 
@@ -187,6 +348,7 @@ class ChromaDBVectorStore:
             return documents
 
     def get_related_ddl(self, question: str) -> list:
+        """Retrieve related DDL statements based on the question."""
         return self._extract_documents(
             self.ddl_collection.query(
                 query_texts=[question],
@@ -194,6 +356,7 @@ class ChromaDBVectorStore:
         )
 
     def get_related_documentation(self, question: str) -> list:
+        """Retrieve related documentation based on the question."""
         return self._extract_documents(
             self.documentation_collection.query(
                 query_texts=[question],
@@ -201,6 +364,7 @@ class ChromaDBVectorStore:
         )
 
     def get_similar_question_sql(self, user_input: str) -> list:
+        """Retrieve similar question - SQL query pairs based on user input."""
         return self._extract_documents(
             self.sql_collection.query(
                 query_texts=[user_input],
@@ -208,6 +372,7 @@ class ChromaDBVectorStore:
         )
 
     def get_similar_python_code(self, question: str) -> list:
+        """Retrieve similar question - Python code pairs based on the question."""
         return self._extract_documents(
             self.python_collection.query(
                 query_texts=[question],
@@ -215,6 +380,7 @@ class ChromaDBVectorStore:
         )
 
     def get_similar_plotting_code(self, question: str) -> list:
+        """Retrieve similar question - plotting code pairs based on the question."""
         return self._extract_documents(
             self.plot_collection.query(
                 query_texts=[question],
@@ -222,12 +388,14 @@ class ChromaDBVectorStore:
         )
 
     def generate_embedding(self, data: str) -> list[float]:
+        """Generate an embedding for the given data."""
         embedding = self.embedding_function([data])
         if len(embedding) == 1:
             return embedding[0]
         return embedding
 
     def add_question_sql(self, question: str, sql: str) -> str:
+        """Add a question and its corresponding SQL query to the collection."""
         question_sql_json = json.dumps(
             {
                 "question": question,
@@ -243,6 +411,7 @@ class ChromaDBVectorStore:
         return sql_id
 
     def add_ddl(self, ddl: str) -> str:
+        """Add a DDL statement to the collection."""
         ddl_id = ChromaDBVectorStore.deterministic_uuid(ddl) + "-ddl"
         self.ddl_collection.add(
             documents=ddl,
@@ -252,6 +421,7 @@ class ChromaDBVectorStore:
         return ddl_id
 
     def add_documentation(self, documentation: str) -> str:
+        """Add documentation to the collection."""
         doc_id = ChromaDBVectorStore.deterministic_uuid(documentation) + "-doc"
         self.documentation_collection.add(
             documents=documentation,
@@ -261,6 +431,7 @@ class ChromaDBVectorStore:
         return doc_id
 
     def add_python_code(self, question: str, python_code: str):
+        """Add a question and its corresponding Python code to the collection."""
         question_analysis_steps = json.dumps(
             {
                 "question": question,
@@ -278,6 +449,7 @@ class ChromaDBVectorStore:
         return python_id
 
     def add_plot_code(self, question: str, plot_code: str):
+        """Add a question and its corresponding plotting code to the collection."""
         question_plot_steps = json.dumps(
             {
                 "question": question,

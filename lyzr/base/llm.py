@@ -1,3 +1,7 @@
+"""
+Classes and functions for interacting with LLMs.
+"""
+
 # standard library imports
 import logging
 import traceback
@@ -18,8 +22,10 @@ litellm.drop_params = True
 
 
 class LyzrLLMFactory:
+    """A factory class for creating instances of LiteLLM."""
+
     @staticmethod
-    def from_defaults(model: str = DEFAULT_LLM, **kwargs) -> LLM:
+    def from_defaults(model: str = DEFAULT_LLM, **kwargs) -> LiteLLM:
         # model_type -> api_type
         # model_name -> model
         # model_prompts -> Sequence[ChatMessage]
@@ -27,6 +33,34 @@ class LyzrLLMFactory:
 
 
 class LiteLLM(LiteLLM):
+    """
+    LiteLLM is a lightweight language model interface that supports chat,
+    text-to-speech (TTS), and speech-to-text (STT) functionalities.
+    Extends the `LiteLLM` class.
+
+    Properties:
+        _tts_kwargs (dict): Returns a dictionary of keyword arguments for TTS, including the voice setting.
+        _model_type (Literal["chat", "tts", "stt"]): Determines the type of model based on the model name.
+
+    Methods:
+        set_model_kwargs(model_kwargs: dict, force: Union[bool, dict] = True) -> dict:
+            Sets the model-specific keyword arguments. If `force` is a boolean, it applies to all arguments; otherwise, it can be a dictionary specifying which arguments to forcefully set.
+
+        set_messages(messages: Sequence[ChatMessage]):
+            Sets the messages for the chat model.
+
+        run(**kwargs):
+            Executes the model based on its type (chat, TTS, or STT) with the provided keyword arguments.
+
+        chat_complete(messages: Sequence[ChatMessage], stream: bool = False, logger: logging.Logger = None, **kwargs):
+            Completes a chat interaction with the provided messages. Supports streaming and logging.
+
+        tts(tts_input, voice: Literal["echo", "alloy", "fable", "onyx", "nova", "shimmer"], **kwargs):
+            Converts text to speech using the specified voice. Requires input text and voice.
+
+        stt(audiofile, **kwargs):
+            Converts speech to text from the provided audio file.
+    """
 
     @property
     def _tts_kwargs(self) -> dict:

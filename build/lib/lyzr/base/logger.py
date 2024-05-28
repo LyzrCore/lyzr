@@ -1,10 +1,12 @@
+"""
+Logging functions for the lyzr package.
+"""
+
 import os
 import re
 import sys
 import logging
 import logging.handlers
-
-# pip install python-json-logger
 
 
 def set_logger(
@@ -13,15 +15,31 @@ def set_logger(
     log_level: str = "INFO",
     print_log: bool = False,
 ):
-    name = "data_analyzr" if name is None else name
-    logfilename = "data-analyzr" if logfilename is None else logfilename
+    """
+    Sets up a logger with specified configurations.
+
+    Args:
+        name (str, optional): The name of the logger. Defaults to "lyzr".
+        logfilename (str, optional): The filename for the log file. Defaults to "lyzr".
+        log_level (str, optional): The logging level (e.g., "INFO", "DEBUG"). Defaults to "INFO".
+        print_log (bool, optional): If True, logs will also be printed to the console. Defaults to False.
+
+    Returns:
+        logging.Logger: Configured logger instance.
+
+    Raises:
+        ValueError: If an invalid log level is provided.
+
+    Notes:
+        - The log file will be in CSV format.
+        - The logger will use a rotating file handler with a maximum file size of 25MB and up to 25 backup files.
+        - Environment variables "log_level" and "logfilepath" will be set to the specified log level and log file path, respectively.
+    """
+    name = "lyzr" if name is None else name
+    logfilename = "lyzr" if logfilename is None else logfilename
     logfilename = os.path.relpath(os.path.splitext(logfilename)[0] + ".csv")
-    logfilename = (
-        os.path.join("lyzr-logs", logfilename)
-        if os.path.dirname(logfilename).strip() == ""
-        else logfilename
-    )
-    os.makedirs(os.path.dirname(logfilename), exist_ok=True)
+    if os.path.dirname(logfilename).strip() != "":
+        os.makedirs(os.path.dirname(logfilename), exist_ok=True)
     logger = logging.getLogger(name=name)
     if logger.hasHandlers():
         for handler in logger.handlers:
@@ -68,6 +86,16 @@ def set_logger(
 
 
 class CustomFormatter(logging.Formatter):
+    """
+    Custom logging formatter to handle dynamic fields and format log records.
+
+    Methods:
+        format(record: logging.LogRecord) -> str
+            Formats the specified log record as text. Ensures that all dynamic fields
+            specified in the format string are present in the log record, setting them
+            to None if they are missing. Handles special formatting for the 'traceback'
+            field and ensures that newlines are properly represented.
+    """
 
     def format(self, record: logging.LogRecord) -> str:
         arg_pattern = re.compile(r"\{(\w+)\}")
@@ -92,6 +120,7 @@ class CustomFormatter(logging.Formatter):
 
 
 def get_csv_log_format():
+    """Returns the format string for logging records to CSV files."""
     columns = [
         "asctime",
         "name",
@@ -112,11 +141,37 @@ def get_csv_log_format():
 
 
 def get_console_log_format():
+    """Returns the format string for logging records to the console."""
     log_format = "{asctime} | {name} — {levelname} — {filename}: {funcName}: {lineno} — {message}"
     return log_format
 
 
 def read_csv_log(filename: str):
+    """
+    Reads a CSV log file and returns it as a pandas DataFrame.
+
+    Args:
+        filename (str): The path to the CSV log file.
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the log data with predefined columns.
+
+    Notes:
+        - The expected columns in the CSV file are:
+            - asctime
+            - name
+            - levelname
+            - filename
+            - funcName
+            - lineno
+            - message
+            - function
+            - traceback
+            - input_args
+            - input_kwargs
+            - response
+        - The CSV file is expected to use ",;" as the separator.
+    """
     import pandas as pd
 
     columns = [

@@ -1,3 +1,7 @@
+"""
+Prompt management classes for Lyzr.
+"""
+
 from typing import Literal
 from lyzr.base.errors import PromptError
 from lyzr.base.prompt_texts import DATA_ANALYZR_PROMPTS
@@ -5,6 +9,8 @@ from lyzr.base.base import ChatMessage, UserMessage, SystemMessage, MessageRole
 
 
 class PromptRole:
+    """A descriptor class to manage and validate the role of a prompt."""
+
     def __init__(self, allowed_names: list):
         self.allowed_names = allowed_names
 
@@ -30,6 +36,24 @@ class LyzrPromptFactory:
         prompt_type: Literal["user", "system"],
         use_sections: list = None,
     ) -> None:
+        """
+        A factory class for creating and managing prompt messages.
+
+        Attributes:
+            prompt_type (MessageRole): The type of the prompt, either "user" or "system".
+            sections (dict): A dictionary containing the sections of the prompt.
+            sections_to_use (list): A list of sections to be used in the prompt.
+
+        Methods:
+            __init__(name: str, prompt_type: Literal["user", "system"], use_sections: list = None) -> None:
+                Initializes the LyzrPromptFactory with a given name, prompt type, and optional sections to use.
+
+            select_sections(use_sections: list = None) -> None:
+                Selects the sections to be used in the prompt.
+
+            get_message(use_sections: list = None, **kwargs) -> ChatMessage:
+                Constructs and returns a ChatMessage object based on the selected sections and additional keyword arguments.
+        """
         self.prompt_type = prompt_type
         if name.lower() not in DATA_ANALYZR_PROMPTS:
             raise PromptError(f"Prompt name {name} not found.")
@@ -37,6 +61,12 @@ class LyzrPromptFactory:
         self.sections_to_use = use_sections or []
 
     def select_sections(self, use_sections: list = None) -> None:
+        """
+        Selects the sections to be used in the prompt.
+
+        Args:
+            use_sections (list, optional): A list of sections to be used. Defaults to None.
+        """
         self.sections_to_use = (
             use_sections
             if (
@@ -48,6 +78,16 @@ class LyzrPromptFactory:
         )
 
     def get_message(self, use_sections: list = None, **kwargs) -> ChatMessage:
+        """
+        Constructs and returns a ChatMessage object based on the selected sections and additional keyword arguments.
+
+        Args:
+            use_sections (list, optional): A list of sections to be used. Defaults to None.
+            **kwargs: Additional keyword arguments to format the sections.
+
+        Returns:
+            ChatMessage: The constructed chat message.
+        """
         self.select_sections(use_sections)
         if self.sections_to_use == []:
             self.sections_to_use = list(self.sections.keys())

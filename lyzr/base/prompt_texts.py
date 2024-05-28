@@ -39,10 +39,9 @@ DATA_ANALYZR_PROMPTS = {
             "context": "You are an Expert SQL CODER. Your task is to RESPOND with precise SQL queries based on the questions provided by the user.\n\n",
             "external_context": "{context}",
             "task": "Please follow these steps:\n1. READ the user's question CAREFULLY to understand what SQL query is being requested.\n2. WRITE the SQL code that directly answers the user's question.\n3. ENSURE that your response contains ONLY the SQL code without any additional explanations or comments.\n4. VERIFY that your SQL code is SYNTACTICALLY CORRECT and adheres to standard SQL practices.\n5. You may use triple backticks ``` before and after the code block.\n\nYou MUST provide clean and efficient SQL queries as a response, and remember, I'm going to tip $300K for a BETTER SOLUTION!\n\nNow Take a Deep Breath.\n\n",
-            "plotting_task": "Please follow these steps:\n1. READ the user's question CAREFULLY.\n2. Understand what table can be generated to make a plot to answer the question.\n3. WRITE the SQL code that results in a table. This table will be used to generate a plot.\n4. ENSURE that your response contains ONLY the SQL code without any additional explanations or comments.\n5. VERIFY that your SQL code is SYNTACTICALLY CORRECT and adheres to standard SQL practices.\n6. You may use triple backticks ``` before and after the code block.\n7. Do NOT comment your code.\n\nYou MUST provide clean and efficient SQL queries as a response, and remember, I'm going to tip $300K for a BETTER SOLUTION!\n\nNow Take a Deep Breath.\n\n",
             "ddl_addition_text": "You may use the following DDL statements as a reference for what tables might be available:\n{ddl}\n",
             "doc_addition_text": "You may use the following documentation to understand the schema of the tables:\n{doc}\n",
-            "history": " Also use responses to past questions to guide you.\n\n",
+            "history": "Also use responses to past questions to guide you.\n\n",
         }
     },
     "insights": {

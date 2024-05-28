@@ -1,3 +1,7 @@
+"""
+Classes for connecting to various databases and executing SQL queries.
+"""
+
 # standard library imports
 import os
 import sqlite3
@@ -28,6 +32,19 @@ required_modules = {
 
 @dataclass
 class TrainingPlanItem:
+    """
+    A class representing an item in a training plan.
+
+    Attributes:
+        item_type (str): The type of the training item (e.g., SQL, DDL, Information Schema).
+        item_group (str): The group to which the training item belongs.
+        item_name (str): The name of the training item.
+        item_value (str): The value associated with the training item.
+
+    Methods:
+        __str__(): Returns a string representation of the training item based on its type.
+    """
+
     item_type: str
     item_group: str
     item_name: str
@@ -49,6 +66,20 @@ class TrainingPlanItem:
 
 
 class TrainingPlan:
+    """
+    A class representing a training plan consisting of multiple training items.
+
+    Attributes:
+        _plan (list[TrainingPlanItem]): A list of training plan items.
+
+    Methods:
+        __init__(plan: list[TrainingPlanItem]): Initializes the training plan with a list of items.
+        __str__(): Returns a string representation of the entire training plan.
+        __repr__(): Returns a string representation of the entire training plan.
+        get_summary() -> list[str]: Returns a summary of the training plan as a list of strings.
+        remove_item(item: str): Removes a training item from the plan based on its string representation.
+    """
+
     _plan: list[TrainingPlanItem]
 
     def __init__(self, plan: list[TrainingPlanItem]):
@@ -71,6 +102,25 @@ class TrainingPlan:
 
 
 def import_modules(modules: dict[str, str]):
+    """
+    Dynamically imports a list of modules with specified versions and returns the imported modules.
+
+    Args:
+        modules (dict[str, str]): A dictionary where keys are module names (str) and values are the required versions (str).
+
+    Returns:
+        list: A list of imported module objects.
+
+    Raises:
+        DependencyError: If a module cannot be imported, an exception is raised with the module name and version.
+
+    Example:
+        modules = {
+            'numpy': '1.21.0',
+            'pandas': '1.3.0'
+        }
+        imported_modules = import_modules(modules)
+    """
     imported_modules = []
     for mod, ver in modules.items():
         try:
@@ -82,23 +132,89 @@ def import_modules(modules: dict[str, str]):
 
 
 class DatabaseConnector:
+    """Parent class for all database connectors."""
+
     def __init__(self):
-        """Parent class for all database connectors."""
+        """Initialize a connection to a database using the input credentials."""
 
     def fetch_dataframes_dict(self, **kwargs):
+        """
+        Fetches data from specified tables in a database and returns them as a dictionary of pandas DataFrames.
+
+        Args:
+            schema (Union[str, list], optional):
+                The schema(s) to fetch tables from. If not provided, defaults to the instance's schema attribute.
+            tables (list[str], optional):
+                The list of table names to fetch. If not provided, defaults to the instance's tables attribute.
+
+        Returns:
+            dict[pd.DataFrame]:
+                A dictionary where the keys are table names and the values are pandas DataFrames containing the table data.
+
+        Raises:
+            RuntimeError: If there is no connection to the database.
+            ValidationError: If an error occurs while connecting to the database.
+            RuntimeError: If an error occurs while fetching data from the table.
+        """
         raise NotImplementedError("You need to connect to a database first.")
 
     def run_sql(self, **kwargs):
+        """
+        Executes a given SQL query on the connected database and returns the results as a pandas DataFrame.
+
+        Args:
+            sql (str): The SQL query to be executed.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the results of the SQL query.
+            None: If there is no connection to the database.
+
+        Raises:
+            RuntimeError: If there is no connection to the database or if an error occurs during query execution.
+            ValidationError: If a module-specific error occurs during query execution.
+        """
+
         raise NotImplementedError("You need to connect to a database first.")
 
     def get_dbschema(self):
+        """
+        Retrieve the database schema information.
+
+        Returns:
+            list: A list of dictionaries containing column information for the specified schemas.
+        """
         raise NotImplementedError("You need to connect to a database first.")
 
     def get_schema_names(self):
+        """
+        Retrieve the names of all schemas in the database, excluding system schemas.
+
+        This method executes a SQL query to fetch all schema names from the database.
+        It filters out the 'information_schema' and any system schemas.
+        If no schemas are found after filtering, a ValidationError is raised.
+
+        Returns:
+            list: A list of schema names present in the database, excluding system schemas.
+
+        Raises:
+            ValidationError: If no schemas are found in the database.
+        """
         raise NotImplementedError("You need to connect to a database first.")
 
     @staticmethod
     def get_connector(db_type: SupportedDBs):
+        """
+        Get the appropriate database connector class based on the provided database type.
+
+        Args:
+            db_type (SupportedDBs): The type of the database for which the connector is needed.
+
+        Returns:
+            class: The connector class corresponding to the specified database type.
+
+        Raises:
+            ValueError: If the provided database type is not supported.
+        """
         if db_type is SupportedDBs.redshift:
             return RedshiftConnector
         elif db_type is SupportedDBs.postgres:
@@ -109,6 +225,16 @@ class DatabaseConnector:
             raise ValueError(f"Unsupported database type: {db_type}")
 
     def get_default_training_plan(self):
+        """
+        Generate a default training plan based on the database schema, to be added to a vector store
+
+        This method inspects the database schema to identify the relevant columns for databases, schemas, tables, and columns.
+        It then constructs a training plan that includes documentation for each table in each database, detailing the columns
+        present in the table and providing a preview of the first five rows of the table.
+
+        Returns:
+            TrainingPlan: An object containing the training plan with documentation for each table in the database.
+        """
         db_schema = self.get_dbschema()
         # For each of the following, we look at the df columns to see if there's a match:
         database_column = db_schema.columns[
@@ -176,11 +302,36 @@ class DatabaseConnector:
                             item_value=doc,
                         )
                     )
-
         return plan
 
 
 class PostgresConnector(DatabaseConnector):
+    """
+    A class to manage connections and operations with a PostgreSQL database.
+
+    Attributes:
+        host (str): The hostname of the PostgreSQL server.
+        port (Union[int, str]): The port number on which the PostgreSQL server is listening.
+        database (str): The name of the database to connect to.
+        user (str): The username to authenticate with.
+        password (str): The password to authenticate with.
+        schema (Union[list, str], optional): The schema(s) to use. Defaults to None.
+        tables (list[str], optional): The list of tables to use. Defaults to None.
+        conn (psycopg2.extensions.connection): The connection object to the PostgreSQL database.
+
+    Methods:
+        fetch_dataframes_dict(schema: Union[str, list] = None, tables: list[str] = None) -> dict[pd.DataFrame]:
+            Fetches data from the specified schema and tables and returns it as a dictionary of pandas DataFrames.
+
+        get_schema_names() -> list:
+            Retrieves the names of all schemas in the database, excluding system schemas.
+
+        get_dbschema() -> pd.DataFrame:
+            Retrieves the schema information for the specified schemas.
+
+        run_sql(sql: str) -> Union[pd.DataFrame, None]:
+            Executes a SQL query and returns the result as a pandas DataFrame.
+    """
 
     def __init__(
         self,
@@ -199,7 +350,8 @@ class PostgresConnector(DatabaseConnector):
         self.password = password or os.getenv("POSTGRES_PASSWORD")
         if not all([self.host, self.port, self.database, self.user, self.password]):
             raise ImproperlyConfigured(
-                "Please provide all required environment variables for Postgres connection: POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD"
+                "Please provide all required environment variables for Postgres connection:"
+                " POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD"
             )
         self.schema = schema or os.getenv("POSTGRES_SCHEMA") or None
         if isinstance(self.schema, str):
@@ -219,7 +371,6 @@ class PostgresConnector(DatabaseConnector):
             raise ValidationError(
                 f"Error occurred while connecting to PostgreSQL database: {e}"
             ) from e
-
         if self.schema is None:
             self.schema = self.get_schema_names()
 
@@ -312,6 +463,32 @@ class PostgresConnector(DatabaseConnector):
 
 
 class RedshiftConnector(DatabaseConnector):
+    """
+    A class to manage connections and operations with an Amazon Redshift database.
+
+    Attributes:
+        host (str): The hostname of the Redshift server.
+        port (int): The port number on which the Redshift server is listening.
+        database (str): The name of the database to connect to.
+        user (str): The username to authenticate with.
+        password (str): The password to authenticate with.
+        schema (Union[list, str]): The schema(s) to use. Defaults to None.
+        tables (list[str], optional): The list of tables to use. Defaults to None.
+        conn (redshift_connector.Connection): The connection object to the Redshift database.
+
+    Methods:
+        fetch_dataframes_dict(schema: str = None, tables: list[str] = None) -> dict[pd.DataFrame]:
+            Fetches data from the specified schema and tables and returns it as a dictionary of pandas DataFrames.
+
+        get_schema_names() -> list:
+            Retrieves the names of all schemas in the database, excluding system schemas.
+
+        get_dbschema() -> pd.DataFrame:
+            Retrieves the schema information for the specified schemas.
+
+        run_sql(sql: str) -> Union[pd.DataFrame, None]:
+            Executes a SQL query and returns the result as a pandas DataFrame.
+    """
 
     def __init__(
         self,
@@ -330,7 +507,8 @@ class RedshiftConnector(DatabaseConnector):
         self.password = password or os.getenv("REDSHIFT_PASSWORD")
         if not all([self.host, self.port, self.database, self.user, self.password]):
             raise ImproperlyConfigured(
-                "Please provide all required environment variables for Redshift connection: REDSHIFT_HOST, REDSHIFT_PORT, REDSHIFT_DB, REDSHIFT_USER, REDSHIFT_PASSWORD"
+                "Please provide all required environment variables for Redshift connection:"
+                " REDSHIFT_HOST, REDSHIFT_PORT, REDSHIFT_DB, REDSHIFT_USER, REDSHIFT_PASSWORD"
             )
         self.schema = schema or os.getenv("REDSHIFT_SCHEMA") or None
         if isinstance(self.schema, str):
@@ -438,6 +616,33 @@ class RedshiftConnector(DatabaseConnector):
 
 
 class SQLiteConnector(DatabaseConnector):
+    """
+    A class to manage connections and operations with an SQLite database.
+
+    Attributes:
+        db_path (str): The file path to the SQLite database.
+        conn (sqlite3.Connection): The connection object to the SQLite database.
+
+    Methods:
+        __init__(db_path: str = None):
+            Initializes the SQLiteConnector with the given database path or environment variable.
+
+        _download_db(url: str) -> Union[str, None]:
+            Downloads the SQLite database file from the given URL if it does not exist locally.
+
+        create_database(db_path: str, df_dict: dict[pd.DataFrame]):
+            Creates an SQLite database at the specified path using the provided dictionary of pandas DataFrames.
+
+        fetch_dataframes_dict(tables: list[str] = None) -> dict[pd.DataFrame]:
+            Fetches data from the specified tables and returns it as a dictionary of pandas DataFrames.
+
+        run_sql(sql: str) -> Union[pd.DataFrame, None]:
+            Executes a SQL query and returns the result as a pandas DataFrame.
+
+        get_default_training_plan() -> TrainingPlan:
+            Generates a default training plan based on the schema and data of the SQLite database.
+    """
+
     def __init__(self, db_path: str = None):
         self.db_path = db_path or os.getenv("SQLITE_DB_PATH")
         self.db_path = SQLiteConnector._download_db(self.db_path)
@@ -455,6 +660,16 @@ class SQLiteConnector(DatabaseConnector):
 
     @staticmethod
     def _download_db(url: str) -> Union[str, None]:
+        """
+        Downloads a database file from the given URL if it does not already exist locally.
+
+        Args:
+            url (str): The URL of the database file to download.
+
+        Returns:
+            Union[str, None]: The local file path of the downloaded database file if successful,
+            otherwise the original URL if the download fails or the file already exists locally.
+        """
         url = urlparse(url).path
         if os.path.exists(url):
             return url
@@ -469,6 +684,22 @@ class SQLiteConnector(DatabaseConnector):
             return url
 
     def create_database(self, db_path: str, df_dict: dict[pd.DataFrame]):
+        """
+        Creates an SQLite database at the specified path and populates it with tables from the provided DataFrame dictionary.
+
+        Args:
+            db_path (str): The file path where the SQLite database will be created. If the path is invalid
+                or empty, an in-memory database will be used.
+            df_dict (dict[pd.DataFrame]): A dictionary where keys are table names and values are pandas
+                DataFrames to be stored in the database.
+
+        Returns:
+            sqlite3.Connection: A connection object to the created SQLite database.
+
+        Raises:
+            ValidationError: If an error occurs while creating the SQLite database.
+            RuntimeError: If an error occurs while executing a query on the SQLite database.
+        """
         self.db_path = urlparse(db_path).path or self.db_path or ":memory:"
 
         parent = Path(self.db_path).parent

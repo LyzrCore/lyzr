@@ -1,10 +1,15 @@
+"""
+Pydantic models for database configurations.
+"""
+
 # standart-library imports
 import warnings
 from enum import Enum
 from typing import Annotated, Union
 
 # third-party imports
-from pydantic import BaseModel, Field, Discriminator, Tag, AliasChoices
+import pandas as pd
+from pydantic import BaseModel, Field, Discriminator, Tag, AliasChoices, ConfigDict
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -17,9 +22,15 @@ class SupportedDBs(str, Enum):
     sqlite = "sqlite"
 
 
+class DataFile(BaseModel):
+    name: str
+    value: Union[str, pd.DataFrame]
+    kwargs: Union[dict, None] = Field(default_factory=dict)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
 class FilesConfig(BaseModel):
-    datasets: dict
-    files_kwargs: Union[dict, None] = Field(default_factory=dict)
+    datasets: list[DataFile]
     db_path: Union[str, None] = Field(default=None)
 
 
@@ -62,13 +73,16 @@ DataConfig = Annotated[
     ],
     Discriminator(lambda x: x["db_type"]),
 ]
+"""
+Union type for database configurations of supported types.
 
+This type is used to validate and discriminate between different
+database configurations based on the `db_type` field:
+    - FilesConfig: Configuration model for file-based databases.
+    - RedshiftConfig: Configuration model for Redshift databases.
+    - PostgresConfig: Configuration model for Postgres databases.
+    - SQLiteConfig: Configuration model for SQLite databases.
 
-class VectorStoreConfig(BaseModel):
-    path: Union[str, None] = Field(
-        default=None,
-        validation_alias=AliasChoices("vector_store_path", "vstore_path", "path"),
-    )
-    remake_store: Union[bool, None] = Field(
-        default=False, validation_alias=AliasChoices("remake", "remake_store")
-    )
+Usage:
+    TypeAdapter(DataConfig).validate_python(db_config)
+"""
