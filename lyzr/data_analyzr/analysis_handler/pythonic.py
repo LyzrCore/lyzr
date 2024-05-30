@@ -19,11 +19,11 @@ import statsmodels.api as sm
 from lyzr.base.llm import LiteLLM
 from lyzr.base.errors import DependencyError
 from lyzr.base.prompt import LyzrPromptFactory
-from lyzr.data_analyzr.utils import iterate_llm_calls
 from lyzr.base.base import UserMessage, SystemMessage
 from lyzr.data_analyzr.models import FactoryBaseClass
 from lyzr.data_analyzr.analysis_handler.utils import (
     extract_df_names,
+    iterate_llm_calls,
     make_locals_string,
     extract_python_code,
     extract_column_names,

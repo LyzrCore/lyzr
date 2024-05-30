@@ -156,11 +156,9 @@ class DataAnalyzr:
             self.df_dict,
             self.database_connector,
             self.vector_store,
-            self.analyser,
             self.analysis_code,
             self.analysis_guide,
             self.analysis_output,
-            self.plotter,
             self.plot_code,
             self.plot_output,
             self.insights_output,
@@ -207,7 +205,7 @@ class DataAnalyzr:
             vector_store_config = {
                 "path": "path/to/vector_store"
             }
-            data = data_analyzr.get_data(
+            data_analyzr.get_data(
                 db_type="postgres",
                 db_config=db_config,
                 vector_store_config=vector_store_config
@@ -263,14 +261,10 @@ class DataAnalyzr:
             print(output)
         """
         if self.analysis_type is AnalysisTypes.skip:
-            self.logger.info(
-                "No analysis performed. Fetching dataframes from database."
-            )
-            self.analysis_guide = (
-                "No analysis performed. Analysis output is the given dataframe."
-            )
+            self.logger.info("No analysis performed.")
+            self.analysis_guide = "No analysis performed."
             self.analysis_output = None
-            self.analyser = None
+            self.analysis_code = None
             return self.analysis_output
         if analysis_context is None:
             analysis_context = ""
@@ -286,20 +280,20 @@ class DataAnalyzr:
         if self.analysis_type is AnalysisTypes.sql:
             from lyzr.data_analyzr.analysis_handler import TxttoSQLFactory
 
-            self.analyser = TxttoSQLFactory(
+            analyser = TxttoSQLFactory(
                 **analyser_args,
                 db_connector=self.database_connector,
             )
         if self.analysis_type is AnalysisTypes.ml:
             from lyzr.data_analyzr.analysis_handler import PythonicAnalysisFactory
 
-            self.analyser = PythonicAnalysisFactory(
+            analyser = PythonicAnalysisFactory(
                 **analyser_args,
                 df_dict=self.df_dict,
             )
-        self.analysis_output = self.analyser.generate_output(user_input)
-        self.analysis_guide = self.analyser.guide
-        self.analysis_code = self.analyser.code
+        self.analysis_output = analyser.generate_output(user_input)
+        self.analysis_guide = analyser.guide
+        self.analysis_code = analyser.code
         return self.analysis_output
 
     def visualisation(
@@ -353,7 +347,7 @@ class DataAnalyzr:
         elif isinstance(self.analysis_output, dict):
             data_kwargs["analysis_output"] = self.analysis_output
         self.plot_output = None
-        self.plotter = PlotFactory(
+        plotter = PlotFactory(
             llm=self.analysis_llm,
             logger=self.logger,
             context=plot_context,
@@ -363,10 +357,10 @@ class DataAnalyzr:
             max_retries=max_retries,
             auto_train=auto_train,
         )
-        self.plot_output = self.plotter.generate_output(
+        self.plot_output = plotter.generate_output(
             user_input=user_input, plot_path=plot_path
         )
-        self.plot_code = self.plotter.code
+        self.plot_code = plotter.code
         return self.plot_output
 
     def insights(

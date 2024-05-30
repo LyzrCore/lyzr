@@ -78,6 +78,16 @@ class TrainingPlan:
         __repr__(): Returns a string representation of the entire training plan.
         get_summary() -> list[str]: Returns a summary of the training plan as a list of strings.
         remove_item(item: str): Removes a training item from the plan based on its string representation.
+
+    Example:
+        plan = TrainingPlan([
+            TrainingPlanItem(
+                item_type="sql",
+                item_group="public",
+                item_name="table_name",
+                item_value="SELECT * FROM table_name;"
+            )
+        ])
     """
 
     _plan: list[TrainingPlanItem]

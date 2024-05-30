@@ -15,12 +15,15 @@ import pandas as pd
 from lyzr.base.llm import LiteLLM
 from lyzr.base.prompt import LyzrPromptFactory
 from lyzr.base.errors import MissingValueError
-from lyzr.data_analyzr.utils import iterate_llm_calls
 from lyzr.data_analyzr.models import FactoryBaseClass
 from lyzr.data_analyzr.db_connector import DatabaseConnector
 from lyzr.base.base import ChatMessage, UserMessage, SystemMessage
 from lyzr.data_analyzr.vector_store_utils import ChromaDBVectorStore
-from lyzr.data_analyzr.analysis_handler.utils import extract_sql, handle_analysis_output
+from lyzr.data_analyzr.analysis_handler.utils import (
+    extract_sql,
+    iterate_llm_calls,
+    handle_analysis_output,
+)
 
 
 class TxttoSQLFactory(FactoryBaseClass):
