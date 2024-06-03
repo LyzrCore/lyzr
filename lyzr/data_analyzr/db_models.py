@@ -35,7 +35,6 @@ class FilesConfig(BaseModel):
 
 
 class RedshiftConfig(BaseModel):
-    name: str
     host: str
     port: int
     user: str
@@ -48,7 +47,6 @@ class RedshiftConfig(BaseModel):
 
 
 class PostgresConfig(BaseModel):
-    name: str
     host: str
     port: int
     user: str

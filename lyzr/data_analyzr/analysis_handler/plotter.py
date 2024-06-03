@@ -247,7 +247,7 @@ class PlotFactory(FactoryBaseClass):
             self._get_message_sections_and_dict(user_input=user_input)
         )
         # add question examples
-        question_examples_list = self.vector_store.get_similar_plotting_code(user_input)
+        question_examples_list = self.vector_store.get_related_plotting_code(user_input)
         if len(question_examples_list) > 0:
             system_message_sections.append("history")
         messages = [
@@ -398,7 +398,7 @@ class PlotFactory(FactoryBaseClass):
             - Return the updated system message sections and dictionary.
         """
         sql_examples = (
-            self.vector_store.get_similar_question_sql(user_input)
+            self.vector_store.get_related_sql_queries(user_input)
             if isinstance(self.connector, DatabaseConnector)
             else []
         )
@@ -524,4 +524,4 @@ class PlotFactory(FactoryBaseClass):
             and code is not None
             and code.strip() != ""
         ):
-            self.vector_store.add_training_plan(question=user_input, plot_code=code)
+            self.vector_store.add_training_data(question=user_input, plot_code=code)

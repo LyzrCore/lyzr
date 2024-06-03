@@ -180,7 +180,7 @@ class TxttoSQLFactory(FactoryBaseClass):
         Returns:
             list[ChatMessage]: A list of chat messages generated based on the user's input.
         """
-        question_sql_list = self.vector_store.get_similar_question_sql(user_input)
+        question_sql_list = self.vector_store.get_related_sql_queries(user_input)
         ddl_list = self.vector_store.get_related_ddl(user_input)
         doc_list = self.vector_store.get_related_documentation(user_input)
         messages = self._get_sql_prompt(
@@ -340,7 +340,7 @@ class TxttoSQLFactory(FactoryBaseClass):
             if user_input is None or user_input.strip() == "":
                 user_input = self._generate_question(code)
             if code is not None and code.strip() != "":
-                self.vector_store.add_training_plan(question=user_input, sql=code)
+                self.vector_store.add_training_data(question=user_input, sql=code)
         return self.output
 
     def _generate_question(self, sql: str, **kwargs) -> str:

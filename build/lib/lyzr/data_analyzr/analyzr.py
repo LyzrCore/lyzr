@@ -30,18 +30,21 @@ class DataAnalyzr:
 
     Attributes:
         analysis_type (Literal["sql", "ml", "skip"]): The type of analysis to be performed.
-        api_key (Optional[str]): API key for accessing LLM services.
-        class_params (Optional[dict]): Dictionary of class parameters.
-        generator_llm (Optional[LiteLLM]): LLM instance for generating analysis.
-        analysis_llm (Optional[LiteLLM]): LLM instance for performing analysis.
-        context (Optional[str]): Context for analysis and response generation.
-        log_params (Optional[dict]): Dictionary of logging parameters.
-        analysis_output (Union[str, pd.DataFrame, dict[str, pd.DataFrame], None]): The output of the analysis.
+        api_key (str): API key for accessing LLM services.
+        params (dict): Dictionary of class parameters.
+        generator_llm (LiteLLM): LLM instance for generating analysis.
+        analysis_llm (LiteLLM): LLM instance for performing analysis.
+        context (Union[str, dict]): Context for analysis and response generation.
+        logger (logging.Logger): Logger instance for logging messages.
+        analysis_guide (str): The guide for the analysis process.
+        analysis_code (str): The code generated for the analysis.
+        analysis_output (Union[str, pd.DataFrame, dict[str, pd.DataFrame], None]): The output of the analysis process.
+        plot_code (str): The code generated for the visualization.
         plot_output (str): The output of the visualization process.
         insights_output (str): The generated insights as a string.
         recommendations_output (str): The generated recommendations in the specified format.
         tasks_output (str): The generated tasks as a string.
-        ai_queries_output (dict[str, list[str]]): The generated AI queries for different types of analysis.
+        ai_queries_output (dict[str, list]): The generated AI queries for different types of analysis.
 
     Methods:
         get_data(db_type, db_config, vector_store_config):
@@ -69,7 +72,7 @@ class DataAnalyzr:
         class_params: Optional[dict] = None,
         generator_llm: Optional[LiteLLM] = None,
         analysis_llm: Optional[LiteLLM] = None,
-        context: Optional[str] = None,
+        context: Optional[Union[str, dict]] = None,
         log_params: Optional[dict] = None,
     ):
         """
@@ -165,7 +168,7 @@ class DataAnalyzr:
             self.recommendations_output,
             self.tasks_output,
             self.ai_queries_output,
-        ) = (None,) * 14
+        ) = (None,) * 12
 
         from lyzr.data_analyzr.utils import logging_decorator
 
@@ -416,7 +419,7 @@ class DataAnalyzr:
 
     def recommendations(
         self,
-        user_input: Optional[str],
+        user_input: str,
         from_insights: Optional[bool] = True,
         recs_format: Optional[dict] = None,
         recommendations_context: Optional[str] = None,
@@ -512,7 +515,7 @@ class DataAnalyzr:
 
     def tasks(
         self,
-        user_input: Optional[str] = None,
+        user_input: str,
         tasks_context: Optional[str] = None,
         n_tasks: Optional[int] = 5,
     ) -> str:

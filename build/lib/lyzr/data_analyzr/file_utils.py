@@ -241,7 +241,12 @@ def get_dict_of_files(datasets: list[DataFile]) -> dict[str, pd.DataFrame]:
         datasets_dict.update(read_file_or_folder(data.name, data.value, data.kwargs))
     df_names = list(datasets_dict.keys())
     for name in df_names:
-        datasets_dict[translate_string_name(name)] = datasets_dict.pop(name)
+        new_df_name = translate_string_name(name)
+        datasets_dict[new_df_name] = datasets_dict.pop(name)
+        rename_cols = {
+            col: translate_string_name(col) for col in datasets_dict[name].columns
+        }
+        datasets_dict[new_df_name].rename(columns=rename_cols, inplace=True)
     return datasets_dict
 
 

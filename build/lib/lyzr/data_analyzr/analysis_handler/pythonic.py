@@ -199,7 +199,7 @@ class PythonicAnalysisFactory(FactoryBaseClass):
             user_input=user_input,
         )
         # add question examples
-        question_examples_list = self.vector_store.get_similar_python_code(user_input)
+        question_examples_list = self.vector_store.get_related_python_code(user_input)
         if len(question_examples_list) > 0:
             system_message_sections.append("history")
         messages = [
@@ -364,4 +364,4 @@ class PythonicAnalysisFactory(FactoryBaseClass):
             and code is not None
             and code.strip() != ""
         ):
-            self.vector_store.add_training_plan(question=user_input, python_code=code)
+            self.vector_store.add_training_data(question=user_input, python_code=code)

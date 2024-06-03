@@ -24,9 +24,12 @@ class ChromaDBVectorStore:
     information, DDL statements, past queries and their associated code - SQL, pythonic and plotting code.
 
     Attributes:
-        path (str): Path to the directory where the ChromaDB data is stored.
-        remake_store (bool): If True, the store will be recreated.
-        training_plan (TrainingPlan): Training plan to be added to the vector store.
+        chroma_client (chromadb.PersistentClient): ChromaDB client instance.
+        sql_collection (chromadb.Collection): Collection for storing SQL queries.
+        documentation_collection (chromadb.Collection): Collection for storing documentation.
+        ddl_collection (chromadb.Collection): Collection for storing DDL statements.
+        python_collection (chromadb.Collection): Collection for storing Python code.
+        plot_collection (chromadb.Collection): Collection for storing plotting code.
         logger (logging.Logger): Logger instance for logging information and errors.
 
     Methods:
@@ -145,7 +148,7 @@ class ChromaDBVectorStore:
                 if not self.remake_vector_store():
                     logger.error(f"Failed to recreate vector store at {path}.")
                 if training_plan is not None:
-                    self.add_training_plan(plan=training_plan)
+                    self.add_training_data(plan=training_plan)
             else:
                 logger.info(f"Vector store exists at {path}. Using existing store.")
         else:
@@ -153,7 +156,7 @@ class ChromaDBVectorStore:
             logger.info(f"Creating vector store at {path}.")
             self.make_chroma_client(path=path)
             if training_plan is not None:
-                self.add_training_plan(plan=training_plan)
+                self.add_training_data(plan=training_plan)
 
     def make_chroma_client(self, path: str):
         """
@@ -221,7 +224,7 @@ class ChromaDBVectorStore:
             )
         return remake
 
-    def add_training_plan(
+    def add_training_data(
         self,
         question: str = None,
         sql: str = None,
@@ -363,7 +366,7 @@ class ChromaDBVectorStore:
             )
         )
 
-    def get_similar_question_sql(self, user_input: str) -> list:
+    def get_related_sql_queries(self, user_input: str) -> list:
         """Retrieve similar question - SQL query pairs based on user input."""
         return self._extract_documents(
             self.sql_collection.query(
@@ -371,7 +374,7 @@ class ChromaDBVectorStore:
             )
         )
 
-    def get_similar_python_code(self, question: str) -> list:
+    def get_related_python_code(self, question: str) -> list:
         """Retrieve similar question - Python code pairs based on the question."""
         return self._extract_documents(
             self.python_collection.query(
@@ -379,7 +382,7 @@ class ChromaDBVectorStore:
             )
         )
 
-    def get_similar_plotting_code(self, question: str) -> list:
+    def get_related_plotting_code(self, question: str) -> list:
         """Retrieve similar question - plotting code pairs based on the question."""
         return self._extract_documents(
             self.plot_collection.query(

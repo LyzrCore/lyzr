@@ -495,7 +495,7 @@ def repeater(
     """
     result = None
     llm_kwargs = {} if llm_kwargs is None else llm_kwargs
-    max_retries = 1 if max_retries is None else max_retries
+    max_retries = 1 if max_retries is None else max(1, max_retries)
     time_limit = 0 if time_limit is None else time_limit
     for i in range(max_retries):
         llm_response = llm.run(messages=llm_messages, **llm_kwargs)
