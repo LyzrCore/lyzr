@@ -32,6 +32,7 @@ setup(
     extras_require={
         "data-analyzr": [
             "matplotlib==3.8.2",
+            "seaborn==0.13.2",
             "scikit-learn==1.4.0",
             "statsmodels==0.14.1",
             "chromadb==0.4.22",
