@@ -31,10 +31,10 @@ class DataAnalyzr:
     Attributes:
         analysis_type (Literal["sql", "ml", "skip"]): The type of analysis to be performed.
         api_key (str): API key for accessing LLM services.
-        params (dict): Dictionary of class parameters.
+        params (ParamsDict): Dictionary of class parameters.
         generator_llm (LiteLLM): LLM instance for generating analysis.
         analysis_llm (LiteLLM): LLM instance for performing analysis.
-        context (Union[str, dict]): Context for analysis and response generation.
+        context (ContextDict): Context for analysis and response generation.
         logger (logging.Logger): Logger instance for logging messages.
         analysis_guide (str): The guide for the analysis process.
         analysis_code (str): The code generated for the analysis.
@@ -89,7 +89,7 @@ class DataAnalyzr:
                 - auto_train (bool): Whether to train the LLM model. Defaults to True.
             generator_llm (Optional[LiteLLM], optional): LLM instance for generating analysis. Defaults to OpenAI's gpt-4o.
             analysis_llm (Optional[LiteLLM], optional): LLM instance for performing analysis. Defaults to OpenAI's gpt-4o.
-            context (Optional[str], optional): Context for analysis and response generation. Defaults to "".
+            context (Optional[Union[str, dict]], optional): Context for analysis and response generation. Defaults to "".
             log_params (Optional[dict], optional): Dictionary of logging parameters.
                 - log_filename (str): Name of the log file. Defaults to "dataanalyzr.csv".
                 - log_level (str): Level of logging. Defaults to "INFO".
