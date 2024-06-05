@@ -87,7 +87,7 @@ class LiteLLM(LiteLLM):
             if (not force.get(arg, True)) and (arg in all_kwargs):
                 continue
             if arg in ["temperature", "max_tokens"]:
-                self.__dict__[arg] = model_kwargs[arg]
+                setattr(self, arg, model_kwargs[arg])
             self.additional_kwargs[arg] = model_kwargs[arg]
 
     def set_messages(self, messages: Sequence[ChatMessage]):
@@ -96,7 +96,7 @@ class LiteLLM(LiteLLM):
     def run(self, **kwargs):
         if self._model_type == "chat":
             return self.chat_complete(
-                messages=kwargs.pop("messages", self.__dict__.get("messages", None)),
+                messages=kwargs.pop("messages", getattr(self, "messages", None)),
                 stream=kwargs.pop("stream", False),
                 logger=self.additional_kwargs.pop("logger", kwargs.pop("logger", None)),
                 **kwargs,

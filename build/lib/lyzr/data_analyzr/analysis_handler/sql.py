@@ -264,7 +264,7 @@ class TxttoSQLFactory(FactoryBaseClass):
             - If the SQL query is a CREATE TABLE statement, passes control to _handle_create_table_sql.
         """
         sql_query, analysis_output = None, None
-        sql_query = extract_sql(llm_response)
+        sql_query = self.code_cleaner(extract_sql(llm_response))
         self.logger.info(f"Extracted SQL query:\n{sql_query}")
         match = re.search("CREATE TABLE", sql_query, re.IGNORECASE)
         if match is not None:
@@ -274,6 +274,9 @@ class TxttoSQLFactory(FactoryBaseClass):
         self.code = sql_query
         self.guide = sql_query
         return analysis_output
+
+    def code_cleaner(self, code) -> str:
+        return code
 
     def _handle_create_table_sql(self, sql_query: str):
         """

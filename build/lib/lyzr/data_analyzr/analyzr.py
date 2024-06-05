@@ -155,6 +155,20 @@ class DataAnalyzr:
         self.analysis_llm.additional_kwargs["logger"] = self.logger
 
         self.context = ContextDict().validate(context)
+
+        if self.analysis_type is AnalysisTypes.ml:
+            from lyzr.data_analyzr.analysis_handler import PythonicAnalysisFactory
+
+            self.analyser = PythonicAnalysisFactory
+        elif self.analysis_type is AnalysisTypes.sql:
+            from lyzr.data_analyzr.analysis_handler import TxttoSQLFactory
+
+            self.analyser = TxttoSQLFactory
+        else:
+            self.analyser = None
+        from lyzr.data_analyzr.analysis_handler import PlotFactory
+
+        self.plotter = PlotFactory
         (
             self.df_dict,
             self.database_connector,
@@ -281,19 +295,12 @@ class DataAnalyzr:
             auto_train=auto_train,
         )
         if self.analysis_type is AnalysisTypes.sql:
-            from lyzr.data_analyzr.analysis_handler import TxttoSQLFactory
-
-            analyser = TxttoSQLFactory(
-                **analyser_args,
-                db_connector=self.database_connector,
-            )
+            analyser_args["db_connector"] = self.database_connector
         if self.analysis_type is AnalysisTypes.ml:
-            from lyzr.data_analyzr.analysis_handler import PythonicAnalysisFactory
-
-            analyser = PythonicAnalysisFactory(
-                **analyser_args,
-                df_dict=self.df_dict,
-            )
+            analyser_args["df_dict"] = self.df_dict
+        analyser = self.analyser(
+            **analyser_args,
+        )
         self.analysis_output = analyser.generate_output(user_input)
         self.analysis_guide = analyser.guide
         self.analysis_code = analyser.code
@@ -337,8 +344,6 @@ class DataAnalyzr:
             from PIL import Image
             Image.open(saved_plot_path).show()
         """
-        from lyzr.data_analyzr.analysis_handler import PlotFactory
-
         if plot_context is None:
             plot_context = ""
         if self.df_dict is None:
@@ -350,7 +355,7 @@ class DataAnalyzr:
         elif isinstance(self.analysis_output, dict):
             data_kwargs["analysis_output"] = self.analysis_output
         self.plot_output = None
-        plotter = PlotFactory(
+        plotter = self.plotter(
             llm=self.analysis_llm,
             logger=self.logger,
             context=plot_context,
@@ -391,7 +396,7 @@ class DataAnalyzr:
 
         if insights_context is None:
             insights_context = ""
-        if "analysis_guide" not in self.__dict__:
+        if not hasattr(self, "analysis_guide") or self.analysis_guide is None:
             self.analysis_guide = ""
         self.insights_output = self.generator_llm.run(
             messages=[

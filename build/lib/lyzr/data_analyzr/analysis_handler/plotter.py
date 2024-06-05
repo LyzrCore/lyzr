@@ -443,7 +443,7 @@ class PlotFactory(FactoryBaseClass):
             - Stores the executed code in the `code` attribute.
             - Returns the value of the 'result' variable from the local scope.
         """
-        code = remove_print_and_plt_show(extract_python_code(llm_response))
+        code = self.code_cleaner(extract_python_code(llm_response))
         self.logger.info(f"Extracted Python code:\n{code}")
         if not isinstance(self.connector, DatabaseConnector):
             assert isinstance(self.df_dict, dict), "df_dict must be a dictionary."
@@ -461,6 +461,9 @@ class PlotFactory(FactoryBaseClass):
         exec(code, globals_, self.locals_)
         self.code = code
         return self.locals_["fig"]
+
+    def code_cleaner(self, code: str) -> str:
+        return remove_print_and_plt_show(code)
 
     def save_plot_image(self) -> str:
         """

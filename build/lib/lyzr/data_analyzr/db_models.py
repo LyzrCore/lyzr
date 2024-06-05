@@ -41,9 +41,9 @@ class RedshiftConfig(BaseModel):
     password: str
     database: str
     schema: Union[list, None] = Field(
-        default_factory=list, validation_alias=AliasChoices("lschema", "schema")
+        default=None, validation_alias=AliasChoices("lschema", "schema")
     )
-    tables: Union[list, None] = Field(default_factory=list)
+    tables: Union[list, None] = Field(default=None)
 
 
 class PostgresConfig(BaseModel):
@@ -53,9 +53,9 @@ class PostgresConfig(BaseModel):
     password: str
     database: str
     schema: Union[list, None] = Field(
-        default_factory=list, validation_alias=AliasChoices("lschema", "schema")
+        default=None, validation_alias=AliasChoices("lschema", "schema")
     )
-    tables: Union[list, None] = Field(default_factory=list)
+    tables: Union[list, None] = Field(default=None)
 
 
 class SQLiteConfig(BaseModel):

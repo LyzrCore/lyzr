@@ -327,7 +327,7 @@ class PythonicAnalysisFactory(FactoryBaseClass):
             - Stores the executed code in the `code` attribute.
             - Returns the value of the 'result' variable from the local scope.
         """
-        code = remove_print_and_plt_show(extract_python_code(llm_response))
+        code = self.code_cleaner(extract_python_code(llm_response))
         self.logger.info(f"Extracted Python code:\n{code}")
         df_names = extract_df_names(code, list(self.df_dict.keys()))
         for name in df_names:
@@ -343,6 +343,9 @@ class PythonicAnalysisFactory(FactoryBaseClass):
         exec(code, globals_, self.locals_)
         self.code = code
         return self.locals_["result"]
+
+    def code_cleaner(self, code: str) -> str:
+        return remove_print_and_plt_show(code)
 
     def auto_train(self, user_input: str, code: str, **kwargs):
         """

@@ -141,6 +141,21 @@ def import_modules(modules: dict[str, str]):
     return imported_modules
 
 
+def register(name: str):
+    """
+    A decorator function to register a connector class with the DatabaseConnector class.
+
+    Args:
+        name (str): The name of the database connector class.
+    """
+
+    def wrapper(cls):
+        DatabaseConnector.register_connector(name, cls)
+        return cls
+
+    return wrapper
+
+
 class DatabaseConnector:
     """Parent class for all database connectors."""
 
@@ -211,6 +226,25 @@ class DatabaseConnector:
         """
         raise NotImplementedError("You need to connect to a database first.")
 
+    @classmethod
+    def register_connector(cls, db_type: str, connector):
+        """
+        Add a database connector class to the list of supported connectors.
+
+        Args:
+            db_type (str): The type of the database for which the connector is being registered.
+            connector (class): The database connector class to be registered.
+
+        Example:
+            class MySQLConnector(DatabaseConnector):
+                pass
+
+            DatabaseConnector.register_connector("mysql", MySQLConnector)
+        """
+        if not hasattr(cls, "connectors"):
+            cls.connectors = {}
+        cls.connectors[db_type] = connector
+
     @staticmethod
     def get_connector(db_type: SupportedDBs):
         """
@@ -223,16 +257,13 @@ class DatabaseConnector:
             class: The connector class corresponding to the specified database type.
 
         Raises:
-            ValueError: If the provided database type is not supported.
+            ValueError: If no connectors are registered or if the provided database type is not supported.
         """
-        if db_type is SupportedDBs.redshift:
-            return RedshiftConnector
-        elif db_type is SupportedDBs.postgres:
-            return PostgresConnector
-        elif db_type is SupportedDBs.sqlite:
-            return SQLiteConnector
-        else:
-            raise ValueError(f"Unsupported database type: {db_type}")
+        if not hasattr(DatabaseConnector, "connectors"):
+            raise ValueError("No connectors registered.")
+        if db_type in DatabaseConnector.connectors:
+            return DatabaseConnector.connectors[db_type]
+        raise ValueError(f"Unsupported database type: {db_type}")
 
     def get_default_training_plan(self):
         """
@@ -315,6 +346,7 @@ class DatabaseConnector:
         return plan
 
 
+@register(name="postgres")
 class PostgresConnector(DatabaseConnector):
     """
     A class to manage connections and operations with a PostgreSQL database.
@@ -472,6 +504,7 @@ class PostgresConnector(DatabaseConnector):
             ) from e
 
 
+@register(name="redshift")
 class RedshiftConnector(DatabaseConnector):
     """
     A class to manage connections and operations with an Amazon Redshift database.
@@ -625,6 +658,7 @@ class RedshiftConnector(DatabaseConnector):
             ) from e
 
 
+@register(name="sqlite")
 class SQLiteConnector(DatabaseConnector):
     """
     A class to manage connections and operations with an SQLite database.
@@ -815,3 +849,6 @@ class SQLiteConnector(DatabaseConnector):
                 )
             )
         return plan
+
+
+DatabaseConnector.register_connector("sqlite", SQLiteConnector)

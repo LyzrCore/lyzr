@@ -217,10 +217,14 @@ class ChromaDBVectorStore:
         for col in all_collections:
             if col in existing_collections:
                 continue
-            self.__dict__[f"{col}_collection"] = (
-                self.chroma_client.get_or_create_collection(
-                    name=col, embedding_function=self.embedding_function
-                )
+            setattr(
+                self,
+                f"{col}_collection",
+                (
+                    self.chroma_client.get_or_create_collection(
+                        name=col, embedding_function=self.embedding_function
+                    )
+                ),
             )
         return remake
 
@@ -317,10 +321,14 @@ class ChromaDBVectorStore:
         for collection in vector_store_collections:
             if collection_name == collection:
                 self.chroma_client.delete_collection(name=collection)
-                self.__dict__[f"{collection}_collection"] = (
-                    self.chroma_client.get_or_create_collection(
-                        name=collection, embedding_function=self.embedding_function
-                    )
+                setattr(
+                    self,
+                    f"{collection}_collection",
+                    (
+                        self.chroma_client.get_or_create_collection(
+                            name=collection, embedding_function=self.embedding_function
+                        )
+                    ),
                 )
                 return True
         return False

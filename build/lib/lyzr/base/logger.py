@@ -101,9 +101,9 @@ class CustomFormatter(logging.Formatter):
         arg_pattern = re.compile(r"\{(\w+)\}")
         arg_names = [x.group(1) for x in arg_pattern.finditer(self._fmt)]
         for field in arg_names:
-            if field not in record.__dict__:
-                record.__dict__[field] = None
-            record_value = record.__dict__[field]
+            if not hasattr(record, field):
+                setattr(record, field, None)
+            record_value = getattr(record, field)
             if (
                 field == "traceback"
                 and isinstance(record_value, str)
@@ -112,8 +112,8 @@ class CustomFormatter(logging.Formatter):
                     and (record_value.strip()[-1] != "]")
                 )
             ):
-                record.__dict__[field] = record_value.splitlines()
-            record.__dict__[field] = str(record_value).replace("\n", "\\n")
+                setattr(record, field, record_value.splitlines())
+            setattr(record, field, str(record_value).replace("\n", "\\n"))
         record.msg = record.getMessage().strip()
         record.msg = record.getMessage().replace("\n", "\\n")
         return super().format(record)
