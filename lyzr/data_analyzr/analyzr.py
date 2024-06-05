@@ -746,7 +746,7 @@ class DataAnalyzr:
         messages = [
             LyzrPromptFactory(name="ai_queries", prompt_type="system").get_message(
                 context=context,
-                schema=schema,
+                schema=json.dumps(schema, indent=4),
             ),
             LyzrPromptFactory(name="ai_queries", prompt_type="user").get_message(
                 df_details=self.vector_store.get_related_documentation(context)
