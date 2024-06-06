@@ -11,6 +11,7 @@ python-dotenv>=1.0.0
 weaviate-client==3.25.3
 
 [data-analyzr]
+aenum
 chromadb==0.4.22
 matplotlib==3.8.2
 mysql-connector-python==8.2.0

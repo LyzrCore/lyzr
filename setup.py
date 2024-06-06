@@ -31,6 +31,7 @@ setup(
     ],
     extras_require={
         "data-analyzr": [
+            "aenum",
             "matplotlib==3.8.2",
             "seaborn==0.13.2",
             "scikit-learn==1.4.0",

@@ -20,7 +20,6 @@ from lyzr.data_analyzr.models import (
 )
 from lyzr.base.prompt import LyzrPromptFactory
 from lyzr.base.llm import LyzrLLMFactory, LiteLLM
-from lyzr.data_analyzr.db_models import SupportedDBs, DataConfig
 
 
 class DataAnalyzr:
@@ -228,8 +227,8 @@ class DataAnalyzr:
                 vector_store_config=vector_store_config
             )
         """
-        from pydantic import TypeAdapter
         from lyzr.data_analyzr.file_utils import get_db_details
+        from lyzr.data_analyzr.db_models import DataConfig, SupportedDBs
 
         if not isinstance(db_config, dict):
             raise ValueError("data_config must be a dictionary.")
@@ -237,7 +236,7 @@ class DataAnalyzr:
         self.database_connector, self.df_dict, self.vector_store = get_db_details(
             analysis_type=self.analysis_type,
             db_type=db_config["db_type"],
-            db_config=TypeAdapter(DataConfig).validate_python(db_config),
+            db_config=DataConfig.validate(db_config),
             vector_store_config=VectorStoreConfig(**vector_store_config),
             logger=self.logger,
         )

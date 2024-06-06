@@ -21,6 +21,7 @@ from lyzr.data_analyzr.db_models import (
     RedshiftConfig,
     PostgresConfig,
     SQLiteConfig,
+    DataConfig,
 )
 from lyzr.data_analyzr.db_connector import (
     DatabaseConnector,
@@ -77,9 +78,16 @@ def get_db_details(
             + "\n"
         )
     else:
+        accepted_db_types = tuple(
+            [
+                elem
+                for elem in DataConfig._config_types.values()
+                if elem is not FilesConfig
+            ]
+        )
         assert isinstance(
-            db_config, (RedshiftConfig, PostgresConfig, SQLiteConfig)
-        ), f"Expected RedshiftConfig, PostgresConfig or SQLiteConfig, got {type(db_config)}"
+            db_config, accepted_db_types
+        ), f"Expected one of {accepted_db_types}, got {type(db_config)}"
         connector = DatabaseConnector.get_connector(db_type)(**db_config.model_dump())
     df_dict, connector = ensure_correct_data_format(
         analysis_type=analysis_type,
