@@ -1,356 +1,374 @@
+"""
+DataAnalyzr class, for conversational data analysis.
+"""
+
 # standard library imports
-import os
+import json
 import time
-import uuid
-import warnings
-from typing import Union, Literal, Optional, Any
+from typing import Literal, Optional, Union
 
 # third-party imports
-import numpy as np
 import pandas as pd
 
 # local imports
+from lyzr.data_analyzr.models import (
+    AnalysisTypes,
+    OutputTypes,
+    ParamsDict,
+    ContextDict,
+    VectorStoreConfig,
+)
 from lyzr.base.prompt import LyzrPromptFactory
-from lyzr.data_analyzr.file_utils import get_db_details
-from lyzr.data_analyzr.txt_to_sql_utils import TxttoSQLFactory
-from lyzr.data_analyzr.ml_analysis_utils import MLAnalysisFactory
-from lyzr.base.errors import (
-    MissingValueError,
-)
-from lyzr.base.llm import (
-    LyzrLLMFactory,
-    LiteLLM,
-)
-from lyzr.data_analyzr.plot_utils import PlotFactory
-from lyzr.data_analyzr.utils import (
-    format_df_with_describe,
-    format_df_with_info,
-    get_info_dict_from_df_dict,
-)
-
-# imports for logging
-import sys
-import logging
-
-# imports for legacy usage
-from PIL import Image
-from pathlib import Path
-from lyzr.base.llms import LLM
-from pandas.errors import EmptyDataError
-
-warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
+from lyzr.base.llm import LyzrLLMFactory, LiteLLM
 
 
 class DataAnalyzr:
+    """
+    DataAnalyzr is a class designed to perform data analysis based on natural language input.
+    It leverages large language models (LLMs) for generating insights, visualizations, recommendations, and tasks based on user input.
+
+    Attributes:
+        analysis_type (Literal["sql", "ml", "skip"]): The type of analysis to be performed.
+        api_key (str): API key for accessing LLM services.
+        params (ParamsDict): Dictionary of class parameters.
+        generator_llm (LiteLLM): LLM instance for generating analysis.
+        analysis_llm (LiteLLM): LLM instance for performing analysis.
+        context (ContextDict): Context for analysis and response generation.
+        logger (logging.Logger): Logger instance for logging messages.
+        analysis_guide (str): The guide for the analysis process.
+        analysis_code (str): The code generated for the analysis.
+        analysis_output (Union[str, pd.DataFrame, dict[str, pd.DataFrame], None]): The output of the analysis process.
+        plot_code (str): The code generated for the visualization.
+        plot_output (str): The output of the visualization process.
+        insights_output (str): The generated insights as a string.
+        recommendations_output (str): The generated recommendations in the specified format.
+        tasks_output (str): The generated tasks as a string.
+        ai_queries_output (dict[str, list]): The generated AI queries for different types of analysis.
+
+    Methods:
+        get_data(db_type, db_config, vector_store_config):
+            Retrieve data from the specified database type using the provided configuration.
+        analysis(user_input, analysis_context, time_limit, max_retries, auto_train):
+            Perform an analysis based on the provided user input and analysis parameters.
+        visualisation(user_input, plot_context, time_limit, max_retries, auto_train, plot_path):
+            Generate a visualization based on the provided user input and context.
+        insights(user_input, insights_context, n_insights):
+            Generate insights based on the provided user input and optional context.
+        recommendations(user_input, from_insights, recs_format, recommendations_context, n_recommendations, output_type):
+            Generate recommendations based on the provided user input and analysis insights.
+        tasks(user_input, tasks_context, n_tasks):
+            Generate a list of tasks based on the provided user input and context.
+        ask(user_input, outputs, plot_path, recommendations_params, counts, context, **kwargs):
+            Ask a question and generate various outputs based on the provided user input and optional parameters.
+        ai_queries(context):
+            Generate AI-based queries for data analysis based on the provided context.
+    """
 
     def __init__(
         self,
-        analysis_type: Optional[Literal["sql", "ml", "skip"]] = None,
+        analysis_type: Literal["sql", "ml", "skip"],
         api_key: Optional[str] = None,
-        max_retries: Optional[int] = 5,
-        generator_model: Optional[LiteLLM] = None,
-        analysis_model: Optional[LiteLLM] = None,
-        user_input: Optional[str] = None,
-        context: Optional[str] = None,
-        log_level: Optional[
-            Literal["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-        ] = "INFO",
-        print_log: Optional[bool] = False,
-        log_filename: Optional[str] = "dataanalyzr.log",
-        # legacy usage
-        df: Union[str, pd.DataFrame] = None,
-        model: Optional[LLM] = None,
-        model_type: Optional[str] = None,
-        model_name: Optional[str] = None,
-        seed: Optional[int] = 0,
+        class_params: Optional[dict] = None,
+        generator_llm: Optional[LiteLLM] = None,
+        analysis_llm: Optional[LiteLLM] = None,
+        context: Optional[Union[str, dict]] = None,
+        log_params: Optional[dict] = None,
     ):
-        api_key = (
-            api_key or os.environ.get("API_KEY") or os.environ.get("OPENAI_API_KEY")
-        )
-        if api_key is None:
-            raise MissingValueError(
-                "Provide a value for `api_key` or set the `OPENAI_API_KEY` environment variable."
-            )
-        self.max_retries = max_retries
-        self.user_input = user_input
-        self.log_filename = log_filename
-        self._set_logger(log_level, print_log)
+        """
+        Initialize a DataAnalyzr instance.
 
-        if df is not None:
-            # legacy usage
-            self._legacy_usage(
+        Args:
+            analysis_type (Literal["sql", "ml", "skip"]): The type of analysis to be performed.
+
+        Keyword Args:
+            api_key (Optional[str], optional): API key for accessing LLM services. May also be set as an environment variable.
+            class_params (Optional[dict], optional): Dictionary of class parameters.
+                - max_retries (int): Maximum number of retries for LLM calls. Defaults to None.
+                - time_limit (int): Time limit for LLM calls. Defaults to None.
+                - auto_train (bool): Whether to train the LLM model. Defaults to True.
+            generator_llm (Optional[LiteLLM], optional): LLM instance for generating analysis. Defaults to OpenAI's gpt-4o.
+            analysis_llm (Optional[LiteLLM], optional): LLM instance for performing analysis. Defaults to OpenAI's gpt-4o.
+            context (Optional[Union[str, dict]], optional): Context for analysis and response generation. Defaults to "".
+            log_params (Optional[dict], optional): Dictionary of logging parameters.
+                - log_filename (str): Name of the log file. Defaults to "dataanalyzr.csv".
+                - log_level (str): Level of logging. Defaults to "INFO".
+                - print_log (bool): Whether to print logs to console. Defaults to False.
+
+        Raises:
+            ValueError: If the provided `analysis_type` is not one of "sql", "ml", or "skip".
+
+        Example:
+            from lyzr.base.llm import LiteLLM
+            from lyzr.data_analyzr.data_analyzr import DataAnalyzr
+
+            analysis_type = "sql"
+            log_params = {"log_filename": "dataanalyzr.log", "log_level": "DEBUG", "print_log": True}
+
+            data_analyzr = DataAnalyzr(
+                analysis_type=analysis_type,
                 api_key=api_key,
-                df=df,
-                user_input=user_input,
-                model=model,
-                model_type=model_type,
-                model_name=model_name,
-                seed=seed,
+                class_params=class_params,
+                generator_llm=generator_llm,
+                analysis_llm=analysis_llm,
+                context=context,
+                log_params=log_params,
             )
-        else:
-            if analysis_type is None:
-                raise MissingValueError("`analysis_type` is a required parameter.")
-            if generator_model is None:
-                self.generator_model = LyzrLLMFactory.from_defaults(
-                    model="gpt-4-1106-preview", api_key=api_key, seed=seed
-                )
-            elif isinstance(generator_model, LiteLLM):
-                self.generator_model = generator_model
-            self.generator_model.additional_kwargs["logger"] = self.logger
-            if analysis_model is None:
-                self.analysis_model = LyzrLLMFactory.from_defaults(
-                    model="gpt-3.5-turbo", api_key=api_key, seed=seed
-                )
-            elif isinstance(analysis_model, LiteLLM):
-                self.analysis_model = analysis_model
-            self.analysis_model.additional_kwargs["logger"] = self.logger
+        """
+        try:
+            self.analysis_type = AnalysisTypes(analysis_type.lower().strip())
+        except ValueError:
+            raise ValueError(
+                f"Invalid value for `analysis_type`. Must be one of {', '.join([at.value for at in AnalysisTypes])}."
+            )
+        class_params = class_params or {}
+        self.params = ParamsDict(
+            max_retries=class_params.get("max_retries", None),
+            time_limit=class_params.get("time_limit", None),
+            auto_train=class_params.get("auto_train", None),
+        )
+        from lyzr.base.logger import set_logger
 
-            self.analysis_type = analysis_type.lower().strip()
-            self.context = context or ""
+        log_params = log_params or {}
+        self.logger = set_logger(
+            name="data_analyzr",
+            logfilename=log_params.get("log_filename", "dataanalyzr.csv"),
+            log_level=log_params.get(
+                "log_level", "INFO"
+            ),  # one of "NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
+            print_log=log_params.get("print_log", False),
+        )
+        if isinstance(generator_llm, LiteLLM):
+            self.generator_llm = generator_llm
+        else:
+            self.generator_llm = LyzrLLMFactory.from_defaults(
+                model="gpt-4o", api_key=api_key, seed=0
+            )
+
+        self.generator_llm.additional_kwargs["logger"] = self.logger
+        if isinstance(analysis_llm, LiteLLM):
+            self.analysis_llm = analysis_llm
+        else:
+            self.analysis_llm = LyzrLLMFactory.from_defaults(
+                model="gpt-4o", api_key=api_key, seed=0
+            )
+        self.analysis_llm.additional_kwargs["logger"] = self.logger
+
+        self.context = ContextDict().validate(context)
+
+        if self.analysis_type is AnalysisTypes.ml:
+            from lyzr.data_analyzr.analysis_handler import PythonicAnalysisFactory
+
+            self.analyser = PythonicAnalysisFactory
+        elif self.analysis_type is AnalysisTypes.sql:
+            from lyzr.data_analyzr.analysis_handler import TxttoSQLFactory
+
+            self.analyser = TxttoSQLFactory
+        else:
+            self.analyser = None
+        from lyzr.data_analyzr.analysis_handler import PlotFactory
+
+        self.plotter = PlotFactory
         (
-            self.dataset_description_output,
-            self.ai_queries,
+            self.df_dict,
+            self.database_connector,
+            self.vector_store,
+            self.analysis_code,
+            self.analysis_guide,
             self.analysis_output,
-            self.visualisation_output,
+            self.plot_code,
+            self.plot_output,
             self.insights_output,
             self.recommendations_output,
             self.tasks_output,
-        ) = (None, None, None, None, None, None, None)
+            self.ai_queries_output,
+        ) = (None,) * 12
 
-    def _legacy_usage(
-        self,
-        api_key: str,
-        df: Union[str, pd.DataFrame],
-        user_input: Optional[str],
-        model: Optional[LLM],
-        model_type: Optional[str],
-        model_name: Optional[str],
-        seed: int,
-    ):
-        warnings.warn(
-            "The `df` parameter is deprecated and will be removed in a future version. Please use the `get_data` method to load data."
+        from lyzr.data_analyzr.utils import logging_decorator
+
+        self.analysis = logging_decorator(logger=self.logger)(self.analysis)
+        self.visualisation = logging_decorator(logger=self.logger)(self.visualisation)
+        self.insights = logging_decorator(logger=self.logger)(self.insights)
+        self.recommendations = logging_decorator(logger=self.logger)(
+            self.recommendations
         )
-        for param in ["model", "model_type", "model_name", "seed"]:
-            if locals()[param] is not None:
-                warnings.warn(
-                    f"The `{param}` parameter is deprecated and will be removed in a future version. Please use the `analysis_model` parameter to set the analysis model, and the `generator_model` parameter to set the generation model."
-                )
-        if isinstance(model, LLM):
-            api_key = model.api_key
-            model_name = model.model_name
-            model_type = model.model_type
-            model_kwargs = {}
-            for attr in model.__dict__:
-                if attr not in ["api_key", "model_name"]:
-                    model_kwargs[attr] = model.__dict__[attr]
-        else:
-            model_kwargs = {}
-            model_type = model_type or os.environ.get("MODEL_TYPE", None)
-            model_name = model_name or os.environ.get("MODEL_NAME", None)
-        self.generator_model = LyzrLLMFactory.from_defaults(
-            api_key=api_key,
-            api_type=model_type,
-            model=model_name or "gpt-4-1106-preview",
-            seed=seed,
-            **model_kwargs,
-        )
-        self.analysis_model = LyzrLLMFactory.from_defaults(
-            api_key=api_key,
-            api_type=model_type,
-            model=model_name or "gpt-3.5-turbo",
-            seed=seed,
-            **model_kwargs,
-        )
-        self.context = ""
-        self.analysis_type = "ml"
-        self.user_input = user_input
+        self.tasks = logging_decorator(logger=self.logger)(self.tasks)
 
-        def _clean_df(df: pd.DataFrame):
-            df = df[df.columns[df.isnull().mean() < 0.5]]
-            cat_columns = df.select_dtypes(include=["object"]).columns
-            num_columns = df.select_dtypes(include=[np.number]).columns
-            df[cat_columns] = df[cat_columns].apply(lambda x: x.fillna(x.mode()[0]))
-            df[num_columns] = df[num_columns].apply(lambda x: x.fillna(x.mean()))
-            df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
-            df = df.drop_duplicates(keep="first")
-            return df
-
-        if isinstance(df, str):
-            self.database_connector, self.df_dict, self.vector_store = get_db_details(
-                "ml", "files", {"datasets": {"Dataset": df}}, {}, logger=self.logger
-            )
-            for name, df in self.df_dict.items():
-                if not isinstance(df, pd.DataFrame):
-                    continue
-                self.df_dict[name] = _clean_df(df)
-        elif isinstance(df, pd.DataFrame):
-            if df.empty:
-                raise EmptyDataError("The provided DataFrame is empty.")
-            self.df_dict = {"dataset": _clean_df(df)}
-            self.database_connector = None
-            self.vector_store = None
-        else:
-            raise ValueError("df must be a path to a file or a pd.DataFrame object.")
-        self.df_info_dict = get_info_dict_from_df_dict(self.df_dict)
-
-    def _set_logger(self, log_level, print_log):
-        self.logger = logging.getLogger(__name__)
-        numeric_level = getattr(logging, log_level.upper(), None)
-        if not isinstance(numeric_level, int):
-            raise ValueError("Invalid log level: %s" % log_level)
-        self.logger.setLevel(numeric_level)
-
-        if self.logger.hasHandlers():
-            for handler in self.logger.handlers:
-                try:
-                    handler.close()
-                except Exception:
-                    pass
-            self.logger.handlers.clear()
-
-        if print_log:
-            # output logs to stdout
-            handler = logging.StreamHandler(sys.stdout)
-            handler.setLevel(numeric_level)
-            self.logger.addHandler(handler)
-
-        log_filename = self.log_filename
-        dir_path = os.path.dirname(log_filename)
-        if dir_path.strip() != "":
-            os.makedirs(dir_path, exist_ok=True)
-        file_handler = logging.FileHandler(
-            log_filename, mode="a"
-        )  # Open the log file in append mode
-        file_handler.setLevel(numeric_level)
-
-        # Optionally, you can set a formatter for the file handler if you want a different format for file logs
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s\n%(message)s\n",
-            datefmt="%d-%b-%y %H:%M:%S %Z",
-        )
-        formatter.converter = time.gmtime
-        file_handler.setFormatter(formatter)
-
-        # Add the file handler to the logger
-        self.logger.addHandler(file_handler)
-
-    # Function to get datasets
     def get_data(
         self,
-        db_type: Literal[
-            "files",
-            "redshift",
-            "postgres",
-            "sqlite",
-        ],
-        config: dict,
-        # if db_type == "files", config_keys = datasets, files_kwargs, db_path
-        # if db_type == "redshift" or "postgres" or "snowflake" or "mysql", config_keys = host, port, user, password, database, schema, table
-        # if db_type == "snowflake", config_keys = warehouse, role
-        # if db_type == "sqlite", config_keys = db_path
-        vector_store_config,
-    ) -> Any:
+        db_type: Literal["files", "redshift", "postgres", "sqlite"],
+        db_config: dict,
+        vector_store_config: dict = {},
+    ):
+        """
+        Retrieve data from the specified database type using the provided configuration.
+
+        Args:
+            db_type (Literal["files", "redshift", "postgres", "sqlite"]): The type of database to connect to.
+            db_config (dict): Configuration dictionary for the database connection.
+            vector_store_config (dict, optional): Configuration dictionary for the vector store. Defaults to an empty dictionary.
+
+        Raises:
+            ValueError: If data_config is not a dictionary.
+
+        Example:
+            db_config = {
+                "host": "localhost",
+                "port": 5432,
+                "user": "username",
+                "password": "password",
+                "database": "dbname"
+            }
+            vector_store_config = {
+                "path": "path/to/vector_store"
+            }
+            data_analyzr.get_data(
+                db_type="postgres",
+                db_config=db_config,
+                vector_store_config=vector_store_config
+            )
+        """
+        from lyzr.data_analyzr.file_utils import get_db_details
+        from lyzr.data_analyzr.db_models import DataConfig, SupportedDBs
+
+        if not isinstance(db_config, dict):
+            raise ValueError("data_config must be a dictionary.")
+        db_config["db_type"] = SupportedDBs(db_type.lower().strip())
         self.database_connector, self.df_dict, self.vector_store = get_db_details(
-            self.analysis_type, db_type, config, vector_store_config, self.logger
-        )
-        self.df_info_dict = (
-            get_info_dict_from_df_dict(self.df_dict)
-            if self.df_dict is not None
-            else None
+            analysis_type=self.analysis_type,
+            db_type=db_config["db_type"],
+            db_config=DataConfig.validate(db_config),
+            vector_store_config=VectorStoreConfig(**vector_store_config),
+            logger=self.logger,
         )
 
     def analysis(
         self,
         user_input: str,
-        analysis_context: str,
-        analysis_steps: dict = None,
-    ):
-        if self.analysis_type == "skip" and analysis_steps is None:
-            if self.df_dict is None:
-                self.logger.info(
-                    "No analysis performed. Fetching dataframes from database."
-                )
-                self.df_dict = self.database_connector.fetch_dataframes_dict()
-            self.analysis_output = self.df_dict
-            self.analysis_guide = (
-                "No analysis performed. Analysis output is the given dataframe."
-            )
-            return self.analysis_output
-        if self.analysis_type == "sql" and analysis_steps is None:
-            return self._txt_to_sql_analysis(
-                self.analysis_model, user_input, analysis_context
-            )
-        if self.analysis_type == "ml" or analysis_steps is not None:
-            return self._ml_analysis(
-                self.analysis_model,
-                user_input,
-                analysis_context,
-                analysis_steps=analysis_steps,
-            )
-
-    def _ml_analysis(
-        self,
-        analysis_model,
-        user_input: str,
         analysis_context: str = None,
-        analysis_steps: dict = None,
-    ):
-        self.analyzer = MLAnalysisFactory(
-            model=analysis_model,
-            data_dict=self.df_dict,
-            data_info_dict=self.df_info_dict,
-            logger=self.logger,
-            context=analysis_context,
-        )
-        if analysis_steps is not None:
-            _, data = self.analyzer.get_analysis_from_steps(analysis_steps)
-            return data
-        else:
-            self.analysis_output = self.analyzer.run_complete_analysis(user_input)
-            self.analysis_guide = self.analyzer.analysis_guide
-            return self.analysis_output
+        time_limit: int = None,
+        max_retries: int = None,
+        auto_train: bool = None,
+    ) -> Union[str, pd.DataFrame, dict[str, pd.DataFrame], None]:
+        """
+        Perform an analysis based on the provided user input and analysis parameters.
 
-    def _txt_to_sql_analysis(
-        self, analysis_model, user_input: str, analysis_context: str = None
-    ):
-        self.analyzer = TxttoSQLFactory(
-            model=analysis_model,
-            db_connector=self.database_connector,
+        This method determines the type of analysis to be performed (SQL, or Pythonic) and executes it.
+        If the analysis type is set to skip, it fetches dataframes from the database and returns them
+        without performing any analysis.
+
+        Args:
+            user_input (str): The input string provided by the user for analysis.
+            analysis_context (str): The context for the analysis. Defaults to "".
+            time_limit (int): Time limit for the analysis execution in seconds. Defaults to 45.
+            max_retries (int): Maximum number of retries for the analysis. Defaults to 10.
+            auto_train (bool): Whether to automatically add the analysis to training data. Defaults to True.
+
+        Returns:
+            Union[str, pd.DataFrame, dict[str, pd.DataFrame], None]: The output of the analysis.
+
+        Example:
+            output = data_analyzr.analysis(
+                user_input="Analyze the sales data.",
+                analysis_context="Sales data analysis for Q1 2023",
+                time_limit=60,
+                max_retries=5,
+                auto_train=True
+            )
+            print(output)
+        """
+        if self.analysis_type is AnalysisTypes.skip:
+            self.logger.info("No analysis performed.")
+            self.analysis_guide = "No analysis performed."
+            self.analysis_output = None
+            self.analysis_code = None
+            return self.analysis_output
+        if analysis_context is None:
+            analysis_context = ""
+        analyser_args = dict(
+            llm=self.analysis_llm,
             logger=self.logger,
             context=analysis_context,
             vector_store=self.vector_store,
+            time_limit=time_limit,
+            max_retries=max_retries,
+            auto_train=auto_train,
         )
-        self.analysis_output = self.analyzer.run_complete_analysis(user_input)
-        self.analysis_guide = self.analyzer.analysis_guide
+        if self.analysis_type is AnalysisTypes.sql:
+            analyser_args["db_connector"] = self.database_connector
+        if self.analysis_type is AnalysisTypes.ml:
+            analyser_args["df_dict"] = self.df_dict
+        analyser = self.analyser(
+            **analyser_args,
+        )
+        self.analysis_output = analyser.generate_output(user_input)
+        self.analysis_guide = analyser.guide
+        self.analysis_code = analyser.code
         return self.analysis_output
 
     def visualisation(
         self,
         user_input: str,
         plot_context: str = None,
+        time_limit: int = None,
+        max_retries: int = None,
+        auto_train: bool = None,
         plot_path: str = None,
-    ):
-        if plot_path is None:
-            plot_path = Path(f"generated_plots/{str(uuid.uuid4())}.png").as_posix()
-        else:
-            plot_path = Path(plot_path).as_posix()
-        self.visualisation_output = None
-        # self.start_time = time.time()
+    ) -> str:
+        """
+        Generate a visualisation based on the provided user input and context.
 
-        self.logger.info("Generating visualisation\n")
-        plotter = PlotFactory(
-            model=self.analysis_model,
+        This method uses the PlotFactory to create visualizations from the analysis output or provided dataframes.
+        It handles retries and time limits for the visualization process and saves the plot to a specified path.
+
+        Args:
+            user_input (str): The input question.
+            plot_context (str): The context for the plot. Defaults to "".
+            time_limit (int): Time limit for the visualization process in seconds. Defaults to 60.
+            max_retries (int): Maximum number of retries for the visualization process. Defaults to 10.
+            auto_train (bool): Whether to automatically add the visualization to training data. Defaults to True.
+            plot_path (str, optional): Path to save the generated plot. Defaults to generated_plots/<random-string>.png.
+
+        Returns:
+            The output of the visualization process, which could be a plot object or a path to the saved plot.
+
+        Example:
+            saved_plot_path = data_analyzr.visualisation(
+                user_input="Plot the distribution of column A.",
+                plot_context="Distribution plot",
+                time_limit=60,
+                max_retries=5,
+                auto_train=True,
+                plot_path="path/to/save/plot.png"
+            )
+            from PIL import Image
+            Image.open(saved_plot_path).show()
+        """
+        if plot_context is None:
+            plot_context = ""
+        if self.df_dict is None:
+            data_kwargs = {"connector": self.database_connector}
+        else:
+            data_kwargs = {"df_dict": self.df_dict}
+        if isinstance(self.analysis_output, pd.DataFrame):
+            data_kwargs["analysis_output"] = {"analysis_output": self.analysis_output}
+        elif isinstance(self.analysis_output, dict):
+            data_kwargs["analysis_output"] = self.analysis_output
+        self.plot_output = None
+        plotter = self.plotter(
+            llm=self.analysis_llm,
             logger=self.logger,
-            plot_context=plot_context,
-            plot_path=plot_path,
-            df_dict=self.df_dict,
-            database_connector=self.database_connector,
-            analysis_type=self.analysis_type,
-            analyzer=self.analyzer,
-            analysis_output=self.analysis_output,
+            context=plot_context,
+            data_kwargs=data_kwargs,
+            vector_store=self.vector_store,
+            time_limit=time_limit,
+            max_retries=max_retries,
+            auto_train=auto_train,
         )
-        self.visualisation_output = plotter.get_visualisation(user_input)
-        return self.visualisation_output
+        self.plot_output = plotter.generate_output(
+            user_input=user_input, plot_path=plot_path
+        )
+        self.plot_code = plotter.code
+        return self.plot_output
 
     def insights(
         self,
@@ -358,17 +376,40 @@ class DataAnalyzr:
         insights_context: Optional[str] = None,
         n_insights: Optional[int] = 3,
     ) -> str:
-        if "analysis_guide" not in self.__dict__:
+        """
+        Generate insights based on the provided user input and optional context.
+
+        Args:
+            user_input (str): The input string provided by the user for generating insights.
+            insights_context (Optional[str], optional): Additional context for generating insights. Defaults to "".
+            n_insights (Optional[int], optional): Number of insights to generate. Defaults to 3.
+
+        Returns:
+            str: The generated insights as a string.
+
+        Example:
+            insights = data_analyzr.insights("What are the key trends?")
+            print(insights)
+        """
+        from lyzr.data_analyzr.utils import format_analysis_output
+
+        if insights_context is None:
+            insights_context = ""
+        if not hasattr(self, "analysis_guide") or self.analysis_guide is None:
             self.analysis_guide = ""
-        self.insights_output = self.generator_model.run(
+        self.insights_output = self.generator_llm.run(
             messages=[
                 LyzrPromptFactory(name="insights", prompt_type="system").get_message(
-                    context=insights_context.strip() + "\n\n", n_insights=n_insights
+                    context=insights_context.strip(), n_insights=n_insights
                 ),
                 LyzrPromptFactory(name="insights", prompt_type="user").get_message(
                     user_input=user_input,
                     analysis_guide=self.analysis_guide,
-                    analysis_output=format_df_with_describe(self.analysis_output),
+                    analysis_output=(
+                        format_analysis_output(output_df=self.analysis_output)
+                        if self.analysis_output is not None
+                        else self.vector_store.get_related_documentation(user_input)
+                    ),
                     date=time.strftime("%d %b %Y"),
                 ),
             ],
@@ -376,57 +417,73 @@ class DataAnalyzr:
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0,
+            logger=self.logger,
         ).message.content.strip()
         return self.insights_output
 
     def recommendations(
         self,
-        user_input: Optional[str] = None,
-        use_insights: Optional[bool] = True,
+        user_input: str,
+        from_insights: Optional[bool] = True,
         recs_format: Optional[dict] = None,
         recommendations_context: Optional[str] = None,
         n_recommendations: Optional[int] = 3,
         output_type: Optional[Literal["text", "json"]] = "text",
-        # legacy usage
-        insights: Optional[str] = None,
-        schema: Optional[list] = None,
     ) -> str:
-        if insights is not None or schema is not None:
-            use_insights = True
-            output_type = "json"
-        if insights is not None:
-            warnings.warn(
-                "The `insights` parameter is deprecated and will be removed in a future version. Please use the `insights_output` attribute to set the insights."
-            )
-            self.insights_output = insights
-        if schema is not None:
-            warnings.warn(
-                "The `schema` parameter is deprecated and will be removed in a future version. Please use the `recs_format` parameter to set the recommendations format as a dictionary."
-            )
-            for elem in schema:
-                if isinstance(elem, dict):
-                    recs_format = elem
-                    break
+        """
+        Generate recommendations based on the provided user input and analysis insights.
+
+        This method generates actionable recommendations by leveraging the analysis output and optional insights.
+        It can format the recommendations in either text or JSON format.
+
+        Args:
+            user_input (Optional[str]): The input string provided by the user for generating recommendations.
+            from_insights (Optional[bool]): Whether to include insights from the analysis in the recommendations. Defaults to True.
+            recs_format (Optional[dict]): The format for the recommendations if output_type is "json". Defaults to None.
+            recommendations_context (Optional[str]): Additional context to be included in the recommendations. Defaults to None.
+            n_recommendations (Optional[int]): The number of recommendations to generate. Defaults to 3.
+            output_type (Optional[Literal["text", "json"]]): The format of the output recommendations.
+                Can be "text" or "json". Defaults to "text".
+
+        Returns:
+            str: The generated recommendations in the specified format.
+
+        Example:
+            recommendations = data_analyzr.recommendations(user_input="How can we improve our sales?")
+            print(recommendations)
+        """
+        from lyzr.data_analyzr.utils import format_analysis_output
 
         system_message_sections = ["context"]
         system_message_dict = {}
+        llm_params = dict(
+            temperature=0.3,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0,
+            logger=self.logger,
+        )
+        df_details = (
+            format_analysis_output(output_df=self.analysis_output)
+            if self.analysis_output is not None
+            else self.vector_store.get_related_documentation(user_input)
+        )
         user_message_dict = {
             "user_input": user_input,
-            "analysis_output": f"Analysis output:\n{format_df_with_describe(self.analysis_output)}",
+            "analysis_output": f"Analysis output:\n{df_details}",
         }
-        if recommendations_context is not None and recommendations_context != "":
-            system_message_sections.append("external_context")
-            system_message_dict["context"] = recommendations_context.strip() + "\n\n"
+        if recommendations_context is None:
+            recommendations_context = ""
+        system_message_dict["context"] = recommendations_context
 
-        if not use_insights:
-            insights = None
-            system_message_sections.append("task_no_insights")
-            user_message_dict["insights"] = ""
-        else:
+        if from_insights:
             system_message_sections.append("task_with_insights")
             user_message_dict["insights"] = (
                 f"\nAnalysis insights:\n{self.insights_output}\n"
             )
+        else:
+            system_message_sections.append("task_no_insights")
+            user_message_dict["insights"] = ""
 
         if output_type.lower().strip() == "json":
             recs_format = recs_format or {
@@ -439,12 +496,13 @@ class DataAnalyzr:
             system_message_dict["json_schema"] = [
                 recs_format for _ in range(n_recommendations)
             ]
+            llm_params["response_format"] = {"type": "json_object"}
         elif output_type.lower().strip() == "text":
             system_message_sections.append("text_type")
         system_message_dict["n_recommendations"] = n_recommendations
 
         system_message_sections.append("closing")
-        self.recommendations_output = self.generator_model.run(
+        self.recommendations_output = self.generator_llm.run(
             messages=[
                 LyzrPromptFactory(
                     name="recommendations", prompt_type="system"
@@ -455,39 +513,37 @@ class DataAnalyzr:
                     name="recommendations", prompt_type="user"
                 ).get_message(**user_message_dict),
             ],
-            temperature=0.3,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-            response_format=(
-                {"type": "json_object"} if output_type == "json" else {"type": "text"}
-            ),
+            **llm_params,
         ).message.content
         return self.recommendations_output
 
     def tasks(
         self,
-        user_input: Optional[str] = None,
+        user_input: str,
         tasks_context: Optional[str] = None,
         n_tasks: Optional[int] = 5,
-        # legacy usage
-        insights: Optional[str] = None,
-        recommendations: Optional[str] = None,
     ) -> str:
-        if insights is not None:
-            warnings.warn(
-                "The `insights` parameter is deprecated and will be removed in a future version. Please use the `insights_output` attribute to set the insights."
-            )
-            self.insights_output = insights
-        if recommendations is not None:
-            warnings.warn(
-                "The `recommendations` parameter is deprecated and will be removed in a future version. Please use the `recommendations_output` attribute to set the recommendations."
-            )
-            self.recommendations_output = recommendations
-        self.tasks_output = self.generator_model.run(
+        """
+        Generate a list of tasks based on the provided user input and context.
+
+        Args:
+            user_input (Optional[str]): The input string provided by the user for generating tasks. Defaults to None.
+            tasks_context (Optional[str]): The context for the tasks to be generated. Defaults to "".
+            n_tasks (Optional[int]): The number of tasks to generate. Defaults to 5.
+
+        Returns:
+            str: The generated tasks as a string.
+
+        Example:
+            tasks_output = data_analyzr.tasks("Analyze sales data")
+            print(tasks_output)
+        """
+        if tasks_context is None:
+            tasks_context = ""
+        self.tasks_output = self.generator_llm.run(
             messages=[
                 LyzrPromptFactory(name="tasks", prompt_type="system").get_message(
-                    context=tasks_context.strip() + "\n\n", n_tasks=n_tasks
+                    context=tasks_context, n_tasks=n_tasks
                 ),
                 LyzrPromptFactory(name="tasks", prompt_type="user").get_message(
                     user_input=user_input,
@@ -499,6 +555,7 @@ class DataAnalyzr:
             top_p=0.3,
             frequency_penalty=0.7,
             presence_penalty=0.3,
+            logger=self.logger,
         ).message.content.strip()
         return self.tasks_output
 
@@ -506,199 +563,207 @@ class DataAnalyzr:
         self,
         user_input: str = None,
         outputs: list[
-            Literal["visualisation", "insights", "recommendations", "tasks"]
+            OutputTypes.visualisation.value,
+            OutputTypes.insights.value,
+            OutputTypes.recommendations.value,
+            OutputTypes.tasks.value,
         ] = None,
         plot_path: str = None,
-        rerun_analysis: bool = True,
-        use_insights: bool = True,
-        recs_format: dict = None,
-        recs_output_type: Literal["text", "json"] = None,
+        recommendations_params: Optional[dict] = None,
         counts: dict = None,  # keys: insights, recommendations, tasks
         context: dict = None,  # keys: analysis, insights, recommendations, tasks
-    ):
-        if use_insights is None:
-            use_insights = True
-        if rerun_analysis is None:
-            rerun_analysis = True
-        if outputs is None:
-            outputs = ["visualisation", "insights", "recommendations", "tasks"]
-        if user_input is None and self.user_input is None:
-            raise MissingValueError(
-                "`user_input` is a required parameter to generate outputs."
+        **kwargs,  # rerun_analysis, max_retries, time_limit, auto_train
+    ) -> dict[str, str]:
+        """
+        Ask a question and generate various outputs based on the provided user input and optional parameters.
+        This is the primary method for generating responses from the DataAnalyzr instance.
+
+        Args:
+            user_input (str): The input string provided by the user for generating outputs.
+            outputs (list, optional): List of output types to generate. Defaults to all output types if not provided.
+                - "visualisation"
+                - "insights"
+                - "recommendations"
+                - "tasks"
+            plot_path (str, optional): Path to save the generated plot. Defaults to generated_plots/<random-string>.png.
+            recommendations_params (dict, optional): Parameters for generating recommendations.
+                - from_insights (bool): Whether to generate recommendations from insights. Defaults to True.
+                - json_format (bool): Whether to format recommendations as JSON. Defaults to None.
+                - output_type (str): The format of the recommendations output. Defaults to "text".
+            counts (dict, optional): Dictionary specifying the number of insights, recommendations, and tasks to generate.
+                - insights (int): Number of insights to generate. Defaults to 3.
+                - recommendations (int): Number of recommendations to generate. Defaults to 3.
+                - tasks (int): Number of tasks to generate. Defaults to 5.
+            context (dict, optional): Dictionary providing context for analysis, insights, recommendations, and tasks. Defaults to self.context.
+                - analysis (str): Context for the analysis.
+                - visualisation (str): Context for the visualisation.
+                - insights (str): Context for the insights.
+                - recommendations (str): Context for the recommendations.
+                - tasks (str): Context for the tasks.
+            **kwargs: Additional keyword arguments to customize the analysis process.
+                - rerun_analysis (bool): Whether to rerun the analysis. Defaults to True.
+                - max_retries (int): Maximum number of retries for analysis. Defaults to self.params.max_retries.
+                - time_limit (int): Time limit for the analysis in seconds. Defaults to self.params.time_limit.
+                - auto_train (bool): Whether to automatically add to training data. Defaults to self.params.auto_train.
+
+        Returns:
+            dict[str, str]: A dictionary containing the generated outputs.
+                - "visualisation": Path to the generated visualization image.
+                - "insights": The generated insights output.
+                - "recommendations": The generated recommendations output.
+                - "tasks": The generated tasks output.
+
+        Raises:
+            AssertionError: If user_input is not provided or is an empty string.
+
+        Example:
+            outputs = data_analyzr.ask(
+                user_input="What are the key trends in the sales data?",
+                outputs=["visualisation", "insights", "recommendations"],
+                plot_path="path/to/save/plot.png",
+                recommendations_params={"from_insights": True, "json_format": True},
+                counts={"insights": 5, "recommendations": 3, "tasks": 2},
+                context={"analysis": "sales analysis context"},
+                rerun_analysis=True,
+                max_retries=5,
+                time_limit=60,
+                auto_train=True
             )
-        if user_input is None:
-            user_input = self.user_input
-        context = context or {}
+            print(outputs)
+        """
+        rerun_analysis = (
+            kwargs.get("rerun_analysis")
+            if isinstance(kwargs.get("rerun_analysis"), bool)
+            else True
+        )
+        if outputs is None or len(outputs) == 0:
+            outputs = [
+                OutputTypes.visualisation,
+                OutputTypes.insights,
+                OutputTypes.recommendations,
+                OutputTypes.tasks,
+            ]
+        else:
+            outputs = [OutputTypes._member_map_[output] for output in outputs]
+        assert (
+            user_input is not None
+            and isinstance(user_input, str)
+            and user_input.strip() != ""
+        ), "user_input is a required string parameter to generate outputs."
+        user_input = user_input.strip()
+        self.context = self.context.validate(context)
         counts = counts or {}
+        recommendations_params = recommendations_params or {}
+
+        time_limit = kwargs.get("time_limit", self.params.time_limit)
+        max_retries = kwargs.get("max_retries", self.params.max_retries)
+        auto_train = kwargs.get("auto_train", self.params.auto_train)
 
         if self.analysis_output is None or rerun_analysis:
             self.analysis_output = self.analysis(
                 user_input=user_input,
-                analysis_context=context.get("analysis", self.context),
+                analysis_context=self.context.analysis,
+                time_limit=time_limit,
+                max_retries=max_retries,
+                auto_train=auto_train,
             )
 
-        if "visualisation" in outputs:
-            self.visualisation_output = self.visualisation(
+        if OutputTypes.visualisation in outputs:
+            self.plot_output = self.visualisation(
                 user_input=user_input,
-                plot_context=context.get("visualisation", self.context),
+                plot_context=self.context.visualisation,
                 plot_path=plot_path,
+                time_limit=time_limit,
+                max_retries=max_retries,
+                auto_train=auto_train,
             )
         else:
-            self.visualisation_output = ""
-
+            self.plot_output = ""
         if (
-            "insights" in outputs
-            or "tasks" in outputs
-            or ("recommendations" in outputs and use_insights)
+            OutputTypes.insights in outputs
+            or OutputTypes.tasks in outputs
+            or (
+                OutputTypes.recommendations in outputs
+                and recommendations_params.get("from_insights", True)
+            )
         ):
             self.insights_output = self.insights(
                 user_input=user_input,
-                insights_context=context.get("insights", self.context),
+                insights_context=self.context.insights,
                 n_insights=counts.get("insights", 3),
             )
         else:
             self.insights_output = ""
 
-        if "recommendations" in outputs or "tasks" in outputs:
+        if OutputTypes.recommendations in outputs or OutputTypes.tasks in outputs:
             self.recommendations_output = self.recommendations(
                 user_input=user_input,
-                use_insights=use_insights,
-                recs_format=recs_format,
-                recommendations_context=context.get("recommendations", self.context),
+                from_insights=recommendations_params.get("from_insights", True),
+                recs_format=recommendations_params.get("json_format", None),
+                recommendations_context=self.context.recommendations,
                 n_recommendations=counts.get("recommendations", 3),
-                output_type=recs_output_type or "text",
+                output_type=recommendations_params.get("output_type", "text"),
             )
         else:
             self.recommendations_output = ""
 
-        if "tasks" in outputs:
+        if OutputTypes.tasks in outputs:
             self.tasks_output = self.tasks(
                 user_input=user_input,
-                tasks_context=context.get("tasks", self.context),
+                tasks_context=self.context.tasks,
                 n_tasks=counts.get("tasks", 5),
             )
         else:
             self.tasks_output = ""
 
         return {
-            "visualisation": self.visualisation_output,
+            "visualisation": self.plot_output,
             "insights": self.insights_output,
             "recommendations": self.recommendations_output,
             "tasks": self.tasks_output,
         }
 
-    # ---------------------------------------- Legacy functions, for backward compatibility ----------------------------------------
-    # ------------------------------ These functions are not used in the current version of the code. ------------------------------
+    def ai_queries(
+        self,
+        context: Optional[str] = None,
+    ) -> dict[str, list[str]]:
+        """
+        Generate AI-based queries for data analysis based on the provided context.
 
-    def analysis_insights(self, user_input: str) -> str:
-        warnings.warn(
-            "The `analysis_insights` method is deprecated and will be removed in a future version. Use the `insights` method instead."
-        )
-        self.analysis_output = self.analysis(
-            user_input=user_input,
-            analysis_context="",
-        )
-        return self.insights(user_input)
+        Args:
+            context (Optional[str]): The context for generating queries. Defaults to "".
 
-    def visualizations(
-        self, user_input: str, dir_path: Path = None
-    ) -> list[Image.Image]:
-        warnings.warn(
-            "The `visualizations` method is deprecated and will be removed in a future version. Use the `visualisation` method instead."
-        )
-        return [
-            Image.open(
-                self.visualisation(
-                    user_input,
-                    plot_path=(
-                        str(dir_path / "plot.png") if dir_path is not None else None
-                    ),
-                )
-            )
+        Returns:
+            dict[str, list[str]]: A dictionary containing the generated AI queries for different types of analysis.
+
+        Example:
+            queries = data_analyzr.ai_queries(context="Analyze sales data trends.")
+            print(queries)
+        """
+
+        context = self.context.insights if context is None else context
+        schema = {
+            "type_of_analysis1": ["query1", "query2", "query3", "query4"],
+            "type_of_analysis2": ["query1", "query2", "query3", "query4"],
+            "type_of_analysis3": ["query1", "query2", "query3", "query4"],
+        }
+        messages = [
+            LyzrPromptFactory(name="ai_queries", prompt_type="system").get_message(
+                context=context,
+                schema=json.dumps(schema, indent=4),
+            ),
+            LyzrPromptFactory(name="ai_queries", prompt_type="user").get_message(
+                df_details=self.vector_store.get_related_documentation(context)
+            ),
         ]
-
-    def dataset_description(self, context: str = None) -> str:
-        warnings.warn(
-            "The `dataset_description` method is deprecated and will be removed in a future version."
-        )
-        context = context or self.context
-        df_desc_dict = {}
-        for name, df in self.df_dict.items():
-            df_desc_dict[name] = self.generator_model.run(
-                messages=[
-                    LyzrPromptFactory(
-                        name="dataset_description", prompt_type="system"
-                    ).get_message(context=context.strip() + "\n\n"),
-                    LyzrPromptFactory(
-                        name="dataset_description", prompt_type="user"
-                    ).get_message(
-                        df_head=df.head(),
-                        headers=df.columns.tolist(),
-                    ),
-                ],
-                temperature=1,
-                top_p=0.3,
-                frequency_penalty=0.7,
-                presence_penalty=0.3,
-            ).message.content.strip()
-        self.dataset_description_output = "\n".join(
-            [f"{name}:\n{desc}" for name, desc in df_desc_dict.items()]
-        )
-        return self.dataset_description_output
-
-    def ai_queries_df(
-        self, dataset_description: Optional[str] = None, context: Optional[str] = None
-    ) -> str:
-        warnings.warn(
-            "The `ai_queries_df` method is deprecated and will be removed in a future version."
-        )
-        context = context or self.context
-        self.dataset_description_output = (
-            dataset_description or self.dataset_description_output
-        )
-        if self.dataset_description_output is None:
-            self.dataset_description_output = self.dataset_description(context)
-
-        self.ai_queries = self.generator_model.run(
-            messages=[
-                LyzrPromptFactory(name="ai_queries", prompt_type="system").get_message(
-                    context=context.strip() + "\n\n"
-                ),
-                LyzrPromptFactory(name="ai_queries", prompt_type="user").get_message(
-                    df_details=format_df_with_describe(self.df_dict)
-                ),
-            ],
+        ai_queries_output = self.generator_llm.run(
+            messages=messages,
             temperature=1,
             top_p=0.3,
             frequency_penalty=0.7,
             presence_penalty=0.3,
-        ).message.content.strip()
+            response_format={"type": "json_object"},
+        ).message.content
+        self.ai_queries_output = json.loads(ai_queries_output)
 
-        return self.ai_queries
-
-    def analysis_recommendation(
-        self,
-        user_input: Optional[str] = None,
-        number_of_recommendations: Optional[int] = 4,
-    ):
-        warnings.warn(
-            "The `analysis_recommendation` method is deprecated and will be removed in a future version."
-        )
-        formatted_user_input: str = (
-            LyzrPromptFactory("format_user_input", "system")
-            .get_message(user_input=user_input)
-            .content
-            if user_input is not None
-            else ""
-        )
-        recommendations = self.generator_model.run(
-            messages=[
-                LyzrPromptFactory("analysis_recommendations", "system").get_message(
-                    number_of_recommendations=number_of_recommendations,
-                    df_details=format_df_with_info(self.df_dict),
-                    formatted_user_input=formatted_user_input,
-                ),
-            ],
-            temperature=0.2,
-        ).message.content.strip()
-        return recommendations
+        return self.ai_queries_output

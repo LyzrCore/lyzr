@@ -1,140 +1,150 @@
+"""
+Utility functions for the data analyzr module in Lyzr.
+"""
+
 # standart-library imports
-import io
-import re
+import time
 import string
 import logging
+import hashlib
+import traceback
+from typing import Union
+from functools import wraps
 
 # third-party imports
 import numpy as np
 import pandas as pd
 
 
-def get_columns_names(
-    df_columns: pd.DataFrame.columns,
-    arguments: dict = {},
-    columns: list = None,
-    logger: logging.Logger = None,
-) -> list:
-    if isinstance(df_columns, pd.MultiIndex):
-        df_columns = df_columns.levels[0]
-    if columns is None:
-        if "columns" not in arguments or not isinstance(arguments.get("columns"), list):
-            return df_columns.to_list()
-        columns = arguments.get("columns", [])
-    if len(columns) == 0:
-        return df_columns.to_list()
-    columns_dict = {remove_punctuation_from_string(col): col for col in df_columns}
-    column_names = []
-    for col in columns:
-        if remove_punctuation_from_string(col) not in columns_dict:
-            logger.warning(
-                "Invalid column name provided: {}. Skipping this column.".format(col)
-            )
-        else:
-            column_names.append(columns_dict[remove_punctuation_from_string(col)])
-    return column_names
+def deterministic_uuid(content: Union[str, bytes, list] = None):
+    """
+    Generate a deterministic UUID based on the provided content.
+
+    Creates a deterministic UUID by hashing the provided content using MD5.
+    The content can be a string, bytes, or a list. If no content is provided, the current time is used.
+
+    Args:
+        content (Union[str, bytes, list], optional):
+            The content to be hashed. Can be a string, bytes, or a list. Defaults to None.
+
+    Returns:
+        str: The generated deterministic UUID as a hexadecimal string.
+    """
+    if content is None:
+        content = str(time.time())
+    if isinstance(content, list):
+        content = "/".join([str(x) for x in content if x is not None])
+    if isinstance(content, str):
+        content = content.encode("utf-8")
+    hash_object = hashlib.md5(content)
+    return hash_object.hexdigest()
 
 
-def remove_punctuation_from_string(value: str) -> str:
-    value = str(value).strip()
-    value = value.translate(str.maketrans("", "", string.punctuation))
-    value = value.replace(" ", "").lower()
-    return value
+def translate_string_name(name: str) -> str:
+    """
+    Converts a given string into a standardized format.
+
+    Args:
+        name (str): The input string to be transformed.
+
+    Returns:
+        str: The transformed string.
+
+    Procedure:
+    - Converts all characters to lowercase.
+    - Strips leading and trailing whitespace.
+    - Replaces all punctuation and spaces with underscores.
+    - Removes leading and trailing underscores.
+    """
+    punc = string.punctuation + " "
+    return (
+        name.lower().strip().translate(str.maketrans(punc, "_" * len(punc))).strip("_")
+    )
 
 
-def flatten_list(lst: list):
-    return_lst = []
-    for el in lst:
-        if isinstance(el, list):
-            return_lst.extend(flatten_list(el))
-        else:
-            return_lst.append(el)
-    return return_lst
+def format_analysis_output(output_df, name: str = None) -> str:
+    """
+    Formats the details of a DataFrame, Series, list of DataFrames, or dictionary of DataFrames into a string.
 
+    Formats inputs them into a string representation, depending on the input type:
+    - pandas Series: Converts the Series to a DataFrame and formats it.
+    - list: Recursively formats each element in the list.
+    - dictionary: Recursively formats each value in the dictionary.
+    - Any other input: Converts the input to a string.
+    - pandas DataFrame: Uses a helper function `df_details_with_describe` to format the DataFrame details.
 
-def _remove_punctuation_from_numeric_string(value) -> str:
-    if not isinstance(value, str):
-        return value
-    negative = False
-    value = value.strip()
-    if value[0] == "-":
-        negative = True
-    cleaned = re.sub(r"[^\d.]", "", str(value))
-    if cleaned.replace(".", "").isdigit():
-        return "-" + cleaned if negative else cleaned
-    else:
-        return value
+    Args:
+        output_df (Union[pd.DataFrame, pd.Series, list, dict, Any]): The input data to be formatted.
+        name (str, optional): An optional name to be used in the formatting. Defaults to None.
 
-
-def convert_to_numeric(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    for col in columns:
-        try:
-            df = df.dropna(subset=[col])
-            column_values = df.loc[:, col].apply(remove_punctuation_from_string)
-            column_values = pd.to_numeric(column_values)
-            df.loc[:, col] = column_values.astype("float")
-        except Exception:
-            pass
-    return df.infer_objects()
-
-
-def get_info_dict_from_df_dict(df_dict: dict[pd.DataFrame]) -> dict[str]:
-    df_info_dict = {}
-    for name, df in df_dict.items():
-        if not isinstance(df, pd.DataFrame):
-            continue
-        buffer = io.StringIO()
-        df.info(buf=buffer)
-        df_info_dict[name] = buffer.getvalue()
-    return df_info_dict
-
-
-def format_df_details(df_dict: dict[pd.DataFrame], df_info_dict: dict[str]) -> str:
-    str_output = []
-    for name, df in df_dict.items():
-        var_name = name.lower().replace(" ", "_")
-        if name in df_info_dict and isinstance(df, pd.DataFrame):
-            str_output.append(
-                f"Dataframe: `{var_name}`\nOutput of `{var_name}.head()`:\n{df.head()}\n\nOutput of `{var_name}.info()`:\n{df_info_dict[name]}\n"
-            )
-        else:
-            str_output.append(f"{name}:\n{df}\n")
-    return "\n".join(str_output)
-
-
-def format_df_with_info(df_dict: dict[pd.DataFrame]) -> str:
-    return format_df_details(df_dict, get_info_dict_from_df_dict(df_dict))
-
-
-def format_df_with_describe(output_df, name: str = None) -> str:
+    Returns:
+        str: The formatted string representation of the input data.
+    """
     if isinstance(output_df, pd.Series):
         output_df = output_df.to_frame()
     if isinstance(output_df, list):
-        return "\n".join([format_df_with_describe(df) for df in output_df])
+        return "\n".join([format_analysis_output(df) for df in output_df])
     if isinstance(output_df, dict):
         return "\n".join(
-            [format_df_with_describe(df, name) for name, df in output_df.items()]
+            [format_analysis_output(df, name) for name, df in output_df.items()]
         )
     if not isinstance(output_df, pd.DataFrame):
         return str(output_df)
+    else:
+        return df_details_with_describe(output_df, name)
 
+
+def df_details_with_describe(
+    output_df: Union[None, pd.DataFrame], name: str = None
+) -> str:
+    """
+    Provides a detailed string representation of a DataFrame, including a snapshot and descriptive statistics.
+
+    Generates a string that includes:
+    - The name of the DataFrame.
+    - A snapshot of the DataFrame (first and last 50 rows if the DataFrame is large).
+    - Descriptive statistics of the DataFrame columns if the DataFrame is large.
+    - If input is None, the function returns a string indicating that the DataFrame is None.
+
+    Args:
+        output_df (Union[None, pd.DataFrame]): The DataFrame to be described.
+        name (str, optional): The name of the DataFrame. Defaults to "Dataframe".
+
+    Returns:
+        str: A string representation of the DataFrame details.
+    """
     name = name or "Dataframe"
+    if output_df is None:
+        return f"{name}: None"
     if output_df.size > 100:
         df_display = pd.concat([output_df.head(50), output_df.tail(50)], axis=0)
-        df_string = f"{name} snapshot:\n{_df_to_string(df_display)}\n\nOutput of `df.describe()`:\n{_df_to_string(output_df.describe())}"
+        df_string = f"DataFrame name: {name}\nDataFrame snapshot:\n{_df_to_string(df_display)}\n\nDataFrame column details:\n{_df_to_string(output_df.describe())}"
     else:
         df_string = f"{name}:\n{_df_to_string(output_df)}"
     return df_string
 
 
 def _df_to_string(output_df: pd.DataFrame) -> str:
+    """
+    Converts a DataFrame to a formatted string representation.
+
+    Args:
+        output_df (pd.DataFrame): The DataFrame to be converted to a string.
+
+    Returns:
+        str: The formatted string representation of the DataFrame.
+
+    Procedure:
+    - Convert all column names to strings.
+    - Identify and convert columns with date or time information to datetime objects.
+    - Format the DataFrame to a string with specific formatting for floats and datetime columns.
+    """
     output_df.columns = [str(col) for col in output_df.columns.tolist()]
-    # convert all datetime columns to datetime objects
     datetimecols = [
         col
         for col in output_df.columns.tolist()
         if ("date" in col.lower() or "time" in col.lower())
-        and output_df[col].dtype != np.number
+        and isinstance(output_df[col].dtype, np.number)
     ]
     if "timestamp" in output_df.columns and "timestamp" not in datetimecols:
         datetimecols.append("timestamp")
@@ -152,32 +162,73 @@ def _df_to_string(output_df: pd.DataFrame) -> str:
 
 
 def _format_date(date: pd.Timestamp):
+    """
+    Formats a pandas Timestamp object to a string, using the format "dd MMM YYYY HH:MM"
+
+    Args:
+        date (pd.Timestamp): The pandas Timestamp object to be formatted.
+
+    Returns:
+        str: The formatted string representation of the Timestamp object.
+    """
     return date.strftime("%d %b %Y %H:%M")
 
 
-def run_n_times(max_tries=1, *, logger: logging.Logger, log_messages={}):
-    def dec_wrapper(func):
-        def wrapped_func(*args, **kwargs):
-            result = None
-            if "start" in log_messages:
-                logger.info(log_messages["start"])
-            for i in range(max_tries):
-                logger.info(f"Try num: {i + 1}")
-                try:
-                    result = func(*args, **kwargs)
-                    if result is not None:
-                        logger.info(f"Result recieved: {result}")
-                        break
-                except Exception as e:
-                    logger.error(
-                        f"Error in try {i + 1}. {e.__class__.__name__}: {e}. Traceback: {e.__traceback__}"
-                    )
-            if result is None:
-                logger.info("Result is None")
-            if "end" in log_messages:
-                logger.info(log_messages["end"])
+def logging_decorator(logger: logging.Logger):
+    """
+    A decorator that logs the execution of a function using a specified logger.
+
+    This decorator logs the start and completion of the function execution, including the
+    input arguments and the result. If an exception occurs during the function execution,
+    it logs the error along with the traceback.
+
+    Args:
+        logger (logging.Logger): The logger instance to be used for logging.
+
+    Returns:
+        function: The decorated function with added logging functionality.
+
+    Example:
+        import logging
+        logger = logging.getLogger(__name__)
+        @logging_decorator(logger)
+        def example_function(x, y):
+            return x + y
+    """
+
+    def decorator_wrapper(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            logger.info(
+                f"Starting {func.__name__}",
+                extra={
+                    "function": func.__name__,
+                    "input_args": None if len(args) == 0 else args,
+                    "input_kwargs": kwargs,
+                },
+            )
+            try:
+                result = func(*args, **kwargs)
+                logger.info(
+                    f"Completed {func.__name__}",
+                    extra={
+                        "function": func.__name__,
+                        "input_args": None if len(args) == 0 else args,
+                        "input_kwargs": kwargs,
+                        "response": result,
+                    },
+                )
+            except Exception as e:
+                logger.error(
+                    f"Error in {func.__name__}: {e.__class__.__name__}.",
+                    extra={
+                        "function": func.__name__,
+                        "traceback": traceback.format_exc().splitlines(),
+                    },
+                )
+                raise e
             return result
 
-        return wrapped_func
+        return wrapper
 
-    return dec_wrapper
+    return decorator_wrapper
