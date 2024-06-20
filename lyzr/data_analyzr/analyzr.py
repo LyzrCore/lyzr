@@ -400,7 +400,7 @@ class DataAnalyzr:
         self.insights_output = self.generator_llm.run(
             messages=[
                 LyzrPromptFactory(name="insights", prompt_type="system").get_message(
-                    context=insights_context.strip(), n_insights=n_insights
+                    context=insights_context, n_insights=n_insights
                 ),
                 LyzrPromptFactory(name="insights", prompt_type="user").get_message(
                     user_input=user_input,
@@ -474,6 +474,7 @@ class DataAnalyzr:
         }
         if recommendations_context is None:
             recommendations_context = ""
+        system_message_sections.append("external_context")
         system_message_dict["context"] = recommendations_context
 
         if from_insights:
