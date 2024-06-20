@@ -540,10 +540,11 @@ class DataAnalyzr:
         """
         if tasks_context is None:
             tasks_context = ""
+        tasks_format = "1. Task 1\n2. Task 2\n...\n"
         self.tasks_output = self.generator_llm.run(
             messages=[
                 LyzrPromptFactory(name="tasks", prompt_type="system").get_message(
-                    context=tasks_context, n_tasks=n_tasks
+                    context=tasks_context, tasks_format=tasks_format, n_tasks=n_tasks
                 ),
                 LyzrPromptFactory(name="tasks", prompt_type="user").get_message(
                     user_input=user_input,
