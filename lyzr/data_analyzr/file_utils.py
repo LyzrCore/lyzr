@@ -303,9 +303,7 @@ def read_file_or_folder(
         )
 
 
-def read_file(
-    filepath: str, encoding: Optional[str] = "utf-8", **kwargs
-) -> pd.DataFrame:
+def read_file(filepath: str, **kwargs) -> pd.DataFrame:
     """
     Read a file and return its contents as a pandas DataFrame.
 
@@ -335,16 +333,16 @@ def read_file(
     file_extension = filepath.split(".")[-1]
     try:
         if file_extension == "csv" or file_extension == "txt":
-            df = pd.read_csv(filepath, encoding=encoding, **kwargs)
+            df = pd.read_csv(filepath, **kwargs)
         elif file_extension == "tsv":
-            df = pd.read_csv(filepath, sep="\t", encoding=encoding, **kwargs)
+            df = pd.read_csv(filepath, sep="\t", **kwargs)
         elif file_extension == "json":
-            df = pd.read_json(filepath, encoding=encoding, **kwargs)
+            df = pd.read_json(filepath, **kwargs)
         elif file_extension in ["xlsx", "xls"]:
-            df = pd.read_excel(filepath, encoding=encoding, **kwargs)
+            df = pd.read_excel(filepath, **kwargs)
         elif file_extension == "pkl":
             with open(filepath, "rb") as f:
-                df = pickle.load(f, encoding=encoding, **kwargs)
+                df = pickle.load(f, **kwargs)
         else:
             raise ValueError(
                 f"File extension '{file_extension}' not supported. Please provide a csv or pkl file."
