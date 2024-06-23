@@ -65,7 +65,6 @@ def get_db_details(
     df_dict = None
     connector = None
     vector_store = None
-    training_plan = None
     # Read given datasets
     if db_type is SupportedDBs.files:
         assert isinstance(
@@ -96,7 +95,6 @@ def get_db_details(
         connector=connector,
     )
     # Create training plan and vector store
-    training_plan = make_training_plan(analysis_type, db_type, df_dict, connector)
     if vector_store_config.path is None:
         uuid = deterministic_uuid(
             [
@@ -109,8 +107,12 @@ def get_db_details(
     vector_store = ChromaDBVectorStore(
         path=vector_store_config.path,
         remake_store=vector_store_config.remake_store,
-        training_plan=training_plan,
+        training_plan_func=make_training_plan,
         logger=logger,
+        analysis_type=analysis_type,
+        db_type=db_type,
+        df_dict=df_dict,
+        connector=connector,
     )
     return connector, df_dict, vector_store
 

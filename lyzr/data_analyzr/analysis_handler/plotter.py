@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 from lyzr.base.llm import LiteLLM
 from lyzr.base.prompt import LyzrPromptFactory
 from lyzr.base.base import UserMessage, SystemMessage
-from lyzr.data_analyzr.models import FactoryBaseClass
+from lyzr.data_analyzr.models import FactoryBaseClass, AnalysisTypes
 from lyzr.data_analyzr.utils import deterministic_uuid
 from lyzr.data_analyzr.analysis_handler.utils import (
     handle_plotpath,
@@ -92,6 +92,7 @@ class PlotFactory(FactoryBaseClass):
         llm: LiteLLM,
         logger: logging.Logger,
         context: str,
+        analysis_type: AnalysisTypes,
         data_kwargs: dict,
         vector_store: ChromaDBVectorStore,
         max_retries: int = None,
@@ -106,6 +107,7 @@ class PlotFactory(FactoryBaseClass):
             llm (LiteLLM): The llm instance to be used.
             logger (logging.Logger): Logger instance for logging purposes.
             context (str): The context for the given query. If empty, pass "".
+            analysis_type (AnalysisTypes): The type of analysis performed.
             data_kwargs (dict): Dictionary containing data-related parameters.
                 - connector (DatabaseConnector, optional): Database connector for fetching data.
                 - df_dict (dict, optional): Dictionary of pandas DataFrames.
@@ -134,6 +136,7 @@ class PlotFactory(FactoryBaseClass):
                 llm=llm,
                 logger=logger,
                 context=context,
+                analysis_type=AnalysisTypes.ml,
                 data_kwargs=data_kwargs,
                 vector_store=vector_store,
                 max_retries=10, # default
@@ -151,6 +154,7 @@ class PlotFactory(FactoryBaseClass):
             auto_train=auto_train,
             llm_kwargs=llm_kwargs,
         )
+        self.analysis_type = analysis_type
         self.plotting_library = "matplotlib"
         self.connector = data_kwargs.get("connector", None)
         self.df_dict = data_kwargs.get("df_dict", None)
@@ -240,9 +244,6 @@ class PlotFactory(FactoryBaseClass):
         Returns:
             list: A list of messages including system prompt, examples, and user input.
         """
-        assert isinstance(
-            self.vector_store, ChromaDBVectorStore
-        ), "Vector store must be a ChromaDBVectorStore object."
         system_message_sections, system_message_dict = (
             self._get_message_sections_and_dict(user_input=user_input)
         )
@@ -280,7 +281,7 @@ class PlotFactory(FactoryBaseClass):
         Procedure:
             - Get related documentation and DataFrame names from _get_message_docs.
             - Get local variables from _get_locals.
-            - If a DatabaseConnector is present, add SQL plot sections and examples.
+            - If a analysis_type is AnalysisTypes.sql, add SQL plot sections and examples.
             - If a DataFrame dictionary is present, add Python plot sections and examples.
             - Return the message sections and dictionary.
         """
@@ -288,7 +289,7 @@ class PlotFactory(FactoryBaseClass):
         system_message_dict = {"context": self.context}
         doc_str, df_names = self._get_message_docs(user_input)
         self.locals_ = self._get_locals()
-        if self.connector is not None:
+        if self.analysis_type is AnalysisTypes.sql:
             system_message_sections.append("sql_plot")
             system_message_sections.append("locals")
             self.locals_["conn"] = self.connector
@@ -445,7 +446,7 @@ class PlotFactory(FactoryBaseClass):
         """
         code = self.code_cleaner(extract_python_code(llm_response))
         self.logger.info(f"Extracted Python code:\n{code}")
-        if not isinstance(self.connector, DatabaseConnector):
+        if self.analysis_type is AnalysisTypes.ml:
             assert isinstance(self.df_dict, dict), "df_dict must be a dictionary."
             df_names = extract_df_names(code, list(self.df_dict.keys()))
             for name in df_names:

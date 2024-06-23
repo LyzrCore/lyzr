@@ -293,10 +293,10 @@ class DataAnalyzr:
             max_retries=max_retries,
             auto_train=auto_train,
         )
-        if self.analysis_type is AnalysisTypes.sql:
-            analyser_args["db_connector"] = self.database_connector
         if self.analysis_type is AnalysisTypes.ml:
             analyser_args["df_dict"] = self.df_dict
+        else:
+            analyser_args["db_connector"] = self.database_connector
         analyser = self.analyser(
             **analyser_args,
         )
@@ -358,6 +358,7 @@ class DataAnalyzr:
             llm=self.analysis_llm,
             logger=self.logger,
             context=plot_context,
+            analysis_type=self.analysis_type,
             data_kwargs=data_kwargs,
             vector_store=self.vector_store,
             time_limit=time_limit,

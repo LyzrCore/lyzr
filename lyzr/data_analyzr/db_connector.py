@@ -849,6 +849,3 @@ class SQLiteConnector(DatabaseConnector):
                 )
             )
         return plan
-
-
-DatabaseConnector.register_connector("sqlite", SQLiteConnector)

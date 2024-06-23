@@ -10,6 +10,7 @@ from enum import Enum
 from typing import Union, Any
 
 # third-party imports
+from aenum import Enum as AEnum
 from pydantic import BaseModel, Field, AliasChoices, ConfigDict, model_validator
 
 # local imports
@@ -18,7 +19,7 @@ from lyzr.base import LiteLLM
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-class AnalysisTypes(str, Enum):
+class AnalysisTypes(str, AEnum):
     sql = "sql"
     ml = "ml"
     skip = "skip"
