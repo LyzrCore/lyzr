@@ -94,7 +94,7 @@ def get_db_details(
         df_dict=df_dict,
         connector=connector,
     )
-    # Create training plan and vector store
+    # Create vector store
     if vector_store_config.path is None:
         uuid = deterministic_uuid(
             [

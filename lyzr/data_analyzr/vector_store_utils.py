@@ -121,11 +121,15 @@ class ChromaDBVectorStore:
         - If the specified path exists:
             - Initializes the ChromaDB client with the given path.
             - If remake_store is True, attempts to recreate the vector store and logs the process.
-            - If a training_plan_func is provided, adds the training data to the vector store.
+            - If a training_plan_func is provided:
+                - Calls the function to generate a training plan.
+                - Adds this training plan to the vector store.
         - If the specified path does not exist:
             - Creates the directory at the specified path.
             - Initializes the ChromaDB client with the given path.
-            - If a training_plan_func is provided, adds the training data to the vector store.
+            - If a training_plan_func is provided:
+                - Calls the function to generate a training plan.
+                - Adds this training plan to the vector store.
 
         Example:
             vector_store = ChromaDBVectorStore(

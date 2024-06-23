@@ -120,7 +120,6 @@ class PlotFactory(FactoryBaseClass):
 
         Raises:
             ValueError: If neither `connector` nor `df_dict` is provided.
-            ValueError: If both `connector` and `df_dict` are provided.
             ValueError: If `connector` is not a DatabaseConnector instance or `df_dict` is not a dictionary of pandas DataFrames.
 
         Example:
@@ -162,10 +161,6 @@ class PlotFactory(FactoryBaseClass):
         if self.connector is None and self.df_dict is None:
             raise ValueError(
                 "Either connector or df_dict must be provided to make a plot."
-            )
-        if self.connector is not None and self.df_dict is not None:
-            raise ValueError(
-                "Both connector and df_dict cannot be provided to make a plot."
             )
         if not isinstance(self.connector, DatabaseConnector) and not isinstance(
             self.df_dict, dict
@@ -281,8 +276,8 @@ class PlotFactory(FactoryBaseClass):
         Procedure:
             - Get related documentation and DataFrame names from _get_message_docs.
             - Get local variables from _get_locals.
-            - If a analysis_type is AnalysisTypes.sql, add SQL plot sections and examples.
-            - If a DataFrame dictionary is present, add Python plot sections and examples.
+            - If analysis_type is AnalysisTypes.sql, add SQL plot sections and examples.
+            - If analysis_type is not AnalysisTypes.sql, add Python plot sections and examples.
             - Return the message sections and dictionary.
         """
         system_message_sections = ["context", "external_context"]
