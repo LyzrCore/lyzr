@@ -42,7 +42,7 @@ class ChromaDBVectorStore:
         remake_vector_store():
             Remakes the vector store by iterating through existing collections and recreating them if necessary.
 
-        add_training_plan(question, sql, ddl, plot_code, python_code, documentation, plan):
+        add_training_data(question, sql, ddl, plot_code, python_code, documentation, plan):
             Adds a training plan or individual components to the ChromaDBVectorStore.
 
         remake_collection(collection_name):
@@ -57,13 +57,13 @@ class ChromaDBVectorStore:
         get_related_documentation(question):
             Retrieves related documentation based on the question.
 
-        get_similar_question_sql(user_input):
+        get_related_sql_queries(user_input):
             Retrieves similar question-SQL query pairs based on user input.
 
-        get_similar_python_code(question):
+        get_related_python_code(question):
             Retrieves similar question-Python code pairs based on the question.
 
-        get_similar_plotting_code(question):
+        get_related_plotting_code(question):
             Retrieves similar question-plotting code pairs based on the question.
 
         generate_embedding(data):

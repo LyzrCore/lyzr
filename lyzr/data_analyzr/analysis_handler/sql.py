@@ -49,6 +49,9 @@ class TxttoSQLFactory(FactoryBaseClass):
         extract_and_execute_code(llm_response: str):
             Extracts an SQL query from the given LLM response and executes it.
 
+        code_cleaner(code) -> str:
+            Handler for cleaning the extracted code before execution.
+
         _handle_create_table_sql(sql_query: str):
             Handles the execution of a SQL query when table creation is involved.
 
@@ -276,6 +279,7 @@ class TxttoSQLFactory(FactoryBaseClass):
         return analysis_output
 
     def code_cleaner(self, code) -> str:
+        """Handler for cleaning the extracted code before execution."""
         return code
 
     def _handle_create_table_sql(self, sql_query: str):

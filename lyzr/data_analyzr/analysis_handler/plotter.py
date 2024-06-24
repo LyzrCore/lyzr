@@ -80,6 +80,9 @@ class PlotFactory(FactoryBaseClass):
         extract_and_execute_code(llm_response: str):
             Executes the plotting code extracted from the provided LLM response.
 
+        code_cleaner(code: str) -> str:
+            Handler for cleaning the code by removing print statements and plt.show() calls.
+
         save_plot_image() -> str:
             Saves the current plot to a file specified by `self.plot_path`.
 
@@ -459,6 +462,7 @@ class PlotFactory(FactoryBaseClass):
         return self.locals_["fig"]
 
     def code_cleaner(self, code: str) -> str:
+        """Handler for cleaning the extracted code before execution."""
         return remove_print_and_plt_show(code)
 
     def save_plot_image(self) -> str:

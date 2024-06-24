@@ -43,16 +43,25 @@ class PythonicAnalysisFactory(FactoryBaseClass):
     Methods:
         __init__(llm, logger, context, df_dict, vector_store, max_retries=None, time_limit=None, auto_train=None, **llm_kwargs):
             Initializes a PythonicAnalysisFactory instance.
+
         generate_output(user_input, **kwargs):
             Runs analysis and generates output based on the provided user input.
+
         get_prompt_messages(user_input):
             Generates a list of prompt messages based on the user's input.
+
         get_analysis_guide(user_input):
             Generates an analysis guide based on the user's input.
+
         _get_locals_and_docs(system_message_sections, system_message_dict, user_input):
             Retrieves local variables and related documentation based on user input.
+
         extract_and_execute_code(llm_response):
             Extracts Python code from a given LLM response, processes it, and executes it within a controlled environment.
+
+        code_cleaner(code) -> str:
+            Handler for cleaning the extracted code.
+
         auto_train(user_input, code, **kwargs):
             Adds the user input and generated Python code to the vector store if the auto_train flag is set.
     """
@@ -345,6 +354,7 @@ class PythonicAnalysisFactory(FactoryBaseClass):
         return self.locals_["result"]
 
     def code_cleaner(self, code: str) -> str:
+        """Handler for cleaning the extracted code before execution."""
         return remove_print_and_plt_show(code)
 
     def auto_train(self, user_input: str, code: str, **kwargs):
