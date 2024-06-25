@@ -42,7 +42,7 @@ class ChromaDBVectorStore:
         remake_vector_store():
             Remakes the vector store by iterating through existing collections and recreating them if necessary.
 
-        add_training_plan(question, sql, ddl, plot_code, python_code, documentation, plan):
+        add_training_data(question, sql, ddl, plot_code, python_code, documentation, plan):
             Adds a training plan or individual components to the ChromaDBVectorStore.
 
         remake_collection(collection_name):
@@ -57,13 +57,13 @@ class ChromaDBVectorStore:
         get_related_documentation(question):
             Retrieves related documentation based on the question.
 
-        get_similar_question_sql(user_input):
+        get_related_sql_queries(user_input):
             Retrieves similar question-SQL query pairs based on user input.
 
-        get_similar_python_code(question):
+        get_related_python_code(question):
             Retrieves similar question-Python code pairs based on the question.
 
-        get_similar_plotting_code(question):
+        get_related_plotting_code(question):
             Retrieves similar question-plotting code pairs based on the question.
 
         generate_embedding(data):
@@ -100,8 +100,9 @@ class ChromaDBVectorStore:
         self,
         path: str = None,  # Path to the directory where the ChromaDB data is stored
         remake_store: bool = False,  # If True, the store will be recreated
-        training_plan: TrainingPlan = None,  # Training plan
+        training_plan_func: callable = None,  # Function to generate a training plan
         logger: logging.Logger = None,
+        **kwargs,
     ):
         """
         Initialize a ChromaDBVectorStore at the specified path.
@@ -110,7 +111,7 @@ class ChromaDBVectorStore:
             path (str, optional): Path to the directory where the ChromaDB data is stored. If not provided,
                 a MissingValueError is raised.
             remake_store (bool, optional): If True, the store will be recreated. Defaults to False.
-            training_plan (TrainingPlan, optional): Training plan to be added to the vector store. Defaults to None.
+            training_plan_func (callable, optional): Function to generate a training plan. Defaults to None. Must return a TrainingPlan object.
             logger (logging.Logger, optional): Logger instance for logging information and errors. Defaults to None.
 
         Raises:
@@ -120,17 +121,21 @@ class ChromaDBVectorStore:
         - If the specified path exists:
             - Initializes the ChromaDB client with the given path.
             - If remake_store is True, attempts to recreate the vector store and logs the process.
-            - If a training_plan is provided, it is added to the vector store.
+            - If a training_plan_func is provided:
+                - Calls the function to generate a training plan.
+                - Adds this training plan to the vector store.
         - If the specified path does not exist:
             - Creates the directory at the specified path.
             - Initializes the ChromaDB client with the given path.
-            - If a training_plan is provided, it is added to the vector store.
+            - If a training_plan_func is provided:
+                - Calls the function to generate a training plan.
+                - Adds this training plan to the vector store.
 
         Example:
             vector_store = ChromaDBVectorStore(
                 path="path/to/vector_store",
                 remake_store=False,
-                training_plan=training_plan,
+                training_plan_func=training_plan_func,
                 logger=logger,
             )
             docs = vector_store.get_related_documentation(question)
@@ -147,16 +152,16 @@ class ChromaDBVectorStore:
                 logger.info(f"Remaking vector store at {path}.")
                 if not self.remake_vector_store():
                     logger.error(f"Failed to recreate vector store at {path}.")
-                if training_plan is not None:
-                    self.add_training_data(plan=training_plan)
+                if training_plan_func is not None:
+                    self.add_training_data(plan=training_plan_func(**kwargs))
             else:
                 logger.info(f"Vector store exists at {path}. Using existing store.")
         else:
             os.makedirs(path)
             logger.info(f"Creating vector store at {path}.")
             self.make_chroma_client(path=path)
-            if training_plan is not None:
-                self.add_training_data(plan=training_plan)
+            if training_plan_func is not None:
+                self.add_training_data(plan=training_plan_func(**kwargs))
 
     def make_chroma_client(self, path: str):
         """

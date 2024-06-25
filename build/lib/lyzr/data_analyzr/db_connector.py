@@ -146,7 +146,7 @@ def register(name: str):
     A decorator function to register a connector class with the DatabaseConnector class.
 
     Args:
-        name (str): The name of the database connector class.
+        name (str): The name or type of the database connector class, e.g. "postgres", "mysql", "redshift".
     """
 
     def wrapper(cls):
@@ -849,6 +849,3 @@ class SQLiteConnector(DatabaseConnector):
                 )
             )
         return plan
-
-
-DatabaseConnector.register_connector("sqlite", SQLiteConnector)

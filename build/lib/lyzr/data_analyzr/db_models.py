@@ -16,6 +16,8 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 
 class SupportedDBs(str, Enum):
+    """A mutable enumeration of supported database types."""
+
     files = "files"
     redshift = "redshift"
     postgres = "postgres"
@@ -23,6 +25,8 @@ class SupportedDBs(str, Enum):
 
 
 class DataFile(BaseModel):
+    """Configuration model for data files."""
+
     name: str
     value: Union[str, pd.DataFrame]
     kwargs: Union[dict, None] = Field(default_factory=dict)
@@ -30,11 +34,15 @@ class DataFile(BaseModel):
 
 
 class FilesConfig(BaseModel):
+    """Configuration model for file-based databases."""
+
     datasets: list[DataFile]
     db_path: Union[str, None] = Field(default=None)
 
 
 class RedshiftConfig(BaseModel):
+    """Configuration model for Redshift databases."""
+
     host: str
     port: int
     user: str
@@ -47,6 +55,8 @@ class RedshiftConfig(BaseModel):
 
 
 class PostgresConfig(BaseModel):
+    """Configuration model for Postgres databases."""
+
     host: str
     port: int
     user: str
@@ -59,6 +69,8 @@ class PostgresConfig(BaseModel):
 
 
 class SQLiteConfig(BaseModel):
+    """Configuration model for SQLite databases."""
+
     db_path: str
 
 

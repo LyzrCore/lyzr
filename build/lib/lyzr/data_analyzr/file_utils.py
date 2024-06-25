@@ -65,7 +65,6 @@ def get_db_details(
     df_dict = None
     connector = None
     vector_store = None
-    training_plan = None
     # Read given datasets
     if db_type is SupportedDBs.files:
         assert isinstance(
@@ -95,8 +94,7 @@ def get_db_details(
         df_dict=df_dict,
         connector=connector,
     )
-    # Create training plan and vector store
-    training_plan = make_training_plan(analysis_type, db_type, df_dict, connector)
+    # Create vector store
     if vector_store_config.path is None:
         uuid = deterministic_uuid(
             [
@@ -109,8 +107,12 @@ def get_db_details(
     vector_store = ChromaDBVectorStore(
         path=vector_store_config.path,
         remake_store=vector_store_config.remake_store,
-        training_plan=training_plan,
+        training_plan_func=make_training_plan,
         logger=logger,
+        analysis_type=analysis_type,
+        db_type=db_type,
+        df_dict=df_dict,
+        connector=connector,
     )
     return connector, df_dict, vector_store
 
@@ -303,9 +305,7 @@ def read_file_or_folder(
         )
 
 
-def read_file(
-    filepath: str, encoding: Optional[str] = "utf-8", **kwargs
-) -> pd.DataFrame:
+def read_file(filepath: str, **kwargs) -> pd.DataFrame:
     """
     Read a file and return its contents as a pandas DataFrame.
 
@@ -335,16 +335,16 @@ def read_file(
     file_extension = filepath.split(".")[-1]
     try:
         if file_extension == "csv" or file_extension == "txt":
-            df = pd.read_csv(filepath, encoding=encoding, **kwargs)
+            df = pd.read_csv(filepath, **kwargs)
         elif file_extension == "tsv":
-            df = pd.read_csv(filepath, sep="\t", encoding=encoding, **kwargs)
+            df = pd.read_csv(filepath, sep="\t", **kwargs)
         elif file_extension == "json":
-            df = pd.read_json(filepath, encoding=encoding, **kwargs)
+            df = pd.read_json(filepath, **kwargs)
         elif file_extension in ["xlsx", "xls"]:
-            df = pd.read_excel(filepath, encoding=encoding, **kwargs)
+            df = pd.read_excel(filepath, **kwargs)
         elif file_extension == "pkl":
             with open(filepath, "rb") as f:
-                df = pickle.load(f, encoding=encoding, **kwargs)
+                df = pickle.load(f, **kwargs)
         else:
             raise ValueError(
                 f"File extension '{file_extension}' not supported. Please provide a csv or pkl file."

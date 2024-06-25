@@ -10,6 +10,7 @@ from enum import Enum
 from typing import Union, Any
 
 # third-party imports
+from aenum import Enum as AEnum
 from pydantic import BaseModel, Field, AliasChoices, ConfigDict, model_validator
 
 # local imports
@@ -18,13 +19,17 @@ from lyzr.base import LiteLLM
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-class AnalysisTypes(str, Enum):
+class AnalysisTypes(str, AEnum):
+    """A mutable enumeration of analysis types."""
+
     sql = "sql"
     ml = "ml"
     skip = "skip"
 
 
 class OutputTypes(str, Enum):
+    """An enumeration of output types."""
+
     visualisation = "visualisation"
     visualisations = "visualisation"
     vizualisation = "visualisation"
@@ -42,9 +47,7 @@ class OutputTypes(str, Enum):
 
 
 class ParamsDict(BaseModel):
-    """
-    Configuration model for `params` attribute of factory classes and the DataAnalyzr class.
-    """
+    """Configuration model for `params` attribute of factory classes and the DataAnalyzr class."""
 
     max_retries: Union[int, None] = Field(default=None)
     time_limit: Union[int, None] = Field(default=None)
@@ -151,9 +154,7 @@ class ContextDict(BaseModel):
 
 
 class VectorStoreConfig(BaseModel):
-    """
-    Configuration model for vector store initialisation settings.
-    """
+    """Configuration model for vector store initialisation settings."""
 
     path: Union[str, None] = Field(
         default=None,
@@ -233,8 +234,6 @@ class FactoryBaseClass:
         self.code = None
         self.output = None
         self.guide = None
-        if self.vector_store is None:
-            raise ValueError("Vector store is required.")
 
     def generate_output(self, **kwargs):
         raise NotImplementedError

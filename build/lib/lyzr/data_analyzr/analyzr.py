@@ -79,23 +79,21 @@ class DataAnalyzr:
 
         Args:
             analysis_type (Literal["sql", "ml", "skip"]): The type of analysis to be performed.
-
-        Keyword Args:
-            api_key (Optional[str], optional): API key for accessing LLM services. May also be set as an environment variable.
-            class_params (Optional[dict], optional): Dictionary of class parameters.
+            api_key (str, optional): API key for accessing LLM services. May also be set as an environment variable.
+            class_params (dict, optional): Dictionary of class-specific parameters.
                 - max_retries (int): Maximum number of retries for LLM calls. Defaults to None.
                 - time_limit (int): Time limit for LLM calls. Defaults to None.
                 - auto_train (bool): Whether to train the LLM model. Defaults to True.
-            generator_llm (Optional[LiteLLM], optional): LLM instance for generating analysis. Defaults to OpenAI's gpt-4o.
-            analysis_llm (Optional[LiteLLM], optional): LLM instance for performing analysis. Defaults to OpenAI's gpt-4o.
-            context (Optional[Union[str, dict]], optional): Context for analysis and response generation. Defaults to "".
-            log_params (Optional[dict], optional): Dictionary of logging parameters.
+            generator_llm (LiteLLM, optional): LLM instance for generating analysis. Defaults to OpenAI's gpt-4o.
+            analysis_llm (LiteLLM, optional): LLM instance for performing analysis. Defaults to OpenAI's gpt-4o.
+            context (Union[str, dict], optional): Context for analysis and response generation. Defaults to "".
+            log_params (dict, optional): Dictionary of logging parameters.
                 - log_filename (str): Name of the log file. Defaults to "dataanalyzr.csv".
                 - log_level (str): Level of logging. Defaults to "INFO".
                 - print_log (bool): Whether to print logs to console. Defaults to False.
 
         Raises:
-            ValueError: If the provided `analysis_type` is not one of "sql", "ml", or "skip".
+            ValueError: If the provided `analysis_type` is not one of AnalysisTypes values.
 
         Example:
             from lyzr.base.llm import LiteLLM
@@ -201,6 +199,7 @@ class DataAnalyzr:
     ):
         """
         Retrieve data from the specified database type using the provided configuration.
+        Configure the vector store for the analysis process.
 
         Args:
             db_type (Literal["files", "redshift", "postgres", "sqlite"]): The type of database to connect to.
@@ -208,7 +207,7 @@ class DataAnalyzr:
             vector_store_config (dict, optional): Configuration dictionary for the vector store. Defaults to an empty dictionary.
 
         Raises:
-            ValueError: If data_config is not a dictionary.
+            ValueError: If db_config is not a dictionary.
 
         Example:
             db_config = {
@@ -253,15 +252,14 @@ class DataAnalyzr:
         Perform an analysis based on the provided user input and analysis parameters.
 
         This method determines the type of analysis to be performed (SQL, or Pythonic) and executes it.
-        If the analysis type is set to skip, it fetches dataframes from the database and returns them
-        without performing any analysis.
+        If the analysis type is set to skip, it sets the analysis guide to "No analysis performed." and returns None.
 
         Args:
             user_input (str): The input string provided by the user for analysis.
-            analysis_context (str): The context for the analysis. Defaults to "".
-            time_limit (int): Time limit for the analysis execution in seconds. Defaults to 45.
-            max_retries (int): Maximum number of retries for the analysis. Defaults to 10.
-            auto_train (bool): Whether to automatically add the analysis to training data. Defaults to True.
+            analysis_context (str, optional): The context for the analysis. Defaults to "".
+            time_limit (int, optional): Time limit for the analysis execution in seconds. Defaults to 45.
+            max_retries (int, optional): Maximum number of retries for the analysis. Defaults to 10.
+            auto_train (bool, optional): Whether to automatically add the analysis to training data. Defaults to True.
 
         Returns:
             Union[str, pd.DataFrame, dict[str, pd.DataFrame], None]: The output of the analysis.
@@ -293,10 +291,10 @@ class DataAnalyzr:
             max_retries=max_retries,
             auto_train=auto_train,
         )
-        if self.analysis_type is AnalysisTypes.sql:
-            analyser_args["db_connector"] = self.database_connector
         if self.analysis_type is AnalysisTypes.ml:
             analyser_args["df_dict"] = self.df_dict
+        else:
+            analyser_args["db_connector"] = self.database_connector
         analyser = self.analyser(
             **analyser_args,
         )
@@ -358,6 +356,7 @@ class DataAnalyzr:
             llm=self.analysis_llm,
             logger=self.logger,
             context=plot_context,
+            analysis_type=self.analysis_type,
             data_kwargs=data_kwargs,
             vector_store=self.vector_store,
             time_limit=time_limit,
@@ -381,8 +380,8 @@ class DataAnalyzr:
 
         Args:
             user_input (str): The input string provided by the user for generating insights.
-            insights_context (Optional[str], optional): Additional context for generating insights. Defaults to "".
-            n_insights (Optional[int], optional): Number of insights to generate. Defaults to 3.
+            insights_context (str, optional): Additional context for generating insights. Defaults to "".
+            n_insights (int, optional): Number of insights to generate. Defaults to 3.
 
         Returns:
             str: The generated insights as a string.
@@ -400,7 +399,7 @@ class DataAnalyzr:
         self.insights_output = self.generator_llm.run(
             messages=[
                 LyzrPromptFactory(name="insights", prompt_type="system").get_message(
-                    context=insights_context.strip(), n_insights=n_insights
+                    context=insights_context, n_insights=n_insights
                 ),
                 LyzrPromptFactory(name="insights", prompt_type="user").get_message(
                     user_input=user_input,
@@ -425,7 +424,7 @@ class DataAnalyzr:
         self,
         user_input: str,
         from_insights: Optional[bool] = True,
-        recs_format: Optional[dict] = None,
+        json_format: Optional[dict] = None,
         recommendations_context: Optional[str] = None,
         n_recommendations: Optional[int] = 3,
         output_type: Optional[Literal["text", "json"]] = "text",
@@ -437,12 +436,12 @@ class DataAnalyzr:
         It can format the recommendations in either text or JSON format.
 
         Args:
-            user_input (Optional[str]): The input string provided by the user for generating recommendations.
-            from_insights (Optional[bool]): Whether to include insights from the analysis in the recommendations. Defaults to True.
-            recs_format (Optional[dict]): The format for the recommendations if output_type is "json". Defaults to None.
-            recommendations_context (Optional[str]): Additional context to be included in the recommendations. Defaults to None.
-            n_recommendations (Optional[int]): The number of recommendations to generate. Defaults to 3.
-            output_type (Optional[Literal["text", "json"]]): The format of the output recommendations.
+            user_input (str): The input string provided by the user for generating recommendations.
+            from_insights (bool, optional): Whether to include insights from the analysis in the recommendations. Defaults to True.
+            json_format (dict, optional): The format for the recommendations if output_type is "json". Defaults to None.
+            recommendations_context (str, optional): Additional context to be included in the recommendations. Defaults to None.
+            n_recommendations (int, optional): The number of recommendations to generate. Defaults to 3.
+            output_type (Literal["text", "json"], optional): The format of the output recommendations.
                 Can be "text" or "json". Defaults to "text".
 
         Returns:
@@ -474,6 +473,7 @@ class DataAnalyzr:
         }
         if recommendations_context is None:
             recommendations_context = ""
+        system_message_sections.append("external_context")
         system_message_dict["context"] = recommendations_context
 
         if from_insights:
@@ -486,15 +486,15 @@ class DataAnalyzr:
             user_message_dict["insights"] = ""
 
         if output_type.lower().strip() == "json":
-            recs_format = recs_format or {
+            json_format = json_format or {
                 "Recommendation": "string",
                 "Basis of the Recommendation": "string",
                 "Impact if implemented": "string",
             }
             system_message_sections.append("json_type")
-            system_message_dict["output_json_keys"] = ", ".join(recs_format.keys())
+            system_message_dict["output_json_keys"] = ", ".join(json_format.keys())
             system_message_dict["json_schema"] = [
-                recs_format for _ in range(n_recommendations)
+                json_format for _ in range(n_recommendations)
             ]
             llm_params["response_format"] = {"type": "json_object"}
         elif output_type.lower().strip() == "text":
@@ -527,9 +527,9 @@ class DataAnalyzr:
         Generate a list of tasks based on the provided user input and context.
 
         Args:
-            user_input (Optional[str]): The input string provided by the user for generating tasks. Defaults to None.
-            tasks_context (Optional[str]): The context for the tasks to be generated. Defaults to "".
-            n_tasks (Optional[int]): The number of tasks to generate. Defaults to 5.
+            user_input (str): The input string provided by the user for generating tasks. Defaults to None.
+            tasks_context (str, optional): The context for the tasks to be generated. Defaults to "".
+            n_tasks (int, optional): The number of tasks to generate. Defaults to 5.
 
         Returns:
             str: The generated tasks as a string.
@@ -540,10 +540,11 @@ class DataAnalyzr:
         """
         if tasks_context is None:
             tasks_context = ""
+        tasks_format = "1. Task 1\n2. Task 2\n...\n"
         self.tasks_output = self.generator_llm.run(
             messages=[
                 LyzrPromptFactory(name="tasks", prompt_type="system").get_message(
-                    context=tasks_context, n_tasks=n_tasks
+                    context=tasks_context, tasks_format=tasks_format, n_tasks=n_tasks
                 ),
                 LyzrPromptFactory(name="tasks", prompt_type="user").get_message(
                     user_input=user_input,
@@ -588,7 +589,7 @@ class DataAnalyzr:
             plot_path (str, optional): Path to save the generated plot. Defaults to generated_plots/<random-string>.png.
             recommendations_params (dict, optional): Parameters for generating recommendations.
                 - from_insights (bool): Whether to generate recommendations from insights. Defaults to True.
-                - json_format (bool): Whether to format recommendations as JSON. Defaults to None.
+                - json_format (bool): JSON format to use to recommendations output. Defaults to None.
                 - output_type (str): The format of the recommendations output. Defaults to "text".
             counts (dict, optional): Dictionary specifying the number of insights, recommendations, and tasks to generate.
                 - insights (int): Number of insights to generate. Defaults to 3.
@@ -600,7 +601,7 @@ class DataAnalyzr:
                 - insights (str): Context for the insights.
                 - recommendations (str): Context for the recommendations.
                 - tasks (str): Context for the tasks.
-            **kwargs: Additional keyword arguments to customize the analysis process.
+            kwargs: Additional keyword arguments to customize the analysis process.
                 - rerun_analysis (bool): Whether to rerun the analysis. Defaults to True.
                 - max_retries (int): Maximum number of retries for analysis. Defaults to self.params.max_retries.
                 - time_limit (int): Time limit for the analysis in seconds. Defaults to self.params.time_limit.
@@ -699,7 +700,7 @@ class DataAnalyzr:
             self.recommendations_output = self.recommendations(
                 user_input=user_input,
                 from_insights=recommendations_params.get("from_insights", True),
-                recs_format=recommendations_params.get("json_format", None),
+                json_format=recommendations_params.get("json_format", None),
                 recommendations_context=self.context.recommendations,
                 n_recommendations=counts.get("recommendations", 3),
                 output_type=recommendations_params.get("output_type", "text"),
@@ -731,7 +732,7 @@ class DataAnalyzr:
         Generate AI-based queries for data analysis based on the provided context.
 
         Args:
-            context (Optional[str]): The context for generating queries. Defaults to "".
+            context (str, optional): The context for generating queries. Defaults to "".
 
         Returns:
             dict[str, list[str]]: A dictionary containing the generated AI queries for different types of analysis.
