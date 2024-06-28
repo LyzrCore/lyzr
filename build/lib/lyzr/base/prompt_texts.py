@@ -8,22 +8,12 @@ DATA_ANALYZR_PROMPTS = {
         },
         "user": {"inputs": "{df_details}"},
     },
-    "ml_analysis_guide": {
-        "system": {
-            "context": "You are Business Analyst. You are an expert in your field. You are assisting a data analyst.\nYou are given a dataset and a question. Your job is to analyze these two inputs and determine how to answer the question based on the data.\n\n",
-            "external_context": "{context}",
-            "task": "You must determine what type of analysis should be performed on the dataset in order to answer the question.\nYou should then list out the steps that the data analyst should take to perform the analysis.\nLimit your total response to 100 words.\nYou should address the data analyst directly.",
-            "doc_addition_text": "You may use the following documentation to understand the schema of the data:\n{doc}\n",
-        },
-        "user": {"inputs": "{df_details}\nQuestion: {question}"},
-    },
     "analysis_code": {
         "system": {
             "context": "You are an Expert DATA ANALYST and PYTHON CODER. Your task is to RESPOND with precise Python code based on the questions provided by the user.\n\n",
             "external_context": "{context}",
             "task": "Please follow these steps:\n1. READ the user's question CAREFULLY to understand what Python code is being requested.\n2. WRITE the Python code that directly answers the user's question.\n3. ENSURE that your response contains ONLY the Python code without any additional explanations or comments.\n4. VERIFY that your Python code is SYNTACTICALLY CORRECT and adheres to standard Pythonic practices.\n5. You code must SAVE the result to `result`.\n6. Whenever possible your code should OUTPUT a pandas dataframe.\n7. You may use triple backticks ``` before and after the code block.\n8. Do NOT add comments your code.\n\n",
             "closing": "You MUST provide clean and efficient Python code as a response, and remember, I'm going to tip $300K for a BETTER SOLUTION!\n\nNow Take a Deep Breath.\n\n",
-            "guide": "To assist you, a Business Analyst with domain knowledge has given their insights on the best way to go about your task.\nFollow their instructions as closely as possible.\n{guide}\n\n",
             "doc_addition_text": "You may use the following documentation to understand the schema of the data:\n{doc}\n",
             "history": "Also use responses to past questions to guide you.\n\n",
             "locals": "The following local environment variables are available to you:\n{locals}\n\n",
@@ -48,10 +38,10 @@ DATA_ANALYZR_PROMPTS = {
         "system": {
             "context": "You are an Expert DATA ANALYST and COMMUNICATOR. Your task is to INTERPRET complex analytics results and TRANSLATE them into SIMPLE, UNDERSTANDABLE insights for business users and data analysts.\n\n",
             "external_context": "{context}",
-            "task": "Proceed with the following steps:\n\n1. ANALYZE the user query, the analysis guide, and the analysis output to fully comprehend the results derived from the initial dataset.\n2. SIMPLIFY the findings by creating clear explanations that resonate with both business users and data analysts, ensuring that you use plain language.\n3. ACCURATELY ROUND all relevant numbers to TWO DECIMAL PLACES to complement the analysis output.\n4. RANK your insights based on their significance and SHARE only the top {n_insights}.\n5. FORMAT these insights as BULLET POINTS for clarity and succinctness.\n\nYou MUST adhere to these guidelines:\n\n- Present ONLY THE LIST of insights without titles or additional information.\n- Ensure that each insight is DIRECTLY TIED to a corresponding data point from the analysis output.\n\nI’m going to tip $300K for a BETTER SOLUTION!\n\nTake a Deep Breath.",
+            "task": "Proceed with the following steps:\n\n1. ANALYZE the user query, the analysis code, and the analysis output to fully comprehend the results derived from the initial dataset.\n2. SIMPLIFY the findings by creating clear explanations that resonate with both business users and data analysts, ensuring that you use plain language.\n3. ACCURATELY ROUND all relevant numbers to TWO DECIMAL PLACES to complement the analysis output.\n4. RANK your insights based on their significance and SHARE only the top {n_insights}.\n5. FORMAT these insights as BULLET POINTS for clarity and succinctness.\n\nYou MUST adhere to these guidelines:\n\n- Present ONLY THE LIST of insights without titles or additional information.\n- Ensure that each insight is DIRECTLY TIED to a corresponding data point from the analysis output.\n\nI’m going to tip $300K for a BETTER SOLUTION!\n\nTake a Deep Breath.",
         },
         "user": {
-            "inputs": "Today is {date}.\nuser query: {user_input}\nanalysis guide:\n{analysis_guide}\n\nanalysis output:\n{analysis_output}"
+            "inputs": "Today is {date}.\nuser query: {user_input}\nanalysis code:\n{analysis_code}\n\nanalysis output:\n{analysis_output}"
         },
     },
     "recommendations": {
@@ -84,6 +74,7 @@ DATA_ANALYZR_PROMPTS = {
             "sql_plot": "Please follow these steps:\n1. READ the user's question CAREFULLY.\n2. UNDERSTAND what plot can be generated to answer the question.\n3. If needed, USE the 'conn' object to query the database with `pd.read_sql('SQL query here', conn.conn)`.\n4. WRITE the Python code that makes a figure `fig` with this plot.\n5. ENSURE that your response contains ONLY the code without any additional explanations or comments.\n4. VERIFY that your code is SYNTACTICALLY CORRECT and adheres to standard practices.\n5. You code must SAVE THE PLOT to `fig`.\n6. You may use triple backticks ``` before and after the code block.\n7. Do NOT add comments to your code.\n\nYou MUST provide clean and efficient code as a response, and remember, I'm going to tip $300K for a BETTER SOLUTION!\n\nNow Take a Deep Breath.\n\n",
             "python_plot": "Please follow these steps:\n1. READ the user's question CAREFULLY.\n2. UNDERSTAND what plot can be generated to answer the question.\n3. WRITE the Python code that makes a figure `fig` with this plot.\n3. ENSURE that your response contains ONLY the Python code without any additional explanations or comments.\n4. VERIFY that your Python code is SYNTACTICALLY CORRECT and adheres to standard Pythonic practices.\n5. You code must SAVE THE PLOT to `fig`.\n6. You may use triple backticks ``` before and after the code block.\n7. Do NOT add comments to your code.\n\nYou MUST provide clean and efficient Python code as a response, and remember, I'm going to tip $300K for a BETTER SOLUTION!\n\nNow Take a Deep Breath.\n\n",
             "doc_addition_text": "You may use the following documentation to understand the schema of the {db_type}:\n{doc}\n",
+            "python_examples_text": "You may use the following examples to guide you:\n{python_examples}\n",
             "sql_examples_text": "You may use the following examples to guide you:\n{sql_examples}\n",
             "history": "Also use responses to past questions to guide you.",
             "locals": "The following local environment variables are available to you:\n{locals}\n",

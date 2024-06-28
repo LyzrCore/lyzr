@@ -3,6 +3,7 @@ Utility functions for the data analyzr module in Lyzr.
 """
 
 # standart-library imports
+import re
 import time
 import string
 import logging
@@ -57,9 +58,10 @@ def translate_string_name(name: str) -> str:
     - Removes leading and trailing underscores.
     """
     punc = string.punctuation + " "
-    return (
+    new_name = (
         name.lower().strip().translate(str.maketrans(punc, "_" * len(punc))).strip("_")
     )
+    return re.sub(r"_+", "_", new_name)
 
 
 def format_analysis_output(output_df, name: str = None) -> str:

@@ -8,6 +8,7 @@ import os
 import time
 import string
 import logging
+import warnings
 import traceback
 from pathlib import Path
 from typing import Any, Sequence, Union
@@ -402,6 +403,7 @@ def iterate_llm_calls(
 
     def decorator_wrapper(func):
         def wrapped_func(**kwargs):
+            warnings.filterwarnings("ignore")
             result = None
             start_time = time.time()
             logger.info(

@@ -275,7 +275,6 @@ class TxttoSQLFactory(FactoryBaseClass):
         else:
             analysis_output = self.connector.run_sql(sql_query)
         self.code = sql_query
-        self.guide = sql_query
         return analysis_output
 
     def code_cleaner(self, code) -> str:

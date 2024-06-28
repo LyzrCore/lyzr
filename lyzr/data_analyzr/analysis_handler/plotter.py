@@ -77,6 +77,9 @@ class PlotFactory(FactoryBaseClass):
         _add_sql_examples(user_input: str, system_message_sections: list, system_message_dict: dict):
             Add SQL examples to the system message sections and dictionary based on user input.
 
+        _add_python_examples(user_input: str, system_message_sections: list, system_message_dict: dict):
+            Add Python examples to the system message sections and dictionary based on user input.
+
         extract_and_execute_code(llm_response: str):
             Executes the plotting code extracted from the provided LLM response.
 
@@ -310,6 +313,11 @@ class PlotFactory(FactoryBaseClass):
                 system_message_sections.append("doc_addition_text")
                 system_message_dict["doc"] = doc_str
                 system_message_dict["db_type"] = "dataframe(s)"
+            system_message_sections, system_message_dict = self._add_python_examples(
+                user_input=user_input,
+                system_message_sections=system_message_sections,
+                system_message_dict=system_message_dict,
+            )
         system_message_dict["locals"] = make_locals_string(self.locals_)
         return system_message_sections, system_message_dict
 
@@ -409,6 +417,37 @@ class PlotFactory(FactoryBaseClass):
                     if "question" in example and "sql" in example:
                         sql_examples_str += f"Question: {example['question']}\nSQL:\n{example['sql']}\n\n"
             system_message_dict["sql_examples"] = sql_examples_str
+        return system_message_sections, system_message_dict
+
+    def _add_python_examples(
+        self, user_input: str, system_message_sections: list, system_message_dict: dict
+    ):
+        """
+        Add SQL examples to the system message sections and dictionary based on user input.
+
+        Args:
+            user_input (str): The input provided by the user.
+            system_message_sections (list): A list of sections in the system message.
+            system_message_dict (dict): A dictionary containing the system message content.
+
+        Returns:
+            tuple: Updated `system_message_sections` and `system_message_dict` with SQL examples included if any were found.
+
+        Procedure:
+            - Retrieve SQL examples similar to the user's input from the vector store.
+            - If any examples are found, append them to the system message sections and format them into a string.
+            - Add the formatted string to the system message dictionary under the key "python_examples".
+            - Return the updated system message sections and dictionary.
+        """
+        python_examples = self.vector_store.get_related_python_code(user_input)
+        if len(python_examples) > 0:
+            system_message_sections.append("python_examples_text")
+            python_examples_str = ""
+            for example in python_examples:
+                if example is not None:
+                    if "question" in example and "python_code" in example:
+                        python_examples_str += f"Question: {example['question']}\nAnalysis Code:\n{example['python_code']}\n\n"
+            system_message_dict["python_examples"] = python_examples_str
         return system_message_sections, system_message_dict
 
     def extract_and_execute_code(self, llm_response: str):
