@@ -35,7 +35,6 @@ class DataAnalyzr:
         analysis_llm (LiteLLM): LLM instance for performing analysis.
         context (ContextDict): Context for analysis and response generation.
         logger (logging.Logger): Logger instance for logging messages.
-        analysis_guide (str): The guide for the analysis process.
         analysis_code (str): The code generated for the analysis.
         analysis_output (Union[str, pd.DataFrame, dict[str, pd.DataFrame], None]): The output of the analysis process.
         plot_code (str): The code generated for the visualization.
@@ -171,7 +170,6 @@ class DataAnalyzr:
             self.database_connector,
             self.vector_store,
             self.analysis_code,
-            self.analysis_guide,
             self.analysis_output,
             self.plot_code,
             self.plot_output,
@@ -179,7 +177,7 @@ class DataAnalyzr:
             self.recommendations_output,
             self.tasks_output,
             self.ai_queries_output,
-        ) = (None,) * 12
+        ) = (None,) * 11
 
         from lyzr.data_analyzr.utils import logging_decorator
 
@@ -252,7 +250,7 @@ class DataAnalyzr:
         Perform an analysis based on the provided user input and analysis parameters.
 
         This method determines the type of analysis to be performed (SQL, or Pythonic) and executes it.
-        If the analysis type is set to skip, it sets the analysis guide to "No analysis performed." and returns None.
+        If the analysis type is set to skip, it sets the analysis code and analysis output to None and returns None.
 
         Args:
             user_input (str): The input string provided by the user for analysis.
@@ -276,7 +274,6 @@ class DataAnalyzr:
         """
         if self.analysis_type is AnalysisTypes.skip:
             self.logger.info("No analysis performed.")
-            self.analysis_guide = "No analysis performed."
             self.analysis_output = None
             self.analysis_code = None
             return self.analysis_output
@@ -299,7 +296,6 @@ class DataAnalyzr:
             **analyser_args,
         )
         self.analysis_output = analyser.generate_output(user_input)
-        self.analysis_guide = analyser.guide
         self.analysis_code = analyser.code
         return self.analysis_output
 
@@ -394,8 +390,8 @@ class DataAnalyzr:
 
         if insights_context is None:
             insights_context = ""
-        if not hasattr(self, "analysis_guide") or self.analysis_guide is None:
-            self.analysis_guide = ""
+        if not hasattr(self, "analysis_code") or self.analysis_code is None:
+            self.analysis_code = ""
         self.insights_output = self.generator_llm.run(
             messages=[
                 LyzrPromptFactory(name="insights", prompt_type="system").get_message(
@@ -403,7 +399,7 @@ class DataAnalyzr:
                 ),
                 LyzrPromptFactory(name="insights", prompt_type="user").get_message(
                     user_input=user_input,
-                    analysis_guide=self.analysis_guide,
+                    analysis_code=self.analysis_code,
                     analysis_output=(
                         format_analysis_output(output_df=self.analysis_output)
                         if self.analysis_output is not None
