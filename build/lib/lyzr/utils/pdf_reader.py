@@ -16,7 +16,7 @@ class LyzrPDFReader(BaseReader):
             )
 
     def load_data(self, file_path: str, extra_info: dict = None) -> List[Document]:
-        llmsherpa_api_url = "https://readers.llmsherpa.com/api/document/developer/parseDocument?renderFormat=all"
+        llmsherpa_api_url = "https://lyzr-parse.dev.app.lyzr.ai/api/parseDocument?renderFormat=all"
         loader = LayoutPDFReader(llmsherpa_api_url)
 
         doc = loader.read_pdf(str(file_path))
