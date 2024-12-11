@@ -20,7 +20,7 @@ import pandas as pd
 # local imports
 from lyzr.base.errors import AnalysisFailedError
 from lyzr.data_analyzr.utils import deterministic_uuid
-from lyzr.base import SystemMessage, AssistantMessage, LiteLLM
+from lyzr.base import UserMessage, AssistantMessage, LiteLLM
 
 
 def extract_python_code(llm_response: str) -> str:
@@ -542,7 +542,7 @@ def repeater(
             )
             llm_messages.append(AssistantMessage(content=llm_response.message.content))
             llm_messages.append(
-                SystemMessage(
+                UserMessage(
                     content=f"Your response resulted in the following error:\n{traceback.format_exc()}\n\n"
                     "Read and understand the error CAREFULLY.\nUNDERSTAND how to FIX the error.\nCHANGE your code accordingly."
                 )
